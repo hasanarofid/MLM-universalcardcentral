@@ -303,7 +303,7 @@ const logout = () => {
                         class="flex items-center h-16 px-4 border-b border-slate-100 lg:hidden justify-center relative shrink-0"
                     >
                         <div class="flex items-center justify-center">
-                            <img src="/images/logo-nexus.png" alt="Universal Card Central" class="h-8 w-auto object-contain" />
+                            <img src="/images/logo-ucc.avif" alt="Universal Card Central" class="h-9 w-auto object-contain rounded-md ring-1 ring-[#D4AF37]/40" />
                         </div>
                         <button
                             @click="isSidebarOpen = false"
@@ -483,7 +483,7 @@ const logout = () => {
             >
                 <!-- Top Bar Header (Theme: Universal Card Central Navy + Gold) -->
                 <header
-                    class="flex items-center justify-between h-16 px-6 md:px-8 bg-gradient-to-r from-[#0F172A] via-[#1E293B] to-[#0F172A] text-white sticky top-0 z-30 shadow-md border-b border-[#D4AF37]/30"
+                    class="flex items-center justify-between h-16 px-6 md:px-8 bg-gradient-to-r from-[#09090B] via-[#121318] to-[#09090B] text-white sticky top-0 z-30 shadow-md border-b border-[#D4AF37]/35"
                 >
                     <div class="flex items-center gap-4">
                         <button
@@ -496,10 +496,13 @@ const logout = () => {
                         <!-- Left Header Logo Badge -->
                         <div class="flex items-center gap-3">
                             <div
-                                class="px-2.5 py-1.5 bg-white/95 rounded-xl shadow-md flex items-center justify-center"
+                                class="rounded-lg overflow-hidden shadow-md ring-1 ring-[#D4AF37]/45 bg-[#09090B] flex items-center justify-center"
                             >
-                                <img src="/images/logo-nexus.png" alt="Universal Card Central" class="h-7 w-auto object-contain" />
+                                <img src="/images/logo-ucc.avif" alt="Universal Card Central" class="h-9 w-auto object-contain" />
                             </div>
+                            <span class="hidden sm:inline-block text-xs font-black tracking-[0.16em] uppercase text-[#E5C07B]">
+                                Universal Card Central
+                            </span>
                         </div>
                     </div>
 

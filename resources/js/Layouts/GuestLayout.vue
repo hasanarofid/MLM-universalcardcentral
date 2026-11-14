@@ -85,7 +85,7 @@ import { Link } from '@inertiajs/vue3';
             <div class="brand-content">
                 <div class="logo-box-wrap">
                     <Link href="/" class="logo-box">
-                        <img src="/images/logo-nexus.png" alt="Universal Card Central Logo">
+                        <img src="/images/logo-ucc.avif" alt="Universal Card Central Logo">
                     </Link>
                 </div>
 
