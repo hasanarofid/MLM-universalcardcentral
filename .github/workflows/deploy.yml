@@ -1,18 +1,12 @@
 name: CD - Deploy to Production
 
 on:
-  workflow_run:
-    workflows: ["CI - Laravel & Vue Build"]
-    types:
-      - completed
-    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
   deploy:
     name: Deploy via SSH
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Deploy to server via SSH
@@ -34,4 +28,3 @@ jobs:
             php artisan view:cache
             php artisan queue:restart || true
             echo "Deploy selesai!"
-
