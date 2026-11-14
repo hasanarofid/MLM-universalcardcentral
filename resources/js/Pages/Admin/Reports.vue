@@ -103,7 +103,7 @@ const reportTabs = [
 </script>
 
 <template>
-  <Head title="Menu Laporan - NEXUS COMMUNITY" />
+  <Head title="Menu Laporan - UNIVERSAL CARD CENTRAL" />
 
   <AdminLayout>
     <div class="space-y-6">

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title }} - NEXUS COMMUNITY</title>
+    <title>{{ $title }} - UNIVERSAL CARD CENTRAL</title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -105,8 +105,8 @@
 
     <div class="header">
         <div>
-            <div class="brand">PT. NEXUS KOMUNITAS BERSAMA</div>
-            <div class="sub-brand">NEXUS COMMUNITY MEMBER SYSTEM</div>
+            <div class="brand">UNIVERSAL CARD CENTRAL</div>
+            <div class="sub-brand">UNIVERSAL CARD CENTRAL MEMBER SYSTEM</div>
             <div style="font-size: 10px; color: #64748b; margin-top: 2px;">
                 User: <strong>{{ $currentUser->name }}</strong> (@{{ $currentUser->username }})
             </div>

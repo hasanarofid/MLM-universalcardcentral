@@ -95,7 +95,7 @@ const formatDate = (dateStr) => {
 </script>
 
 <template>
-  <Head title="Kelola Artikel & Berita - NEXUS COMMUNITY" />
+  <Head title="Kelola Artikel & Berita - UNIVERSAL CARD CENTRAL" />
 
   <AdminLayout>
     <div class="space-y-6 max-w-7xl mx-auto">
@@ -110,7 +110,7 @@ const formatDate = (dateStr) => {
             Kelola Artikel & Publikasi
           </h1>
           <p class="text-xs md:text-sm text-slate-200 font-medium max-w-xl">
-            Tulis, edit, dan kelola berita, artikel edukasi, serta panduan resmi untuk jaringan kemitraan NEXUS COMMUNITY.
+            Tulis, edit, dan kelola berita, artikel edukasi, serta panduan resmi untuk jaringan kemitraan UNIVERSAL CARD CENTRAL.
           </p>
         </div>
 

@@ -38,9 +38,9 @@ class RegistrationPendingNotification extends Notification
         $packageName = $this->user->package_name ?: 'Standard';
 
         return (new MailMessage)
-            ->subject('Pendaftaran Member Berhasil Terkirim - nexuscommunity.id')
+            ->subject('Pendaftaran Member Berhasil Terkirim - universalcardcentral.com')
             ->greeting('Halo ' . $this->user->name . ',')
-            ->line('Terima kasih telah melakukan pendaftaran keanggotaan di **nexuscommunity.id**.')
+            ->line('Terima kasih telah melakukan pendaftaran keanggotaan di **universalcardcentral.com**.')
             ->line('Data pendaftaran dan bukti transfer Anda telah berhasil diterima oleh sistem kami.')
             ->line('• **Nama:** ' . $this->user->name)
             ->line('• **Username:** @' . ($this->user->username ?: strtolower(explode(' ', $this->user->name)[0])))
@@ -48,6 +48,6 @@ class RegistrationPendingNotification extends Notification
             ->line('• **Paket Membership:** ' . $packageName)
             ->line('Sistem sedang melakukan verifikasi data pendaftaran. Akun Anda akan otomatis diaktifkan dalam waktu 1 - 10 menit.')
             ->line('Notifikasi email aktivasi beserta rincian akses login akan dikirimkan secara otomatis setelah proses verifikasi selesai.')
-            ->line('Terima kasih atas kepercayaan Anda bersama nexuscommunity.id!');
+            ->line('Terima kasih atas kepercayaan Anda bersama universalcardcentral.com!');
     }
 }

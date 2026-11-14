@@ -221,7 +221,7 @@ const formatRupiah = (val) => {
 </script>
 
 <template>
-  <Head title="Dashboard Member Area - NEXUS COMMUNITY" />
+  <Head title="Dashboard Member Area - UNIVERSAL CARD CENTRAL" />
 
   <AdminLayout>
     <div class="space-y-6">
@@ -599,7 +599,7 @@ const formatRupiah = (val) => {
                   <span class="font-black text-slate-900">Bank BCA:</span>
                   <span class="font-mono font-black text-base sm:text-lg text-slate-950 px-2.5 py-1 bg-white border-2 border-[#D4AF37]/70 rounded-lg shadow-2xs tracking-wider">172-666-2020</span>
                   <span class="text-slate-700 font-bold text-xs sm:text-sm">a/n</span>
-                  <strong class="font-black text-slate-950 uppercase tracking-wide text-sm sm:text-base">PT. NEXUS KOMUNITAS BERSAMA</strong>
+                  <strong class="font-black text-slate-950 uppercase tracking-wide text-sm sm:text-base">UNIVERSAL CARD CENTRAL</strong>
                 </div>
               </div>
 

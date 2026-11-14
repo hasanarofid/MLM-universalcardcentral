@@ -31,3 +31,4 @@ return new class extends Migration
         Schema::dropIfExists('ucc_point_ledgers');
     }
 };
+

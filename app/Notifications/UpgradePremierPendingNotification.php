@@ -40,7 +40,7 @@ class UpgradePremierPendingNotification extends Notification
         $formattedAmount = 'Rp ' . number_format($this->amount, 0, ',', '.');
 
         return (new MailMessage)
-            ->subject('Permintaan Upgrade Premier Diterima - nexuscommunity.id')
+            ->subject('Permintaan Upgrade Premier Diterima - universalcardcentral.com')
             ->greeting('Halo ' . $this->user->name . ',')
             ->line('Permintaan permohonan **Upgrade Premier Member** Anda telah kami terima.')
             ->line('• **Nama Member:** ' . $this->user->name)
@@ -48,6 +48,6 @@ class UpgradePremierPendingNotification extends Notification
             ->line('• **Nominal Upgrade:** ' . $formattedAmount)
             ->line('Permohonan upgrade sedang diproses oleh sistem. Akun Anda akan otomatis diaktifkan sebagai **Premier Member** dalam waktu 1 - 10 menit.')
             ->line('Setelah aktif, Anda akan menerima email konfirmasi aktivasi Premier beserta hak istimewa perlindungan asuransi hingga Rp 500.000.000.')
-            ->line('Terima kasih telah melakukan perpanjangan & upgrade bersama nexuscommunity.id!');
+            ->line('Terima kasih telah melakukan perpanjangan & upgrade bersama universalcardcentral.com!');
     }
 }

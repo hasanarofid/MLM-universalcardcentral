@@ -35,7 +35,7 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Atur Ulang Password | Nexus Community" />
+        <Head title="Atur Ulang Password | Universal Card Central" />
 
         <div class="panel-heading">
             <span class="eyebrow">RESET PASSWORD</span>

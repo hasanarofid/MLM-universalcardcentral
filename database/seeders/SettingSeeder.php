@@ -15,22 +15,22 @@ class SettingSeeder extends Seeder
         $settings = [
             [
                 'key' => 'site_name',
-                'value' => 'NEXUS COMMUNITY',
+                'value' => 'UNIVERSAL CARD CENTRAL',
                 'type' => 'text',
             ],
             [
                 'key' => 'company_name',
-                'value' => 'PT.Nexus Community Punya Kita',
+                'value' => 'Universal Card Central',
                 'type' => 'text',
             ],
             [
                 'key' => 'company_owner',
-                'value' => 'PT.Nexus Community Punya Kita',
+                'value' => 'Universal Card Central',
                 'type' => 'text',
             ],
             [
                 'key' => 'company_copyright',
-                'value' => 'PT.Nexus Community Punya Kita Corp. Hak Cipta Dilindungi Undang-Undang.',
+                'value' => 'Universal Card Central. Hak Cipta Dilindungi Undang-Undang.',
                 'type' => 'text',
             ],
             [
@@ -40,7 +40,7 @@ class SettingSeeder extends Seeder
                         'type'           => 'bank',
                         'bank_name'      => 'Bank BRI',
                         'account_number' => '806401000095564',
-                        'account_name'   => 'PT.Nexus Community Punya Kita',
+                        'account_name'   => 'Universal Card Central',
                     ],
                 ]),
                 'type' => 'json',
@@ -50,16 +50,16 @@ class SettingSeeder extends Seeder
             [
                 'key' => 'company_profile',
                 'value' => json_encode([
-                    'name'      => 'PT.Nexus Community Punya Kita',
-                    'owner'     => 'PT.Nexus Community Punya Kita',
-                    'copyright' => 'PT.Nexus Community Punya Kita Corp. Hak Cipta Dilindungi Undang-Undang.',
+                    'name'      => 'Universal Card Central',
+                    'owner'     => 'Universal Card Central',
+                    'copyright' => 'Universal Card Central. Hak Cipta Dilindungi Undang-Undang.',
                     'whatsapp'  => '6281234567890',
                     'banks'     => [
                         [
                             'type'           => 'bank',
                             'bank_name'      => 'Bank BRI',
                             'account_number' => '806401000095564',
-                            'account_name'   => 'PT.Nexus Community Punya Kita',
+                            'account_name'   => 'Universal Card Central',
                         ],
                     ],
                 ]),
@@ -67,7 +67,7 @@ class SettingSeeder extends Seeder
             ],
             [
                 'key' => 'site_description',
-                'value' => 'Platform jaringan mitra & manajemen bonus unilevel matahari multi-tier NEXUS COMMUNITY.',
+                'value' => 'Platform jaringan mitra, aktivasi kartu belanja, dan manajemen royalty Universal Card Central.',
                 'type' => 'textarea',
             ],
             [

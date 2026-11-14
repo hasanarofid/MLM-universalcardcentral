@@ -36,7 +36,7 @@ const handleDelete = (item) => {
 </script>
 
 <template>
-  <Head title="Kelola Halaman CMS - NEXUS COMMUNITY" />
+  <Head title="Kelola Halaman CMS - UNIVERSAL CARD CENTRAL" />
 
   <AdminLayout>
     <div class="space-y-6 max-w-7xl mx-auto">
@@ -51,7 +51,7 @@ const handleDelete = (item) => {
             Kelola Halaman Web
           </h1>
           <p class="text-xs md:text-sm text-slate-200 font-medium max-w-xl">
-            Atur struktur layout landing page, banner hero, blok keunggulan, dan testimoni website NEXUS COMMUNITY.
+            Atur struktur layout landing page, banner hero, blok keunggulan, dan testimoni website UNIVERSAL CARD CENTRAL.
           </p>
         </div>
 

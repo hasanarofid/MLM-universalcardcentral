@@ -124,14 +124,14 @@ const submitMemberProfile = () => {
 
 // Form for Corporate & Admin Profile
 const form = useForm({
-    company_name: props.company_profile?.name || "PT.Nexus Community Punya Kita",
-    company_owner: props.company_profile?.owner || "PT.Nexus Community Punya Kita",
+    company_name: props.company_profile?.name || "Universal Card Central",
+    company_owner: props.company_profile?.owner || "Universal Card Central",
     company_copyright:
         props.company_profile?.copyright ||
-        "PT.Nexus Community Punya Kita Corp. Hak Cipta Dilindungi Undang-Undang.",
+        "Universal Card Central Corp. Hak Cipta Dilindungi Undang-Undang.",
     name: props.admin_user?.name || "President Director (Admin)",
     username: props.admin_user?.username || "admin",
-    email: props.admin_user?.email || "admin@nexuscommunity.id",
+    email: props.admin_user?.email || "admin@universalcardcentral.com",
     phone: props.admin_user?.phone || "081234567890",
     password: "",
     site_logo: null,
@@ -237,8 +237,8 @@ const saveBanks = () => {
     <Head
         :title="
             is_admin
-                ? 'Pengaturan Profile Instansi & Administrator - NEXUS COMMUNITY'
-                : 'Pengaturan Profile Member - NEXUS COMMUNITY'
+                ? 'Pengaturan Profile Instansi & Administrator - UNIVERSAL CARD CENTRAL'
+                : 'Pengaturan Profile Member - UNIVERSAL CARD CENTRAL'
         "
     />
 
@@ -285,7 +285,7 @@ const saveBanks = () => {
                                 <h2
                                     class="text-lg md:text-xl font-black text-slate-900 tracking-tight"
                                 >
-                                    Data Diri Anggota NEXUS COMMUNITY
+                                    Data Diri Anggota UNIVERSAL CARD CENTRAL
                                 </h2>
                             </div>
                         </div>
@@ -904,13 +904,13 @@ const saveBanks = () => {
                     </div>
                 </form>
 
-                <!-- TABEL DATA DIRI & STATUS KEANGGOTAAN NEXUS COMMUNITY (TABLE SUMMARY) -->
+                <!-- TABEL DATA DIRI & STATUS KEANGGOTAAN UNIVERSAL CARD CENTRAL (TABLE SUMMARY) -->
                 <div class="border-t border-slate-100 pt-8 space-y-4">
                     <div class="flex items-center justify-between flex-wrap gap-2">
                         <div class="flex items-center gap-2">
                             <HeartHandshake class="w-5 h-5 text-emerald-600" />
                             <h3 class="text-sm font-black text-slate-900 uppercase tracking-tight">
-                                TABEL RINGKASAN DATA ANGGOTA NEXUS COMMUNITY TERDAFTAR
+                                TABEL RINGKASAN DATA ANGGOTA UNIVERSAL CARD CENTRAL TERDAFTAR
                             </h3>
                         </div>
                         <span class="text-xs font-bold text-slate-400">
@@ -1285,7 +1285,7 @@ const saveBanks = () => {
                                     </label>
                                     <input
                                         v-model="newBank.account_name"
-                                        placeholder="cth: PT.Nexus Community Punya Kita"
+                                        placeholder="cth: Universal Card Central"
                                         class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-emerald-500"
                                     />
                                 </div>

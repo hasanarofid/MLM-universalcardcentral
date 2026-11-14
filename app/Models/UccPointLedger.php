@@ -44,3 +44,4 @@ class UccPointLedger extends Model
         return $this->belongsTo(User::class, 'source_user_id');
     }
 }
+

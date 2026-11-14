@@ -191,7 +191,7 @@ const bankList = [
 </script>
 
 <template>
-  <Head title="Penarikan Saldo (WD) - NEXUS COMMUNITY" />
+  <Head title="Penarikan Saldo (WD) - UNIVERSAL CARD CENTRAL" />
 
   <AdminLayout>
     <div class="space-y-6">

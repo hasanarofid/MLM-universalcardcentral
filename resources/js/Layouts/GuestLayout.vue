@@ -85,17 +85,17 @@ import { Link } from '@inertiajs/vue3';
             <div class="brand-content">
                 <div class="logo-box-wrap">
                     <Link href="/" class="logo-box">
-                        <img src="/images/logo-nexus.png" alt="NEXUS Logo">
+                        <img src="/images/logo-nexus.png" alt="Universal Card Central Logo">
                     </Link>
                 </div>
 
                 <h1>
                     Welcome to
-                    <span>Nexus Community</span>
+                    <span>Universal Card Central</span>
                 </h1>
 
                 <p>
-                    Masuk ke akun Anda untuk mengakses fitur, aktivitas, dan layanan Nexus Community.
+                    Masuk ke akun Anda untuk mengakses fitur, aktivitas, dan layanan Universal Card Central.
                 </p>
             </div>
         </div>

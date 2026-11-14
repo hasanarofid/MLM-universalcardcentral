@@ -58,7 +58,7 @@ const resetDefaults = () => {
 </script>
 
 <template>
-  <Head title="Pengaturan Sistem & Konfigurasi Bonus - NEXUS COMMUNITY" />
+  <Head title="Pengaturan Sistem & Konfigurasi Bonus - UNIVERSAL CARD CENTRAL" />
 
   <AdminLayout>
     <div class="space-y-6">

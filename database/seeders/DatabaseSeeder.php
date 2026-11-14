@@ -22,21 +22,25 @@ class DatabaseSeeder extends Seeder
 
         // 3. Seed ONLY President Director (Admin) User
         $admin = User::where('username', 'admin')
+            ->orWhere('email', 'admin@universalcardcentral.com')
             ->orWhere('email', 'admin@nexuscommunity.com')
-            ->orWhere('email', 'admin@nexuscommunity.id')
+            ->orWhere('email', 'admin@universalcardcentral.com')
             ->orWhere('id', 1)
             ->first() ?: new User();
 
         $admin->fill([
             'name' => 'President Director (Admin)',
             'username' => 'admin',
-            'email' => 'admin@nexuscommunity.com',
+            'email' => 'admin@universalcardcentral.com',
+            'nik' => '0000000000000001',
             'password' => bcrypt('password'),
             'left_count' => 0,
             'right_count' => 0,
             'left_points' => 0,
             'right_points' => 0,
-            'package_name' => 'Standard',
+            'package_name' => 'Platinum',
+            'member_tier' => 'platinum',
+            'activation_amount' => 350000,
             'saldo' => 0,
             'total_bonus' => 0,
             'is_premier' => false,

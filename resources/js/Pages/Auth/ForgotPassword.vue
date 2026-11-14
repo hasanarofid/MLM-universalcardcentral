@@ -21,7 +21,7 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Reset Password | Nexus Community" />
+        <Head title="Reset Password | Universal Card Central" />
 
         <div class="panel-heading">
             <span class="eyebrow">RESET PASSWORD</span>

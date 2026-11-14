@@ -38,9 +38,9 @@ class UpgradePremierActivatedNotification extends Notification
         $dashboardUrl = route('admin.dashboard');
 
         return (new MailMessage)
-            ->subject('Selamat! Akun Anda Berhasil Upgrade ke Premier Member - NEXUS COMMUNITY')
+            ->subject('Selamat! Akun Anda Berhasil Upgrade ke Premier Member - UNIVERSAL CARD CENTRAL')
             ->greeting('Halo ' . $this->user->name . ',')
-            ->line('Akun Anda telah resmi diupgrade menjadi **Premier Member** di **Nexus Community**.')
+            ->line('Akun Anda telah resmi diupgrade menjadi **Premier Member** di **Universal Card Central**.')
             ->line('• **Status Membership:** Premier Member')
             ->line('• **Username:** @' . $this->user->username)
             ->action('Buka Member Area', $dashboardUrl);

@@ -46,7 +46,7 @@ const tabList = [
 </script>
 
 <template>
-  <Head title="Aktivitas & Rincian Mutasi Bonus - NEXUS COMMUNITY" />
+  <Head title="Aktivitas & Rincian Mutasi Bonus - UNIVERSAL CARD CENTRAL" />
 
   <AdminLayout>
     <div class="space-y-6">

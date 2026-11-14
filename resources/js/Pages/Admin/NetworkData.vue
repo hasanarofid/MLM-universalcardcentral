@@ -49,7 +49,7 @@ const formatRupiah = (val) => {
 </script>
 
 <template>
-  <Head title="Data Member - NEXUS COMMUNITY" />
+  <Head title="Data Member - UNIVERSAL CARD CENTRAL" />
 
   <AdminLayout>
     <div class="space-y-6">

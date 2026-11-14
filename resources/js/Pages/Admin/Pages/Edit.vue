@@ -67,7 +67,7 @@ const removeTestimonialItem = (index) => {
 </script>
 
 <template>
-  <Head :title="`Edit Halaman: ${page.title} - NEXUS COMMUNITY`" />
+  <Head :title="`Edit Halaman: ${page.title} - UNIVERSAL CARD CENTRAL`" />
 
   <AdminLayout>
     <div class="space-y-6 max-w-7xl mx-auto">

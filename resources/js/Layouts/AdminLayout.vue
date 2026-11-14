@@ -37,12 +37,12 @@ import {
 const page = usePage();
 const user = page.props.auth?.user || {
     name: "President Director (Admin)",
-    email: "admin@nexuscommunity.id",
+    email: "admin@universalcardcentral.com",
 };
 
 const isAdmin = computed(() => {
     if (!user) return false;
-    if (user.username === "admin" || user.email === "admin@nexuscommunity.id")
+    if (user.username === "admin" || user.email === "admin@universalcardcentral.com")
         return true;
     return (
         user.roles &&
@@ -303,7 +303,7 @@ const logout = () => {
                         class="flex items-center h-16 px-4 border-b border-slate-100 lg:hidden justify-center relative shrink-0"
                     >
                         <div class="flex items-center justify-center">
-                            <img src="/images/logo-nexus.png" alt="NEXUS" class="h-8 w-auto object-contain" />
+                            <img src="/images/logo-nexus.png" alt="Universal Card Central" class="h-8 w-auto object-contain" />
                         </div>
                         <button
                             @click="isSidebarOpen = false"
@@ -481,7 +481,7 @@ const logout = () => {
                     'flex flex-col min-h-screen transition-all duration-300 ease-in-out',
                 ]"
             >
-                <!-- Top Bar Header (Theme: Nexus Community Navy + Gold) -->
+                <!-- Top Bar Header (Theme: Universal Card Central Navy + Gold) -->
                 <header
                     class="flex items-center justify-between h-16 px-6 md:px-8 bg-gradient-to-r from-[#0F172A] via-[#1E293B] to-[#0F172A] text-white sticky top-0 z-30 shadow-md border-b border-[#D4AF37]/30"
                 >
@@ -498,7 +498,7 @@ const logout = () => {
                             <div
                                 class="px-2.5 py-1.5 bg-white/95 rounded-xl shadow-md flex items-center justify-center"
                             >
-                                <img src="/images/logo-nexus.png" alt="NEXUS" class="h-7 w-auto object-contain" />
+                                <img src="/images/logo-nexus.png" alt="Universal Card Central" class="h-7 w-auto object-contain" />
                             </div>
                         </div>
                     </div>
@@ -687,7 +687,7 @@ const logout = () => {
                     class="p-4 text-center text-[11px] text-slate-500 border-t border-slate-200 bg-white"
                 >
                     <p>
-                        &copy;{{ new Date().getFullYear() }} Nexus Community. All Rights Reserved <span class="text-white select-text">| Developed by <a href="https://www.cekotechnology.com/mlm/jasa-pembuatan-website-mlm/" target="_blank" rel="noopener noreferrer" class="text-white cursor-default hover:text-white">Cekotechnology</a></span>
+                        &copy;{{ new Date().getFullYear() }} Universal Card Central. All Rights Reserved <span class="text-white select-text">| Developed by <a href="https://www.cekotechnology.com/mlm/jasa-pembuatan-website-mlm/" target="_blank" rel="noopener noreferrer" class="text-white cursor-default hover:text-white">Cekotechnology</a></span>
                     </p>
                 </footer>
             </div>

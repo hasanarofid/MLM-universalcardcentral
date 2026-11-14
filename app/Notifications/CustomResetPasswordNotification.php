@@ -41,12 +41,12 @@ class CustomResetPasswordNotification extends Notification
         ], false));
 
         return (new MailMessage)
-            ->subject('Reset Password Akun nexuscommunity.id')
+            ->subject('Reset Password Akun universalcardcentral.com')
             ->greeting('Halo ' . $notifiable->name . ',')
-            ->line('Anda menerima email ini karena kami menerima permintaan reset password untuk akun nexuscommunity.id Anda.')
+            ->line('Anda menerima email ini karena kami menerima permintaan reset password untuk akun universalcardcentral.com Anda.')
             ->action('Reset Password Sekarang', $resetUrl)
             ->line('Tautan reset password ini akan kedaluwarsa dalam waktu 60 menit.')
             ->line('Jika Anda tidak merasa melakukan permintaan reset password, tidak ada tindakan lanjutan yang perlu dilakukan.')
-            ->line('Terima kasih, Salam sukses nexuscommunity.id!');
+            ->line('Terima kasih, Salam sukses universalcardcentral.com!');
     }
 }

@@ -618,7 +618,7 @@ const submit = () => {
                             <span class="font-black text-slate-900">Bank BCA:</span>
                             <span class="font-mono font-black text-xs text-slate-950 px-2 py-0.5 bg-white border border-[#D4AF37]/70 rounded-md shadow-2xs tracking-wider">172-666-2020</span>
                             <span class="text-slate-700 font-bold text-[11px]">a/n</span>
-                            <strong class="font-black text-slate-950 uppercase tracking-wide text-xs">PT. NEXUS KOMUNITAS BERSAMA</strong>
+                            <strong class="font-black text-slate-950 uppercase tracking-wide text-xs">UNIVERSAL CARD CENTRAL</strong>
                         </div>
                     </div>
 

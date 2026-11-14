@@ -64,7 +64,7 @@ class WithdrawalStatusNotification extends Notification
         } else {
             $mail->subject('Permohonan Penarikan Saldo ' . $amountFormatted . ' Diterima (WD #' . $this->withdrawal->id . ')')
                 ->greeting('Halo ' . $notifiable->name . ',')
-                ->line('Permohonan penarikan saldo (WD) Anda sebesar ' . $amountFormatted . ' telah berhasil terkirim dan sedang diproses oleh Tim Keuangan nexuscommunity.id.')
+                ->line('Permohonan penarikan saldo (WD) Anda sebesar ' . $amountFormatted . ' telah berhasil terkirim dan sedang diproses oleh Tim Keuangan universalcardcentral.com.')
                 ->line('• **Nominal WD:** ' . $amountFormatted)
                 ->line('• **Biaya Admin:** ' . $feeFormatted)
                 ->line('• **Estimasi Dana Diterima:** **' . $netFormatted . '**')
@@ -73,6 +73,6 @@ class WithdrawalStatusNotification extends Notification
 
         return $mail
             ->action('Lihat Riwayat Penarikan', $wdUrl)
-            ->line('Terima kasih atas kepercayaan Anda menggunakan nexuscommunity.id.');
+            ->line('Terima kasih atas kepercayaan Anda menggunakan universalcardcentral.com.');
     }
 }

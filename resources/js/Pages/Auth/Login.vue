@@ -31,7 +31,7 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Login | Nexus Community" />
+        <Head title="Login | Universal Card Central" />
 
         <div class="panel-heading">
             <h2>MEMBER AREA</h2>

@@ -53,7 +53,7 @@ const copyLink = () => {
 };
 
 const shareWhatsapp = () => {
-  const text = encodeURIComponent(`${props.post.title}\n\nBaca selengkapnya di Nexus Community:\n${window.location.href}`);
+  const text = encodeURIComponent(`${props.post.title}\n\nBaca selengkapnya di Universal Card Central:\n${window.location.href}`);
   window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
 };
 
@@ -86,7 +86,7 @@ const readingTime = Math.max(1, Math.ceil((props.post.content || '').split(' ').
 </script>
 
 <template>
-  <Head :title="`${post.title} - NEXUS COMMUNITY`">
+  <Head :title="`${post.title} - UNIVERSAL CARD CENTRAL`">
     <meta name="description" :content="post.content?.substring(0, 160)" />
   </Head>
 
@@ -97,11 +97,11 @@ const readingTime = Math.max(1, Math.ceil((props.post.content || '').split(' ').
         <!-- Logo -->
         <Link href="/" class="flex items-center gap-3 group">
           <div class="h-9 w-auto flex items-center">
-            <img src="/images/logo-nexus.png" alt="NEXUS Logo" class="h-8 object-contain" />
+            <img src="/images/logo-nexus.png" alt="Universal Card Central Logo" class="h-8 object-contain" />
           </div>
           <div class="flex flex-col">
             <span class="font-black text-lg tracking-tight text-[#0b1f3a] group-hover:text-[#1653a1] transition-colors">
-              NEXUS COMMUNITY
+              UNIVERSAL CARD CENTRAL
             </span>
             <span class="text-[9px] font-extrabold uppercase tracking-widest text-[#04bdb2] -mt-1">
               Saling Bantu • Manfaat Bersama
@@ -184,7 +184,7 @@ const readingTime = Math.max(1, Math.ceil((props.post.content || '').split(' ').
               </div>
               <div class="flex items-center gap-1.5 text-emerald-600 font-bold">
                 <Sparkles class="w-3.5 h-3.5" />
-                <span>Official Nexus Community</span>
+                <span>Official Universal Card Central</span>
               </div>
             </div>
           </div>
@@ -261,14 +261,14 @@ const readingTime = Math.max(1, Math.ceil((props.post.content || '').split(' ').
 
         <!-- Right Sidebar -->
         <aside class="lg:col-span-4 space-y-6">
-          <!-- CTA Card Nexus Community -->
+          <!-- CTA Card Universal Card Central -->
           <div class="bg-gradient-to-br from-[#0b1f3a] via-[#103f80] to-[#1653a1] rounded-3xl p-6 text-white shadow-lg space-y-4 relative overflow-hidden">
             <div class="space-y-2 relative z-10">
               <span class="inline-block px-3 py-1 bg-white/10 backdrop-blur border border-white/20 rounded-full text-[10px] font-black uppercase tracking-wider text-[#a9fff7]">
                 Program Saling Bantu
               </span>
               <h3 class="text-xl font-black tracking-tight leading-snug">
-                Mulai Sukses Finansial Bersama NEXUS COMMUNITY
+                Mulai Sukses Finansial Bersama UNIVERSAL CARD CENTRAL
               </h3>
               <p class="text-xs text-slate-200 leading-relaxed font-medium">
                 Nikmati bagi hasil 10 Generasi, Auto Save, Saldo WD, Poin RO & Personal Reward PO hingga Rp 150.000.000.
@@ -353,10 +353,10 @@ const readingTime = Math.max(1, Math.ceil((props.post.content || '').split(' ').
     <footer class="border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500 mt-12">
       <div class="max-w-7xl mx-auto px-4 space-y-2">
         <p class="font-bold text-slate-700">
-          PT. NEXUS COMMUNITY PUNYA KITA &copy; {{ new Date().getFullYear() }} — Saling Bantu, Manfaat Bersama.
+          UNIVERSAL CARD CENTRAL &copy; {{ new Date().getFullYear() }} — Saling Bantu, Manfaat Bersama.
         </p>
         <p class="text-[11px] text-slate-400">
-          Domain Resmi: <a href="https://nexuscommunity.id" class="text-[#1653a1] font-bold">https://nexuscommunity.id</a>
+          Domain Resmi: <a href="https://system.universalcardcentral.com" class="text-[#1653a1] font-bold">https://system.universalcardcentral.com</a>
         </p>
       </div>
     </footer>
