@@ -56,13 +56,24 @@ const bankOptions = [
 ];
 
 const form = useForm({
-  nik: '',
-  name: '',
   phone: '',
   email: '',
-  address: '',
+  postal_code: '',
   member_tier: 'bronze',
-  is_left_handed: 'Tidak',
+  nik: '',
+  name: '',
+  birth_place: '',
+  birth_date: '',
+  gender: 'Laki-laki',
+  blood_type: '-',
+  address: '',
+  rt_rw: '',
+  village: '',
+  district: '',
+  city: '',
+  province: '',
+  religion: 'Islam',
+  marital_status: 'Belum Kawin',
   beneficiary_name: '',
   beneficiary_birth_date: '',
   beneficiary_relation: '',
@@ -202,7 +213,11 @@ const submitForm = () => {
     preserveScroll: true,
     onSuccess: () => {
       form.reset();
-      form.is_left_handed = 'Tidak';
+      form.member_tier = 'bronze';
+      form.gender = 'Laki-laki';
+      form.blood_type = '-';
+      form.religion = 'Islam';
+      form.marital_status = 'Belum Kawin';
       form.bank_name = 'Bank BRI';
       form.sponsor_username = props.default_sponsor || 'admin';
       ktpPreview.value = null;
@@ -236,62 +251,18 @@ const submitForm = () => {
         <!-- Form -->
         <form @submit.prevent="submitForm" class="space-y-5 pt-1">
           
-          <!-- SECTION 1: DATA PRIBADI -->
+          <!-- SECTION 0: KONTAK & PAKET AKTIVASI (PALING ATAS) -->
           <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-4">
             <div class="text-[11px] font-black tracking-wider text-[#D4AF37] uppercase flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
-              <User class="w-3.5 h-3.5" />
-              <span>1. Data Pribadi</span>
+              <Phone class="w-3.5 h-3.5" />
+              <span>Kontak & Paket Aktivasi</span>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <!-- ID KTP (NIK) -->
-              <div class="form-group">
-                <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                  ID KTP (NIK 16 Digit) <span class="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  inputmode="numeric"
-                  maxlength="16"
-                  v-model="form.nik"
-                  required
-                  placeholder="16 Digit NIK Sesuai KTP"
-                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
-                />
-                <p v-if="form.errors.nik" class="text-xs text-rose-500 mt-1">{{ form.errors.nik }}</p>
-              </div>
-
-              <!-- Paket Aktivasi -->
-              <div class="form-group">
-                <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                  Paket Aktivasi Non-Card Member <span class="text-rose-500">*</span>
-                </label>
-                <select
-                  v-model="form.member_tier"
-                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
-                >
-                  <option value="bronze">Bronze — Rp 100.000</option>
-                  <option value="silver">Silver — Rp 350.000</option>
-                </select>
-                <p v-if="form.errors.member_tier" class="text-xs text-rose-500 mt-1">{{ form.errors.member_tier }}</p>
-              </div>
-
-              <!-- Nama Sesuai KTP -->
-              <div class="form-group sm:col-span-2">
-                <label class="block text-xs font-bold text-slate-700 mb-1">
-                  Nama Lengkap <span class="text-rose-500">*</span>
-                </label>
-                <div class="auth-input-wrap">
-                  <span class="auth-input-icon"><User class="w-4 h-4 text-slate-400" /></span>
-                  <input type="text" v-model="form.name" required placeholder="Nama Lengkap Member" class="w-full text-sm" />
-                </div>
-                <InputError class="mt-1" :message="form.errors.name" />
-              </div>
-
-              <!-- Whatsapp -->
+              <!-- Nomor WhatsApp / HP -->
               <div class="form-group">
                 <label class="block text-xs font-bold text-slate-700 mb-1">
-                  Whatsapp <span class="text-rose-500">*</span>
+                  Nomor WhatsApp / HP <span class="text-rose-500">*</span>
                 </label>
                 <div class="auth-input-wrap">
                   <span class="auth-input-icon"><Phone class="w-4 h-4 text-slate-400" /></span>
@@ -312,22 +283,265 @@ const submitForm = () => {
                 <InputError class="mt-1" :message="form.errors.email" />
               </div>
 
-              <!-- Kidal -->
-              <div class="form-group sm:col-span-2 pt-1">
-                <label class="block text-xs font-bold text-slate-700 mb-2">
-                  Apakah dominan tangan kiri (Kidal) ? <span class="text-rose-500">*</span>
+              <!-- Kode Pos -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  Kode Pos <span class="text-rose-500">*</span>
                 </label>
-                <div class="grid grid-cols-2 gap-3">
-                  <label :class="['flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all', form.is_left_handed === 'Iya' ? 'border-[#D4AF37] bg-[#D4AF37]/10 font-bold text-slate-900 shadow-sm' : 'border-slate-200 bg-white text-slate-700']">
-                    <input type="radio" value="Iya" v-model="form.is_left_handed" class="w-4 h-4 accent-[#0F172A]" />
-                    <span class="text-xs">Iya</span>
-                  </label>
-                  <label :class="['flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all', form.is_left_handed === 'Tidak' ? 'border-[#D4AF37] bg-[#D4AF37]/10 font-bold text-slate-900 shadow-sm' : 'border-slate-200 bg-white text-slate-700']">
-                    <input type="radio" value="Tidak" v-model="form.is_left_handed" class="w-4 h-4 accent-[#0F172A]" />
-                    <span class="text-xs">Tidak</span>
-                  </label>
-                </div>
-                <InputError class="mt-1" :message="form.errors.is_left_handed" />
+                <input
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="10"
+                  v-model="form.postal_code"
+                  required
+                  placeholder="Contoh: 10110"
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                />
+                <InputError class="mt-1" :message="form.errors.postal_code" />
+              </div>
+
+              <!-- Paket Aktivasi -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  Paket Aktivasi Non-Card Member <span class="text-rose-500">*</span>
+                </label>
+                <select
+                  v-model="form.member_tier"
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                >
+                  <option value="bronze">Bronze — Rp 100.000</option>
+                  <option value="silver">Silver — Rp 350.000</option>
+                </select>
+                <InputError class="mt-1" :message="form.errors.member_tier" />
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 1: DATA DIRI SESUAI KTP (14 FIELD STANDARD) -->
+          <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-4">
+            <div class="text-[11px] font-black tracking-wider text-[#D4AF37] uppercase flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
+              <User class="w-3.5 h-3.5" />
+              <span>1. Data Diri Sesuai KTP</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- 1. NIK (16 digit) -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  1. NIK (16 Digit) <span class="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="16"
+                  v-model="form.nik"
+                  required
+                  placeholder="16 Digit NIK Sesuai KTP"
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                />
+                <InputError class="mt-1" :message="form.errors.nik" />
+              </div>
+
+              <!-- 2. Nama Lengkap -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  2. Nama Lengkap <span class="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  v-model="form.name"
+                  required
+                  placeholder="Nama Lengkap Sesuai KTP"
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                />
+                <InputError class="mt-1" :message="form.errors.name" />
+              </div>
+
+              <!-- 3. Tempat Lahir -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  3. Tempat Lahir <span class="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  v-model="form.birth_place"
+                  required
+                  placeholder="Contoh: Surabaya"
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                />
+                <InputError class="mt-1" :message="form.errors.birth_place" />
+              </div>
+
+              <!-- 4. Tanggal Lahir -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  4. Tanggal Lahir <span class="text-rose-500">*</span>
+                </label>
+                <BirthDatePicker v-model="form.birth_date" />
+                <InputError class="mt-1" :message="form.errors.birth_date" />
+              </div>
+
+              <!-- 5. Jenis Kelamin -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  5. Jenis Kelamin <span class="text-rose-500">*</span>
+                </label>
+                <select
+                  v-model="form.gender"
+                  required
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                >
+                  <option value="Laki-laki">Laki-laki</option>
+                  <option value="Perempuan">Perempuan</option>
+                </select>
+                <InputError class="mt-1" :message="form.errors.gender" />
+              </div>
+
+              <!-- 6. Golongan Darah -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  6. Golongan Darah
+                </label>
+                <select
+                  v-model="form.blood_type"
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                >
+                  <option value="-">-</option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="AB">AB</option>
+                  <option value="O">O</option>
+                </select>
+                <InputError class="mt-1" :message="form.errors.blood_type" />
+              </div>
+
+              <!-- 7. Alamat -->
+              <div class="form-group sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  7. Alamat <span class="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  v-model="form.address"
+                  required
+                  placeholder="Jalan / Dusun / Nomor Rumah sesuai KTP"
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                />
+                <InputError class="mt-1" :message="form.errors.address" />
+              </div>
+
+              <!-- 8. RT / RW -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  8. RT / RW <span class="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  v-model="form.rt_rw"
+                  required
+                  placeholder="Contoh: 001/002"
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                />
+                <InputError class="mt-1" :message="form.errors.rt_rw" />
+              </div>
+
+              <!-- 9. Kelurahan / Desa -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  9. Kelurahan / Desa <span class="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  v-model="form.village"
+                  required
+                  placeholder="Nama Kelurahan / Desa"
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                />
+                <InputError class="mt-1" :message="form.errors.village" />
+              </div>
+
+              <!-- 10. Kecamatan -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  10. Kecamatan <span class="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  v-model="form.district"
+                  required
+                  placeholder="Nama Kecamatan"
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                />
+                <InputError class="mt-1" :message="form.errors.district" />
+              </div>
+
+              <!-- 11. Kabupaten / Kota -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  11. Kabupaten / Kota <span class="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  v-model="form.city"
+                  required
+                  placeholder="Nama Kabupaten / Kota"
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                />
+                <InputError class="mt-1" :message="form.errors.city" />
+              </div>
+
+              <!-- 12. Provinsi -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  12. Provinsi <span class="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  v-model="form.province"
+                  required
+                  placeholder="Nama Provinsi"
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                />
+                <InputError class="mt-1" :message="form.errors.province" />
+              </div>
+
+              <!-- 13. Agama -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  13. Agama <span class="text-rose-500">*</span>
+                </label>
+                <select
+                  v-model="form.religion"
+                  required
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                >
+                  <option value="Islam">Islam</option>
+                  <option value="Kristen">Kristen</option>
+                  <option value="Katolik">Katolik</option>
+                  <option value="Hindu">Hindu</option>
+                  <option value="Buddha">Buddha</option>
+                  <option value="Konghucu">Konghucu</option>
+                  <option value="Lainnya">Lainnya</option>
+                </select>
+                <InputError class="mt-1" :message="form.errors.religion" />
+              </div>
+
+              <!-- 14. Status Perkawinan -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  14. Status Perkawinan <span class="text-rose-500">*</span>
+                </label>
+                <select
+                  v-model="form.marital_status"
+                  required
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                >
+                  <option value="Belum Kawin">Belum Kawin</option>
+                  <option value="Kawin">Kawin</option>
+                  <option value="Cerai Hidup">Cerai Hidup</option>
+                  <option value="Cerai Mati">Cerai Mati</option>
+                </select>
+                <InputError class="mt-1" :message="form.errors.marital_status" />
               </div>
             </div>
           </div>

@@ -147,5 +147,65 @@ class UccRegistrationAndActivationTest extends TestCase
         $this->assertEquals(200000, (float) $bronze->total_bonus);
         $this->assertEquals(150000, (float) $silver->total_bonus);
     }
+
+    public function test_admin_member_activation_persists_all_14_standard_ktp_fields(): void
+    {
+        $admin = User::factory()->create([
+            'username' => 'admin',
+            'email' => 'admin@universalcardcentral.com',
+            'nik' => '0000000000000001',
+            'member_tier' => 'platinum',
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('admin.activation.store'), [
+            'phone' => '081234567899',
+            'email' => 'ktpmember@example.com',
+            'postal_code' => '60111',
+            'member_tier' => 'silver',
+            'nik' => '3578010101900001',
+            'name' => 'Andi Wijaya',
+            'birth_place' => 'Surabaya',
+            'birth_date' => '1990-01-01',
+            'gender' => 'Laki-laki',
+            'blood_type' => 'O',
+            'address' => 'Jl. Pemuda No. 12',
+            'rt_rw' => '002/005',
+            'village' => 'Embong Kaliasin',
+            'district' => 'Genteng',
+            'city' => 'Kota Surabaya',
+            'province' => 'Jawa Timur',
+            'religion' => 'Islam',
+            'marital_status' => 'Kawin',
+            'beneficiary_name' => 'Rina Wijaya',
+            'beneficiary_birth_date' => '1992-05-10',
+            'beneficiary_relation' => 'Istri',
+            'emergency_phone' => '081298765431',
+            'ktp_image' => UploadedFile::fake()->image('ktp.jpg'),
+            'transfer_proof' => UploadedFile::fake()->image('transfer.jpg'),
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'sponsor_username' => 'admin',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('users', [
+            'nik' => '3578010101900001',
+            'name' => 'Andi Wijaya',
+            'birth_place' => 'Surabaya',
+            'gender' => 'Laki-laki',
+            'blood_type' => 'O',
+            'address' => 'Jl. Pemuda No. 12',
+            'rt_rw' => '002/005',
+            'village' => 'Embong Kaliasin',
+            'district' => 'Genteng',
+            'city' => 'Kota Surabaya',
+            'province' => 'Jawa Timur',
+            'religion' => 'Islam',
+            'marital_status' => 'Kawin',
+            'postal_code' => '60111',
+            'member_tier' => 'silver',
+            'activation_amount' => 350000,
+        ]);
+    }
 }
 

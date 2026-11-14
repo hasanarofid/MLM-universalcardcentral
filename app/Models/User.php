@@ -13,8 +13,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable([
     'name', 'email', 'password', 'username', 'phone', 'is_left_handed',
-    'nik', 'ktp_image', 'transfer_proof', 'gender', 'birth_place', 'birth_date', 'religion', 'marital_status', 'last_education', 'occupation',
-    'address', 'province', 'city', 'district', 'village', 'postal_code',
+    'nik', 'ktp_image', 'transfer_proof', 'gender', 'blood_type', 'birth_place', 'birth_date', 'religion', 'marital_status', 'last_education', 'occupation',
+    'address', 'rt_rw', 'province', 'city', 'district', 'village', 'postal_code',
     'beneficiary_name', 'beneficiary_birth_date', 'beneficiary_relation', 'beneficiary_phone', 'emergency_phone',
     'parent_id', 'position', 'left_count', 'right_count', 'left_points', 'right_points', 
     'team_points', 'ro_points', 'po_points', 'package_name', 'member_tier', 'activation_amount',
