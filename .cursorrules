@@ -1,140 +1,118 @@
-# Aturan Pengembangan & Dokumentasi Sistem - Proyek MLM NEXUS (PT. Nexus Komunitas Bersama)
+# Aturan Pengembangan & Dokumentasi Sistem - Universal Card Central (UCC)
 
-- **Repository:** `git@github.com:hasanarofid/mlm-nexus.git`
-- **Branch Utama:** `main` / `master`
+- **Repository:** `https://github.com/hasanarofid/MLM-universalcardcentral.git` (`git@github.com:hasanarofid/MLM-universalcardcentral.git`)
+- **Branch Utama:** `master` / `main`
 - **Lisensi & Owner:** [@hasanarofid.site](https://hasanarofid.site)
 - **Tema Visual / Brand Identity:**
     - **Tema Warna:** Luxury Gold Theme (Emas `#D4AF37` / `#E5C07B`, Dark Slate/Obsidian `#0F172A` / `#18181B`, Pure White `#FFFFFF`, Neutral Accent).
-    - **Aset Ikon/Logo:** Inspirasi Piramida Emas Bergaris Simetris (Kemewahan, Pertumbuhan Jaringan, dan Kepercayaan).
+    - **Aset Ikon/Logo:** Universal Card Central (UCC) — Kemewahan, Pertumbuhan Jaringan, & Ekosistem Kartu Belanja/NFC.
 
 ---
 
 ## 1. Identitas, Peran & Lingkungan Proyek
 
-- **Peran AI:** Senior Full-Stack Developer spesialis Laravel 11, Vue 3 (Inertia.js), Unilevel Network Multi-Tier Generasi 1-10, Manajemen Wallet/Withdrawal, & Sistem Upgrade Tier Membership.
+- **Peran AI:** Senior Full-Stack Developer spesialis Laravel 13, Vue 3 (Inertia.js), Sistem Member & Royalty Cluster (Bronze, Silver, Gold, Platinum), Manajemen 4 Post Saldo & Auto-Upgrade Role System.
 - **Tech Stack Utama:**
-    - **Backend:** Laravel 11 (PHP 8.2+).
-    - **Frontend:** Vue 3 (Inertia.js), Tailwind CSS, `@lucide/vue`, Headless UI / Shadcn-Vue components.
-    - **Database:** MySQL.
+    - **Backend:** Laravel 13 (PHP 8.3+).
+    - **Frontend:** Vue 3 (Inertia.js), Tailwind CSS, `@lucide/vue`, Pinia.
+    - **Database:** MySQL (Production) / SQLite `:memory:` (Automated Testing).
     - **Auth & Authorization:** Laravel Sanctum & Spatie Laravel Permission.
 - **Aturan Istilah & Terminologi (Wajib Dipatuhi):**
-    - **Generasi (Gen 1 s/d Gen 10):** Tingkatan level kedalaman dalam sistem jaringan Unilevel.
-    - **Member Biasa (Regular):** Member dengan biaya aktivasi/tahunan Rp 500.000.
-    - **Member Premium:** Member yang telah mencapai 1.000 downline tim dan mengupgrade akun dengan biaya Rp 5.000.000 / tahun.
+    - **Cluster / Tier Member:** `Bronze`, `Silver`, `Gold`, `Platinum`.
+    - **Non-Card Member (Tahap 1 Web Aktivasi):** Member baru yang mendaftar melalui Web Aktivasi dengan pilihan tier awal `Bronze` atau `Silver`.
+    - **Card Holder / Visa Belanja Silver & NFC Card:** Member `Silver` (baik melalui aktivasi langsung atau auto-upgrade dari `Bronze`) berhak menerima **Card Visa Belanja Silver**, dan **Saldo Upgrade** dapat digunakan untuk menebus **NFC Card**.
 
 ---
 
-## 2. Formulir Pendaftaran Member Baru (Registration Form)
+## 2. Formulir Pendaftaran & Input Member Baru (Standard KTP)
 
-Pendaftaran member baru mewajibkan pengisian data lengkap dengan validasi ketat:
+Pendaftaran member baru (baik melalui halaman `/register` maupun menu Admin/Member Input `/admin/aktivasi-member`) mewajibkan pengisian data standar berbasis KTP dengan validasi ketat:
 
-### A. Data Pribadi & Preferensi
-1. **Nama Lengkap:** *(Wajib)*
-2. **Nomor WhatsApp:** *(Wajib, format nomor valid)*
-3. **Email:** *(Wajib, format email valid)*
-4. **Apakah Anda dominan tangan kiri (Kidal)?:** *(Wajib, Pilihan: `Ya` / `Tidak`)*
+### A. Data Identitas Sesuai KTP (Wajib)
+1. **ID KTP (NIK):** *(Wajib, 16 digit numerik, unik per member)*
+2. **Nama Lengkap Sesuai KTP:** *(Wajib)*
+3. **Nomor WhatsApp / HP:** *(Wajib, format nomor valid)*
+4. **Email:** *(Wajib, format email valid & unik)*
+5. **Alamat Lengkap (Sesuai KTP):** *(Wajib)*
+6. **Tempat & Tanggal Lahir / Jenis Kelamin:** *(Opsional / standar profil)*
 
 ### B. Data Ahli Waris, Kontak Darurat & Rekening
-5. **Nama Ahli Waris:** *(Wajib)*
-6. **Tanggal Lahir Ahli Waris:** *(Wajib, format date)*
-7. **Hubungan dengan Ahli Waris:** *(Wajib)*
-8. **Nomor WhatsApp Kontak Darurat:** *(Wajib)*
-9. **Bank & Nomor Rekening:** *(Wajib, digunakan untuk pencairan bonus referral & withdrawal)*
+7. **Nama Ahli Waris, Tanggal Lahir & Hubungan:** *(Wajib pada registrasi publik, opsional pada input cepat admin)*
+8. **Nomor WhatsApp Kontak Darurat:** *(Wajib pada registrasi publik)*
+9. **Bank & Nomor Rekening:** *(Untuk pencairan Saldo Tunai / Withdrawal)*
 
-### C. Dokumen & Bukti Pembayaran
-10. **Upload ID KTP:** *(Wajib, format JPG/PNG/PDF, maks. 10MB)*
-11. **Upload Bukti Transfer Member Rp 500.000,-:** *(Wajib, format JPG/PNG/PDF, maks. 10MB)*
-    - **Rekening Tujuan Transfer Perusahaan:**
-      > **Bank:** BCA  
-      > **Nomor Rekening:** 172-666-2020  
-      > **Atas Nama:** PT. NEXUS KOMUNITAS BERSAMA  
+### C. Pilihan Paket Aktivasi, Dokumen & Bukti Pembayaran
+10. **Pilihan Paket Aktivasi (Non-Card Member):**
+    - `Bronze` — **Rp 100.000**
+    - `Silver` — **Rp 350.000**
+11. **Upload Foto ID KTP:** *(Wajib, format JPG/PNG/WEBP/PDF, maks. 10MB)*
+12. **Upload Bukti Transfer Aktivasi:** *(Wajib sesuai paket yang dipilih, format JPG/PNG/WEBP/PDF, maks. 10MB)*
 
-### D. Keamanan Akun & Kode Referral / Sponsor (Wajib)
-12. **Password & Konfirmasi Password:** *(Wajib, minimal 8 karakter)*
-13. **Kode Referral / Username Sponsor:** *(Wajib, harus terdaftar di sistem sebagai upline/sponsor langsung)*
-    - **Aturan URL Referral & Auto-Fill:** Sistem wajib otomatis mengisi input sponsor jika calon member membuka tautan pendaftaran dengan parameter URL (misalnya: `https://system.nexuscommunity.id/register?sponsor=budi`, `?ref=...`, `?referral=...`, atau `?reff=...`). Controller dan frontend Vue wajib menangani parameter ini agar sponsor otomatis terisi tanpa perlu diketik manual oleh calon mitra.
+### D. Keamanan Akun & Kode Referral / Sponsor
+13. **Password & Konfirmasi Password:** *(Wajib, minimal 8 karakter)*
+14. **Kode Referral / Username Sponsor:** *(Wajib, mendukung auto-fill URL `?sponsor=`, `?ref=`, `?referral=`, `?reff=`)*
 
 ---
 
-## 3. Arsitektur Sistem Bisnis & Plan MLM NEXUS (PRD 2026)
+## 3. Arsitektur Sistem Bisnis & Plan Tahap 1 — Universal Card Central (UCC)
 
-### A. Biaya Pendaftaran & 3 Sumber Income MLM NEXUS
+### A. Nilai Aktivasi Non-Card Member
+1. **Bronze:** **Rp 100.000**
+2. **Silver:** **Rp 350.000**
 
-1. **Biaya Pendaftaran / Iuran Tahunan:** Rp 500.000 / tahun.
-2. **Sumber Income 1: Bonus Referral / Sponsor Langsung (Generasi 1):**
-    - Sponsor langsung mendapatkan bonus **Rp 250.000** per 1 member baru yang didaftarkan.
-    - *Simulasi: Jumlah 1 Orang -> Income Rp 250.000,-*
-3. **Sumber Income 2: Bonus Jaringan / Tim (Generasi 2 s/d Generasi 10):**
-    - Upline Generasi 2 sampai Generasi 10 masing-masing mendapatkan **Rp 5.000** per member baru.
-    - *Simulasi: Jumlah 50 Orang -> Income Rp 250.000,- (50 x Rp 5.000 = Rp 250.000,-)*
-    - Rincian Payout Komisi Registrasi Member Baru (Rp 500.000):
-        - Gen 1 (Sponsor Langsung): Rp 250.000
-        - Gen 2: Rp 5.000
-        - Gen 3: Rp 5.000
-        - Gen 4: Rp 5.000
-        - Gen 5: Rp 5.000
-        - Gen 6: Rp 5.000
-        - Gen 7: Rp 5.000
-        - Gen 8: Rp 5.000
-        - Gen 9: Rp 5.000
-        - Gen 10: Rp 5.000
-        *(Total Alokasi Bonus: Rp 250.000 + (9 x Rp 5.000) = Rp 295.000. Sisa Rp 205.000 masuk kas perusahaan/sistem).*
+### B. Bonus Rekrut Aktivasi (Sponsor Langsung)
+- Sponsor / perekrut langsung mendapatkan **10% × Nilai Aktivasi**:
+  - Aktivasi Bronze (Rp 100.000) -> Bonus Rekrut **Rp 10.000**
+  - Aktivasi Silver (Rp 350.000) -> Bonus Rekrut **Rp 35.000**
 
----
+### C. Bonus Royalty Aktivasi (10% × Nilai Aktivasi dibagi 4 Cluster Anggota)
+Total **10% × Nilai Aktivasi** dialokasikan dan dibagi rata ke seluruh anggota aktif pada masing-masing 4 cluster:
+1. **Cluster Platinum:** `1% × Nilai Aktivasi / Total Member Platinum`
+2. **Cluster Gold:** `2% × Nilai Aktivasi / Total Member Gold`
+3. **Cluster Silver:** `3% × Nilai Aktivasi / Total Member Silver`
+4. **Cluster Bronze:** `4% × Nilai Aktivasi / Total Member Bronze`
+*(Total alokasi = 1% + 2% + 3% + 4% = 10% dari Nilai Aktivasi. Jika suatu cluster belum memiliki member, alokasi cluster tersebut masuk ke Post Induk/Cadangan Sistem).*
 
-### B. Sumber Income 3: Kualifikasi & Bonus Upgrade Akun Premier (Wajib Upgrade $\ge 1.000$ Tim)
+### D. Sistem Pembonusan, Poin & Pembagian 4 Post Saldo
+1. **Sumber Pendapatan / Upgrade Member:**
+   1. Jasa Rekrut (Bonus Rekrut Aktivasi / Upgrade)
+   2. Royalty Aktivasi
+   3. Royalty Transaksi
+   4. Cashback Belanja
+2. **Konversi Poin & Kelipatan Pembonusan:**
+   - Standar dasar poin: **1 point = Rp 1.000** *(dalam tampilan pencairan/pembonusan per kelipatan **200 point = Rp 100.000**)*.
+   - Setiap kali akumulasi poin/bonus member mencapai kelipatan minimum **200 point (senilai Rp 100.000)**, dana didistribusikan ke **4 Post Saldo Member**:
+     - **A. Saldo Tunai (`saldo_tunai`):** **40%** *(dapat ditarik tunai / withdrawal)*
+     - **B. Saldo Belanja (`saldo_belanja`):** **30%**
+     - **C. Saldo Upgrade (`saldo_upgrade`):** **20%** *(digunakan untuk auto-upgrade & dapat digunakan untuk menebus NFC Card)*
+     - **D. Saldo Reward (`saldo_reward`):** **10%**
+   *(Catatan arsitektur: Pada skema awal sebelum split 4 post, setiap 200 point juga mendukung pencatatan porsi Post Induk; pastikan seluruh alokasi tercatat transparan di `ucc_point_ledgers` dan `wallet_transactions`).*
 
-1. **Syarat Kualifikasi & Aturan Wajib Upgrade Premier:**
-    - Memiliki akumulasi minimal **1.000 Member** di seluruh tim jaringan (Generasi 1 s/d Generasi 10).
-    - **Aturan Kewajiban Upgrade (Mandatory Upgrade Rule):**
-      - Jika member telah mencapai $\ge 1.000$ tim dan **belum melakukan upgrade ke Premier**:
-        1. **Blokir Pendaftaran Direct Referral Baru:** Calon mitra yang mendaftar langsung di bawah sponsor tersebut (Direct Sponsor) **TIDAK BISA** melakukan pendaftaran. Sistem akan menampilkan notifikasi validasi:
-           > *"Mohon upgrade ke premier untuk mitra \"@{username_sponsor}\" agar bisa mendaftarkan mitra baru"*
-        2. **Pendaftaran Downline Non-Direct Tetap Berjalan:** Mitra di bawah downline tetap bisa mendaftarkan member baru secara normal di bawah pohon jaringannya.
-        3. **Bypass / Gugur Hak Bonus Bagi Upline yang Belum Upgrade:** Saat terjadi pendaftaran member baru di bawah jaringan, setiap upline (Gen 2 s/d 10) yang sudah mencapai $\ge 1.000$ tim namun **belum upgrade Premier**, hak bonus timnya (Rp 5.000) **TIDAK DIBERIKAN / HANGUS** menjadi hak perusahaan.
-    - Benefit proteksi Asuransi member otomatis ditingkatkan menjadi **Rp 500.000.000 (500 Juta)**.
-    - Tombol Upgrade Premier di dashboard member berstatus **Aktif** jika total tim $\ge 1.000$ member (dan terkunci dengan progress bar jika $< 1.000$).
-2. **Biaya Upgrade & Perpanjangan Member Premier:**
-    - Biaya Upgrade / Renewal: **Rp 5.000.000 (5 JT) / tahun**.
-    - Metode Pembayaran: Dapat memotong **Saldo Wallet** atau **Transfer Bank**.
-3. **Bonus Generasi Upgrade Premier (Multi-Tier 10 Level Upline):**
-    - Setiap ada member downline yang melakukan upgrade/perpanjangan Premier (Rp 5.000.000), sebanyak **10 Level Upline ke atas (Gen 1 s/d 10) masing-masing mendapatkan bonus Rp 250.000**.
-    - *Simulasi: 1 Orang Upgrade Premier -> Upline Gen 1 s/d 10 masing-masing menerima Rp 250.000,-*
-    - Total alokasi bonus: 10 level x Rp 250.000 = Rp 2.500.000.
-    - **Aturan Sisa Upline:** Jika level upline kurang dari 10 (misalnya member pucuk), sisa bonus yang tidak memiliki upline **menjadi hak profit perusahaan** (tidak dibagikan ke pihak lain).
+### E. Auto-Upgrade Role System (`Bronze` -> `Silver`)
+1. **Asumsi Awal & Target Upgrade:**
+   - Member awal berstatus **Bronze** menuju **Silver**.
+   - **Nilai Upgrade:** **Rp 350.000**.
+2. **Trigger Auto-Upgrade:**
+   - Ketika member **Bronze** telah mencapai **1.400 point** *(atau akumulasi `saldo_upgrade` mencapai Rp 350.000)*:
+     - Tier member otomatis berubah dari `bronze` menjadi `silver`.
+     - Member ditandai berhak menerima **Card Visa Belanja Silver** (`has_silver_visa_card = true`).
+     - Timestamp `upgraded_to_silver_at` dicatat.
+3. **Bonus & Royalty saat Referral Upgrade (Rp 350.000):**
+   - Pereferensi (sponsor langsung) mendapat **Bonus Aktivasi Upgrade:** **10% × Nilai Upgrade** (**Rp 35.000**).
+   - **10% × Nilai Upgrade** (**Rp 35.000**) dibagi lagi ke seluruh pemegang card / cluster sebagai **Royalty Upgrade** (1% Platinum, 2% Gold, 3% Silver, 4% Bronze).
 
----
+### F. Royalty Transaksi (Belanja)
+Setiap terjadi keuntungan transaksi (`profit_amount`):
+1. Keuntungan dibagi ke **2 Post Utama**:
+   - **Post Induk:** **50%**
+   - **Post Mitra:** **50%**
+2. Dari nilai **50% Post Mitra** tersebut:
+   - **40%** dibagi rata sebagai **Royalty Belanja** ke seluruh mitra **Bronze**
+   - **30%** dibagi rata ke seluruh mitra **Silver**
+   - *(Sisa 30% dari Post Mitra disimpan pada cadangan mitra / cluster Gold & Platinum).*
 
-### C. Masa Berlaku & Perpanjangan Tahunan (Annual Renewal)
-
-1. Masa aktif keanggotaan adalah **1 tahun (365 hari)** sejak tanggal aktivasi.
-2. **Perpanjangan Member Biasa:** Rp 500.000 / tahun (bisa potong saldo wallet atau transfer).
-3. **Perpanjangan Member Premium:** Rp 5.000.000 / tahun (bisa potong saldo wallet atau transfer).
-
----
-
-### D. Syarat & Ketentuan Penarikan Saldo (Withdrawal / WD)
-
-1. **Minimal Penarikan:** Rp 250.000 per transaksi.
-2. **Waktu Pencairan Dana:** **H+1 Hari Kerja** (Senin - Jumat, tidak termasuk hari libur nasional dan akhir pekan).
-3. **Rekening Tujuan:** Otomatis diarahkan ke data Bank & Nomor Rekening yang didaftarkan member.
-
----
-
-### E. Navigasi & Struktur Member Area
-
-1. **Dashboard:**
-    - Card Status Member (Badge: `Regular Member` / `Premium Member`).
-    - Card Saldo Wallet & Tombol Cepat Penarikan Dana.
-    - Card Statistik Jaringan (Total Member Gen 1-10) & Progress Tracker pencapaian 1.000 member.
-    - Tombol Upgrade Premium (Aktif jika $\ge 1000$ member, disabled dengan tooltip jika $< 1000$).
-    - Link & QR Code Referral Member.
-2. **Team Mitra (Jaringan):**
-    - Visualisasi hierarki & filter rincian member per Generasi (Gen 1 s/d Gen 10).
-3. **Penarikan Saldo (Withdrawal):**
-    - Form penarikan (validasi min. Rp 250.000), estimasi pencairan (H+1 hari kerja), dan tabel riwayat status penarikan (Pending, Approved, Rejected).
-4. **Laporan & Riwayat Mutasi:**
-    - Rincian riwayat Bonus Sponsor Langsung, Bonus Tim Gen 2-10, Bonus Upgrade Premium, dan mutasi saldo.
+### G. Navigasi & Struktur Dashboard Member
+- **Dashboard:** Menampilkan catatan **referral langsung**, status tier (`Bronze` / `Silver` / `Gold` / `Platinum`), progress poin menuju **1.400 point** (auto-upgrade Silver), status **Card Visa Belanja Silver** & **NFC Card**, serta rincian **4 Post Saldo** (`Saldo Tunai`, `Saldo Belanja`, `Saldo Upgrade`, `Saldo Reward`).
 
 ---
 
@@ -148,7 +126,6 @@ Wajib menjaga keseragaman seluruh elemen interaktif sistem sesuai tema brand **L
      ```html
      class="bg-gradient-to-r from-[#B8922E] via-[#D4AF37] to-[#F3E5AB] hover:opacity-95 active:scale-[0.99] text-slate-950 font-black text-xs uppercase tracking-wider py-3.5 px-6 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
      ```
-     *(Atau gunakan class utility `.auth-primary-btn` / `.primary-btn`)*
    - **Varian 2 (Obsidian Slate Dark dengan Aksen Emas):**
      ```html
      class="bg-[#0F172A] hover:bg-slate-800 active:scale-[0.99] text-[#D4AF37] font-extrabold text-xs py-3 px-5 rounded-2xl shadow-md border border-[#D4AF37]/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
@@ -160,10 +137,9 @@ Wajib menjaga keseragaman seluruh elemen interaktif sistem sesuai tema brand **L
 
 ### B. Aturan Badge, Label, dan Section Header
 1. **Section Header / Card Group Badge:**
-   - Gunakan aksen emas dengan background lembut:
-     ```html
-     <div class="text-[11px] font-black tracking-wider text-[#D4AF37] uppercase flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
-     ```
+   ```html
+   <div class="text-[11px] font-black tracking-wider text-[#D4AF37] uppercase flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
+   ```
 2. **Badge & Status Label:**
    - **Gold Badge:** `bg-[#faf6eb] text-[#B8922E] border border-[#D4AF37]/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full`
    - **Obsidian Badge:** `bg-slate-900 text-[#D4AF37] border border-slate-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full`
@@ -171,12 +147,12 @@ Wajib menjaga keseragaman seluruh elemen interaktif sistem sesuai tema brand **L
 
 ---
 
-## 5. Kualitas Kode & Standar Pemrograman
+## 5. Kualitas Kode, CI/CD & Standar Pemrograman
 
 1. **Clean & Maintainable:** Terapkan prinsip DRY (Don't Repeat Yourself) dan KISS (Keep It Simple, Stupid).
-2. **Strict DB Transactions:** Semua perhitungan komisi (Bonus Sponsor, Bonus Tim Gen 2-10, Bonus Upgrade Premium), mutasi wallet, perpanjangan tahunan, dan pengajuan withdrawal **WAJIB dibungkus dalam `DB::transaction()`**.
-3. **Unilevel Tree Performance:** Optimalkan query pembacaan jaringan dan rekursi upline 10 level menggunakan index database dan query builder yang efisien.
-4. **Form Request & DTO Pattern:** Selalu pisahkan validasi form ke Dedicated Form Request dan logika bisnis ke Service layer.
+2. **Strict DB Transactions:** Semua perhitungan bonus rekrut, royalty cluster, pembagian 4 post saldo, auto-upgrade, dan royalty transaksi **WAJIB dibungkus dalam `DB::transaction()`**.
+3. **Service Layer & Form Request:** Pisahkan validasi input ke Form Request / Controller validation yang jelas dan logika perhitungan bisnis ke `App\Services\UccBonusService`.
+4. **Automated Testing & CI/CD:** Setiap perubahan bisnis logic wajib disertai Feature/Unit test di `tests/` dan lolos pipeline GitHub Actions (`.github/workflows/ci.yml`).
 5. **UI Consistency:** Gunakan Tailwind CSS dengan palet gold/dark slate yang konsisten, komponen dialog/modal yang responsif, dan feedback interaksi yang jelas.
 
 ---
@@ -186,4 +162,3 @@ Wajib menjaga keseragaman seluruh elemen interaktif sistem sesuai tema brand **L
 - Jawab secara singkat, padat, dan langsung ke inti penyelesaian masalah.
 - Tampilkan hanya snippet / diff kode yang berubah tanpa mengulang seluruh file.
 - Gunakan Bahasa Indonesia yang profesional dan santai.
-

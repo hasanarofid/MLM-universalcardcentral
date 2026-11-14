@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\BonusLog;
 use App\Models\User;
-use App\Models\WalletTransaction;
+use App\Services\UccBonusService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -106,10 +105,13 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
+            'nik' => 'required|digits:16|unique:users,nik',
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'phone' => 'required|string|max:25',
-            'is_left_handed' => 'required|string|in:Iya,Tidak',
+            'address' => 'nullable|string|max:500',
+            'member_tier' => 'nullable|string|in:bronze,silver',
+            'is_left_handed' => 'nullable|string|in:Iya,Tidak',
             'beneficiary_name' => 'required|string|max:255',
             'beneficiary_birth_date' => 'required|date|before_or_equal:today|after:1900-01-01',
             'beneficiary_relation' => 'required|string|max:100',
@@ -122,6 +124,9 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'referral' => 'required|string|max:255',
         ], [
+            'nik.required' => 'ID KTP (NIK 16 digit) wajib diisi.',
+            'nik.digits' => 'ID KTP (NIK) harus terdiri dari tepat 16 digit angka.',
+            'nik.unique' => 'ID KTP (NIK) sudah terdaftar di sistem.',
             'transfer_proof.required' => 'Bukti transfer pembayaran wajib diunggah.',
             'referral.required' => 'Kode Referral / Username Sponsor wajib diisi.',
         ]);
@@ -180,14 +185,19 @@ class RegisteredUserController extends Controller
             $username = $usernameBase . $counter++;
         }
 
+        $tier = strtolower((string) $request->input('member_tier', 'bronze'));
         $user = null;
-        DB::transaction(function () use ($request, $sponsor, $username, $ktpPath, $transferProofPath, &$user) {
+        DB::transaction(function () use ($request, $sponsor, $username, $ktpPath, $transferProofPath, $tier, &$user) {
             $user = User::create([
+                'nik' => $request->nik,
                 'name' => $request->name,
                 'email' => $request->email,
                 'username' => $username,
                 'phone' => $request->phone,
-                'is_left_handed' => $request->is_left_handed,
+                'address' => $request->address,
+                'member_tier' => $tier,
+                'activation_amount' => UccBonusService::getActivationAmount($tier),
+                'is_left_handed' => $request->input('is_left_handed', 'Tidak'),
                 'beneficiary_name' => $request->beneficiary_name,
                 'beneficiary_birth_date' => $request->beneficiary_birth_date,
                 'beneficiary_relation' => $request->beneficiary_relation,
@@ -215,70 +225,7 @@ class RegisteredUserController extends Controller
                 \Illuminate\Support\Facades\Log::error('Gagal mengirim email pendaftaran member: ' . $e->getMessage());
             }
 
-            // Allocation Bonus Sponsor (Gen 1: Rp 250.000) & Bonus Tim (Gen 2-10: Rp 5.000 / member)
-            $sponsorBonus = 250000;
-            $bonusPerGen = 5000;
-
-            // Direct Sponsor (Gen 1)
-            $sponsor->increment('saldo', $sponsorBonus);
-            $sponsor->increment('total_bonus', $sponsorBonus);
-
-            $sponsorDesc = "Bonus Referral dari pendaftaran @{$user->username}";
-            BonusLog::create([
-                'transaction_code' => 'SP' . sprintf('%03d', BonusLog::count() + 1),
-                'user_id' => $sponsor->id,
-                'category' => 'sponsor',
-                'source_user_id' => $user->id,
-                'description' => $sponsorDesc,
-                'amount' => $sponsorBonus,
-            ]);
-
-            WalletTransaction::create([
-                'user_id' => $sponsor->id,
-                'type' => 'in',
-                'category' => 'bonus_sponsor',
-                'amount' => $sponsorBonus,
-                'description' => $sponsorDesc,
-            ]);
-
-            // Multi-tier Gen 2 s/d Gen 10 Uplines (Rp 5.000 / level per member baru)
-            $currentUpline = $sponsor;
-            for ($gen = 2; $gen <= 10; $gen++) {
-                if (!$currentUpline->parent_id) {
-                    break;
-                }
-
-                $upline = User::find($currentUpline->parent_id);
-                if (!$upline) {
-                    break;
-                }
-
-                // Check eligibility (if downlines >= 1000 and not premier, bonus is bypassed)
-                if ($upline->isEligibleForBonus()) {
-                    $upline->increment('saldo', $bonusPerGen);
-                    $upline->increment('total_bonus', $bonusPerGen);
-
-                    $genDesc = "Bonus Tim Gen {$gen} dari pendaftaran @{$user->username}";
-                    BonusLog::create([
-                        'transaction_code' => 'G' . sprintf('%03d', BonusLog::count() + 1),
-                        'user_id' => $upline->id,
-                        'category' => 'generasi',
-                        'source_user_id' => $user->id,
-                        'description' => $genDesc,
-                        'amount' => $bonusPerGen,
-                    ]);
-
-                    WalletTransaction::create([
-                        'user_id' => $upline->id,
-                        'type' => 'in',
-                        'category' => 'bonus_generasi',
-                        'amount' => $bonusPerGen,
-                        'description' => $genDesc,
-                    ]);
-                }
-
-                $currentUpline = $upline;
-            }
+            app(UccBonusService::class)->processActivation($user, $sponsor, $tier);
         });
 
         event(new Registered($user));

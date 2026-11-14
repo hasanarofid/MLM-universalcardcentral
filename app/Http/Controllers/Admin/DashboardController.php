@@ -81,6 +81,19 @@ class DashboardController extends Controller
             ];
 
         $sponsorStatus = $user->canSponsorNewMember();
+        $directReferrals = User::where('parent_id', $user->id)
+            ->latest()
+            ->take(20)
+            ->get(['id', 'name', 'username', 'nik', 'member_tier', 'activation_amount', 'created_at'])
+            ->map(fn ($ref) => [
+                'id' => $ref->id,
+                'name' => $ref->name,
+                'username' => $ref->username,
+                'nik' => $ref->nik,
+                'member_tier' => ucfirst((string) ($ref->member_tier ?? 'bronze')),
+                'activation_amount' => (int) ($ref->activation_amount ?? 100000),
+                'joined_at' => $ref->created_at?->format('d M Y H:i'),
+            ]);
 
         return Inertia::render('Admin/Dashboard', [
             'is_admin' => $isAdmin,
@@ -112,6 +125,22 @@ class DashboardController extends Controller
                 'min_amount' => 10000,
                 'description' => 'Pembayaran Premi bulanan (min Rp 10.000) masuk 100% full ke Total Saldo mitra.',
             ],
+            'ucc_summary' => [
+                'member_tier' => strtolower((string) ($user->member_tier ?? 'bronze')),
+                'member_tier_label' => $user->getUccTierLabel(),
+                'points' => (int) ($user->points ?? 0),
+                'pending_points' => (int) ($user->pending_points ?? 0),
+                'upgrade_target_points' => \App\Services\UccBonusService::UPGRADE_TRIGGER_POINTS,
+                'upgrade_progress' => $user->getUpgradeProgressPercentage(),
+                'saldo_tunai' => (float) ($user->saldo_tunai ?? 0),
+                'saldo_belanja' => (float) ($user->saldo_belanja ?? 0),
+                'saldo_upgrade' => (float) ($user->saldo_upgrade ?? 0),
+                'saldo_reward' => (float) ($user->saldo_reward ?? 0),
+                'has_silver_visa_card' => (bool) ($user->has_silver_visa_card ?? false),
+                'has_nfc_card' => (bool) ($user->has_nfc_card ?? false),
+                'upgraded_to_silver_at' => $user->upgraded_to_silver_at?->format('d M Y H:i'),
+            ],
+            'direct_referrals' => $directReferrals,
         ]);
     }
 

@@ -68,9 +68,12 @@ const checkSponsorLive = async (val) => {
 };
 
 const form = useForm({
+    nik: '',
     name: '',
     phone: '',
     email: '',
+    address: '',
+    member_tier: 'bronze',
     is_left_handed: 'Tidak',
     beneficiary_name: '',
     beneficiary_birth_date: '',
@@ -245,12 +248,12 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Form Pendaftaran | Nexus Community" />
+        <Head title="Form Pendaftaran | Universal Card Central" />
 
         <div class="panel-heading">
             <span class="eyebrow">FORMULIR PENDAFTARAN</span>
-            <h2>Daftar Akun Baru</h2>
-            <p>Silakan lengkapi formulir pendaftaran anggota di bawah ini dengan data yang benar.</p>
+            <h2>Daftar Member Universal Card Central</h2>
+            <p>Silakan lengkapi formulir pendaftaran anggota sesuai KTP di bawah ini.</p>
         </div>
 
         <form @submit.prevent="submit" class="space-y-4">
@@ -259,13 +262,37 @@ const submit = () => {
             <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 space-y-3.5">
                 <div class="text-[11px] font-black tracking-wider text-[#D4AF37] uppercase flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
                     <User class="w-3.5 h-3.5" />
-                    <span>1. Data Pribadi & Kontak</span>
+                    <span>1. Data Identitas Sesuai KTP & Kontak</span>
                 </div>
 
-                <!-- Nama Lengkap -->
+                <!-- ID KTP (NIK) -->
+                <div class="form-group">
+                    <label for="nik" class="block text-xs font-bold text-slate-700 mb-1">
+                        ID KTP (NIK 16 Digit) <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon">
+                            <CreditCard class="w-4.5 h-4.5 text-slate-400" />
+                        </span>
+                        <input
+                            id="nik"
+                            type="text"
+                            inputmode="numeric"
+                            maxlength="16"
+                            v-model="form.nik"
+                            required
+                            autofocus
+                            placeholder="16 Digit NIK Sesuai KTP"
+                            class="w-full text-sm"
+                        />
+                    </div>
+                    <InputError class="mt-1" :message="form.errors.nik" />
+                </div>
+
+                <!-- Nama Sesuai KTP -->
                 <div class="form-group">
                     <label for="name" class="block text-xs font-bold text-slate-700 mb-1">
-                        Nama Lengkap <span class="text-rose-500">*</span>
+                        Nama Lengkap Sesuai KTP <span class="text-rose-500">*</span>
                     </label>
                     <div class="auth-input-wrap">
                         <span class="auth-input-icon">
@@ -276,12 +303,57 @@ const submit = () => {
                             type="text"
                             v-model="form.name"
                             required
-                            autofocus
-                            placeholder="Jawaban Anda"
+                            placeholder="Nama Lengkap Sesuai KTP"
                             class="w-full text-sm"
                         />
                     </div>
                     <InputError class="mt-1" :message="form.errors.name" />
+                </div>
+
+                <!-- Alamat Sesuai KTP -->
+                <div class="form-group">
+                    <label for="address" class="block text-xs font-bold text-slate-700 mb-1">
+                        Alamat Lengkap Sesuai KTP
+                    </label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon">
+                            <FileText class="w-4.5 h-4.5 text-slate-400" />
+                        </span>
+                        <input
+                            id="address"
+                            type="text"
+                            v-model="form.address"
+                            placeholder="Alamat lengkap sesuai KTP"
+                            class="w-full text-sm"
+                        />
+                    </div>
+                    <InputError class="mt-1" :message="form.errors.address" />
+                </div>
+
+                <!-- Pilihan Tier Aktivasi -->
+                <div class="form-group">
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                        Paket Aktivasi Non-Card Member <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <label
+                            class="cursor-pointer rounded-xl border p-3 transition-all flex flex-col gap-0.5"
+                            :class="form.member_tier === 'bronze' ? 'border-[#D4AF37] bg-[#faf6eb] text-slate-900 shadow-sm' : 'border-slate-200 bg-white text-slate-600'"
+                        >
+                            <input type="radio" v-model="form.member_tier" value="bronze" class="sr-only" />
+                            <span class="text-xs font-black uppercase tracking-wider text-[#B8922E]">Bronze</span>
+                            <span class="text-sm font-extrabold">Rp 100.000</span>
+                        </label>
+                        <label
+                            class="cursor-pointer rounded-xl border p-3 transition-all flex flex-col gap-0.5"
+                            :class="form.member_tier === 'silver' ? 'border-[#D4AF37] bg-[#faf6eb] text-slate-900 shadow-sm' : 'border-slate-200 bg-white text-slate-600'"
+                        >
+                            <input type="radio" v-model="form.member_tier" value="silver" class="sr-only" />
+                            <span class="text-xs font-black uppercase tracking-wider text-slate-700">Silver</span>
+                            <span class="text-sm font-extrabold">Rp 350.000</span>
+                        </label>
+                    </div>
+                    <InputError class="mt-1" :message="form.errors.member_tier" />
                 </div>
 
                 <!-- Whatsapp -->

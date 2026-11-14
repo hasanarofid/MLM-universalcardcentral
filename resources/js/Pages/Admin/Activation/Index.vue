@@ -56,9 +56,12 @@ const bankOptions = [
 ];
 
 const form = useForm({
+  nik: '',
   name: '',
   phone: '',
   email: '',
+  address: '',
+  member_tier: 'bronze',
   is_left_handed: 'Tidak',
   beneficiary_name: '',
   beneficiary_birth_date: '',
@@ -241,7 +244,39 @@ const submitForm = () => {
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <!-- Nama Lengkap -->
+              <!-- ID KTP (NIK) -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  ID KTP (NIK 16 Digit) <span class="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="16"
+                  v-model="form.nik"
+                  required
+                  placeholder="16 Digit NIK Sesuai KTP"
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                />
+                <p v-if="form.errors.nik" class="text-xs text-rose-500 mt-1">{{ form.errors.nik }}</p>
+              </div>
+
+              <!-- Paket Aktivasi -->
+              <div class="form-group">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                  Paket Aktivasi Non-Card Member <span class="text-rose-500">*</span>
+                </label>
+                <select
+                  v-model="form.member_tier"
+                  class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
+                >
+                  <option value="bronze">Bronze — Rp 100.000</option>
+                  <option value="silver">Silver — Rp 350.000</option>
+                </select>
+                <p v-if="form.errors.member_tier" class="text-xs text-rose-500 mt-1">{{ form.errors.member_tier }}</p>
+              </div>
+
+              <!-- Nama Sesuai KTP -->
               <div class="form-group sm:col-span-2">
                 <label class="block text-xs font-bold text-slate-700 mb-1">
                   Nama Lengkap <span class="text-rose-500">*</span>

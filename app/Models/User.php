@@ -17,7 +17,10 @@ use Spatie\Permission\Traits\HasRoles;
     'address', 'province', 'city', 'district', 'village', 'postal_code',
     'beneficiary_name', 'beneficiary_birth_date', 'beneficiary_relation', 'beneficiary_phone', 'emergency_phone',
     'parent_id', 'position', 'left_count', 'right_count', 'left_points', 'right_points', 
-    'team_points', 'ro_points', 'po_points', 'package_name', 'is_premier', 'premier_activated_at', 'premier_expires_at', 'saldo', 'auto_save_saldo', 
+    'team_points', 'ro_points', 'po_points', 'package_name', 'member_tier', 'activation_amount',
+    'points', 'pending_points', 'is_premier', 'premier_activated_at', 'premier_expires_at',
+    'saldo', 'saldo_tunai', 'saldo_belanja', 'saldo_upgrade', 'saldo_reward', 'saldo_induk',
+    'has_silver_visa_card', 'has_nfc_card', 'upgraded_to_silver_at', 'auto_save_saldo', 
     'total_bonus', 'security_pin', 'bonus_uncashed', 'bank_name', 'bank_account_number', 'bank_account_name'
 ])]
 #[Hidden(['password', 'remember_token'])]
@@ -40,6 +43,9 @@ class User extends Authenticatable
             'is_premier' => 'boolean',
             'premier_activated_at' => 'datetime',
             'premier_expires_at' => 'datetime',
+            'has_silver_visa_card' => 'boolean',
+            'has_nfc_card' => 'boolean',
+            'upgraded_to_silver_at' => 'datetime',
         ];
     }
 
@@ -199,6 +205,33 @@ class User extends Authenticatable
         }
 
         return true;
+    }
+
+    public function uccPointLedgers()
+    {
+        return $this->hasMany(UccPointLedger::class, 'user_id');
+    }
+
+    public function getUccTierLabel(): string
+    {
+        return match (strtolower((string) ($this->member_tier ?? 'bronze'))) {
+            'platinum' => 'Platinum',
+            'gold' => 'Gold',
+            'silver' => 'Silver',
+            default => 'Bronze',
+        };
+    }
+
+    public function getUpgradeProgressPercentage(): float
+    {
+        if (strtolower((string) $this->member_tier) !== 'bronze') {
+            return 100.0;
+        }
+
+        $targetPoints = 1400;
+        $current = (int) ($this->points ?? 0);
+
+        return min(100.0, round(($current / $targetPoints) * 100, 2));
     }
 
     /**
