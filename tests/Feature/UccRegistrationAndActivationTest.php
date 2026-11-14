@@ -148,3 +148,4 @@ class UccRegistrationAndActivationTest extends TestCase
         $this->assertEquals(150000, (float) $silver->total_bonus);
     }
 }
+
