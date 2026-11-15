@@ -137,3 +137,4 @@ class UccNotificationProfileSoftDeleteTest extends TestCase
         $this->assertSoftDeleted('users', ['id' => $user->id]);
     }
 }
+
