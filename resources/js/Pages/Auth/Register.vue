@@ -235,10 +235,6 @@ const submit = () => {
         form.setError('referral', `Sponsor "${form.referral}" tidak ditemukan. Pendaftaran tidak dapat diproses.`);
         return;
     }
-    if (!form.transfer_proof) {
-        form.setError('transfer_proof', 'Bukti transfer pembayaran wajib diunggah.');
-        return;
-    }
     form.post(route('register'), {
         forceFormData: true,
         onFinish: () => form.reset('password', 'password_confirmation'),
@@ -253,46 +249,22 @@ const submit = () => {
         <div class="panel-heading">
             <span class="eyebrow">FORMULIR PENDAFTARAN</span>
             <h2>Daftar Member Universal Card Central</h2>
-            <p>Silakan lengkapi formulir pendaftaran anggota sesuai KTP di bawah ini.</p>
+            <p>Isi data dasar di bawah ini untuk membuat akun. Data verifikasi KTP dapat dilengkapi setelah login.</p>
         </div>
 
         <form @submit.prevent="submit" class="space-y-4">
             
-            <!-- SECTION 1: DATA PRIBADI -->
+            <!-- SECTION 1: DATA PENDAFTARAN -->
             <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 space-y-3.5">
                 <div class="text-[11px] font-black tracking-wider text-[#D4AF37] uppercase flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
                     <User class="w-3.5 h-3.5" />
-                    <span>1. Data Identitas Sesuai KTP & Kontak</span>
+                    <span>1. Data Pendaftaran Member</span>
                 </div>
 
-                <!-- ID KTP (NIK) -->
-                <div class="form-group">
-                    <label for="nik" class="block text-xs font-bold text-slate-700 mb-1">
-                        ID KTP (NIK 16 Digit) <span class="text-rose-500">*</span>
-                    </label>
-                    <div class="auth-input-wrap">
-                        <span class="auth-input-icon">
-                            <CreditCard class="w-4.5 h-4.5 text-slate-400" />
-                        </span>
-                        <input
-                            id="nik"
-                            type="text"
-                            inputmode="numeric"
-                            maxlength="16"
-                            v-model="form.nik"
-                            required
-                            autofocus
-                            placeholder="16 Digit NIK Sesuai KTP"
-                            class="w-full text-sm"
-                        />
-                    </div>
-                    <InputError class="mt-1" :message="form.errors.nik" />
-                </div>
-
-                <!-- Nama Sesuai KTP -->
+                <!-- Nama Lengkap -->
                 <div class="form-group">
                     <label for="name" class="block text-xs font-bold text-slate-700 mb-1">
-                        Nama Lengkap Sesuai KTP <span class="text-rose-500">*</span>
+                        Nama Lengkap <span class="text-rose-500">*</span>
                     </label>
                     <div class="auth-input-wrap">
                         <span class="auth-input-icon">
@@ -303,31 +275,12 @@ const submit = () => {
                             type="text"
                             v-model="form.name"
                             required
-                            placeholder="Nama Lengkap Sesuai KTP"
+                            autofocus
+                            placeholder="Nama Lengkap Anda"
                             class="w-full text-sm"
                         />
                     </div>
                     <InputError class="mt-1" :message="form.errors.name" />
-                </div>
-
-                <!-- Alamat Sesuai KTP -->
-                <div class="form-group">
-                    <label for="address" class="block text-xs font-bold text-slate-700 mb-1">
-                        Alamat Lengkap Sesuai KTP
-                    </label>
-                    <div class="auth-input-wrap">
-                        <span class="auth-input-icon">
-                            <FileText class="w-4.5 h-4.5 text-slate-400" />
-                        </span>
-                        <input
-                            id="address"
-                            type="text"
-                            v-model="form.address"
-                            placeholder="Alamat lengkap sesuai KTP"
-                            class="w-full text-sm"
-                        />
-                    </div>
-                    <InputError class="mt-1" :message="form.errors.address" />
                 </div>
 
                 <!-- Pilihan Tier Aktivasi -->
@@ -399,290 +352,17 @@ const submit = () => {
                     <InputError class="mt-1" :message="form.errors.email" />
                 </div>
 
-                <!-- Dominan Tangan Kiri (Kidal) -->
-                <div class="form-group pt-1">
-                    <label class="block text-xs font-bold text-slate-700 mb-2">
-                        Apakah Anda dominan tangan kiri (Kidal) ? <span class="text-rose-500">*</span>
-                    </label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label 
-                            :class="[
-                                'flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-200',
-                                form.is_left_handed === 'Iya' 
-                                    ? 'border-[#D4AF37] bg-[#D4AF37]/10 text-slate-900 font-bold shadow-sm' 
-                                    : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
-                            ]"
-                        >
-                            <input
-                                type="radio"
-                                name="is_left_handed"
-                                value="Iya"
-                                v-model="form.is_left_handed"
-                                class="w-4 h-4 text-[#D4AF37] focus:ring-[#D4AF37] accent-[#0F172A]"
-                            />
-                            <span class="text-xs">Iya</span>
-                        </label>
-
-                        <label 
-                            :class="[
-                                'flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-200',
-                                form.is_left_handed === 'Tidak' 
-                                    ? 'border-[#D4AF37] bg-[#D4AF37]/10 text-slate-900 font-bold shadow-sm' 
-                                    : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
-                            ]"
-                        >
-                            <input
-                                type="radio"
-                                name="is_left_handed"
-                                value="Tidak"
-                                v-model="form.is_left_handed"
-                                class="w-4 h-4 text-[#D4AF37] focus:ring-[#D4AF37] accent-[#0F172A]"
-                            />
-                            <span class="text-xs">Tidak</span>
-                        </label>
-                    </div>
-                    <InputError class="mt-1" :message="form.errors.is_left_handed" />
-                </div>
             </div>
 
-            <!-- SECTION 2: DATA AHLI WARIS & KONTAK DARURAT -->
-            <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 space-y-3.5">
-                <div class="text-[11px] font-black tracking-wider text-[#D4AF37] uppercase flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
-                    <Users class="w-3.5 h-3.5" />
-                    <span>2. Data Ahli Waris & Kontak Darurat</span>
-                </div>
-
-                <!-- Nama Ahli Waris -->
-                <div class="form-group">
-                    <label for="beneficiary_name" class="block text-xs font-bold text-slate-700 mb-1">
-                        Nama Ahli Waris: <span class="text-rose-500">*</span>
-                    </label>
-                    <div class="auth-input-wrap">
-                        <span class="auth-input-icon">
-                            <User class="w-4.5 h-4.5 text-slate-400" />
-                        </span>
-                        <input
-                            id="beneficiary_name"
-                            type="text"
-                            v-model="form.beneficiary_name"
-                            required
-                            placeholder="Jawaban Anda"
-                            class="w-full text-sm"
-                        />
-                    </div>
-                    <InputError class="mt-1" :message="form.errors.beneficiary_name" />
-                </div>
-
-                <!-- Tanggal Lahir Ahli Waris -->
-                <div class="form-group">
-                    <label for="beneficiary_birth_date" class="block text-xs font-bold text-slate-700 mb-1">
-                        Tanggal Lahir Ahli Waris: <span class="text-rose-500">*</span>
-                    </label>
-                    <BirthDatePicker
-                        id="beneficiary_birth_date"
-                        v-model="form.beneficiary_birth_date"
-                        :required="true"
-                    />
-                    <InputError class="mt-1" :message="form.errors.beneficiary_birth_date" />
-                </div>
-
-                <!-- Hubungan dengan Ahli Waris -->
-                <div class="form-group">
-                    <label for="beneficiary_relation" class="block text-xs font-bold text-slate-700 mb-1">
-                        Hubungan dengan Ahli Waris: <span class="text-rose-500">*</span>
-                    </label>
-                    <div class="auth-input-wrap">
-                        <span class="auth-input-icon">
-                            <Users class="w-4.5 h-4.5 text-slate-400" />
-                        </span>
-                        <input
-                            id="beneficiary_relation"
-                            type="text"
-                            v-model="form.beneficiary_relation"
-                            required
-                            placeholder="Jawaban Anda (Contoh: Anak / Pasangan / Orang Tua / Saudara)"
-                            class="w-full text-sm"
-                        />
-                    </div>
-                    <InputError class="mt-1" :message="form.errors.beneficiary_relation" />
-                </div>
-
-                <!-- Nomor Whatsapp Kontak Darurat -->
-                <div class="form-group">
-                    <label for="emergency_phone" class="block text-xs font-bold text-slate-700 mb-1">
-                        Nomor Whatsapp Kontak Darurat: <span class="text-rose-500">*</span>
-                    </label>
-                    <div class="auth-input-wrap">
-                        <span class="auth-input-icon">
-                            <AlertCircle class="w-4.5 h-4.5 text-slate-400" />
-                        </span>
-                        <input
-                            id="emergency_phone"
-                            type="tel"
-                            v-model="form.emergency_phone"
-                            required
-                            placeholder="Jawaban Anda"
-                            class="w-full text-sm"
-                        />
-                    </div>
-                    <InputError class="mt-1" :message="form.errors.emergency_phone" />
-                </div>
+            <div class="rounded-2xl border border-[#D4AF37]/30 bg-[#faf6eb] px-4 py-3 text-xs text-slate-700 leading-relaxed">
+                <span class="font-bold text-[#9A7B2C]">Catatan Verifikasi:</span> Data KTP, alamat lengkap, ahli waris, rekening bank, serta bukti transfer aktivasi dapat dilengkapi setelah Anda login ke dashboard member.
             </div>
 
-            <!-- SECTION 3: DOKUMEN IDENTITAS KTP -->
-            <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 space-y-3.5">
-                <div class="text-[11px] font-black tracking-wider text-[#D4AF37] uppercase flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
-                    <FileText class="w-3.5 h-3.5" />
-                    <span>3. Dokumen Verifikasi KTP</span>
-                </div>
-
-                <!-- ID KTP Upload -->
-                <div class="form-group pt-1">
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="text-xs font-bold text-slate-700">
-                            ID KTP <span class="text-rose-500">*</span>
-                        </label>
-                        <span class="text-[10px] text-slate-400 font-medium">Maks 10 MB (JPG, PNG, PDF)</span>
-                    </div>
-
-                    <div 
-                        v-if="!form.ktp_image"
-                        @click="$refs.fileInput.click()"
-                        class="border-2 border-dashed border-slate-300 hover:border-[#D4AF37] rounded-xl p-4 text-center cursor-pointer transition-colors bg-white group flex flex-col items-center justify-center gap-2"
-                    >
-                        <div class="w-10 h-10 rounded-full bg-slate-100 group-hover:bg-[#D4AF37]/10 flex items-center justify-center text-slate-500 group-hover:text-[#D4AF37] transition-colors">
-                            <UploadCloud class="w-5 h-5" />
-                        </div>
-                        <div class="text-xs font-bold text-slate-700 group-hover:text-slate-900">
-                            Tambahkan file
-                        </div>
-                        <div class="text-[11px] text-slate-400">
-                            Klik untuk memilih file foto KTP Anda
-                        </div>
-                    </div>
-
-                    <!-- File Attached Preview -->
-                    <div v-else class="p-3 bg-white border border-[#D4AF37]/40 rounded-xl flex items-center justify-between shadow-sm">
-                        <div class="flex items-center gap-3 overflow-hidden">
-                            <div v-if="ktpPreview && ktpPreview !== 'document'" class="w-12 h-12 rounded-lg overflow-hidden border border-slate-200 flex-shrink-0">
-                                <img :src="ktpPreview" alt="KTP Preview" class="w-full h-full object-cover" />
-                            </div>
-                            <div v-else class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                                <FileText class="w-5 h-5" />
-                            </div>
-                            <div class="overflow-hidden">
-                                <p class="text-xs font-bold text-slate-800 truncate max-w-[180px] sm:max-w-xs">
-                                    {{ form.ktp_image.name }}
-                                </p>
-                                <p class="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
-                                    <Check class="w-3 h-3" /> Siap diunggah ({{ (form.ktp_image.size / 1024 / 1024).toFixed(2) }} MB)
-                                </p>
-                            </div>
-                        </div>
-
-                        <button
-                            type="button"
-                            @click="removeFile"
-                            class="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 transition-colors"
-                            title="Hapus file"
-                        >
-                            <X class="w-4 h-4" />
-                        </button>
-                    </div>
-
-                    <input
-                        ref="fileInput"
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp,application/pdf"
-                        @change="handleFileUpload"
-                        class="hidden"
-                    />
-                    <InputError class="mt-1" :message="form.errors.ktp_image" />
-                </div>
-
-                <!-- Bukti Transfer Upload -->
-                <div class="form-group pt-3 border-t border-slate-200/60">
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="text-xs font-bold text-slate-700">
-                            Bukti Transfer <span class="text-rose-500">*</span>
-                        </label>
-                        <span class="text-[10px] text-slate-400 font-medium">Maks 10 MB (JPG, PNG, PDF)</span>
-                    </div>
-
-                    <div class="mb-3 p-3.5 bg-gradient-to-r from-[#fffbeb] via-[#faf6eb] to-[#fffbeb] border-2 border-[#D4AF37] rounded-xl shadow-2xs space-y-2">
-                        <div class="flex items-center justify-between gap-2 border-b border-[#D4AF37]/30 pb-1.5">
-                            <span class="text-xs font-black text-slate-950 uppercase tracking-tight">Rekening Perusahaan:</span>
-                            <span class="text-xs sm:text-sm font-black text-[#B8922E] font-mono whitespace-nowrap shrink-0">Rp 500.000</span>
-                        </div>
-                        <div class="text-xs text-slate-900 font-black flex flex-wrap items-center gap-x-2 gap-y-1 pt-0.5">
-                            <span class="font-black text-slate-900">Bank BCA:</span>
-                            <span class="font-mono font-black text-xs text-slate-950 px-2 py-0.5 bg-white border border-[#D4AF37]/70 rounded-md shadow-2xs tracking-wider">172-666-2020</span>
-                            <span class="text-slate-700 font-bold text-[11px]">a/n</span>
-                            <strong class="font-black text-slate-950 uppercase tracking-wide text-xs">UNIVERSAL CARD CENTRAL</strong>
-                        </div>
-                    </div>
-
-                    <div 
-                        v-if="!form.transfer_proof"
-                        @click="$refs.transferProofFileInput.click()"
-                        class="border-2 border-dashed border-slate-300 hover:border-[#D4AF37] rounded-xl p-4 text-center cursor-pointer transition-colors bg-white group flex flex-col items-center justify-center gap-2"
-                    >
-                        <div class="w-10 h-10 rounded-full bg-slate-100 group-hover:bg-[#D4AF37]/10 flex items-center justify-center text-slate-500 group-hover:text-[#D4AF37] transition-colors">
-                            <CreditCard class="w-5 h-5" />
-                        </div>
-                        <div class="text-xs font-bold text-slate-700 group-hover:text-slate-900">
-                            Tambahkan Bukti Transfer
-                        </div>
-                        <div class="text-[11px] text-slate-400">
-                            Klik untuk memilih foto/file bukti transfer pembayaran
-                        </div>
-                    </div>
-
-                    <!-- File Attached Preview -->
-                    <div v-else class="p-3 bg-white border border-[#D4AF37]/40 rounded-xl flex items-center justify-between shadow-sm">
-                        <div class="flex items-center gap-3 overflow-hidden">
-                            <div v-if="transferProofPreview && transferProofPreview !== 'document'" class="w-12 h-12 rounded-lg overflow-hidden border border-slate-200 flex-shrink-0">
-                                <img :src="transferProofPreview" alt="Transfer Proof Preview" class="w-full h-full object-cover" />
-                            </div>
-                            <div v-else class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                                <CreditCard class="w-5 h-5" />
-                            </div>
-                            <div class="overflow-hidden">
-                                <p class="text-xs font-bold text-slate-800 truncate max-w-[180px] sm:max-w-xs">
-                                    {{ form.transfer_proof.name }}
-                                </p>
-                                <p class="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
-                                    <Check class="w-3 h-3" /> Siap diunggah ({{ (form.transfer_proof.size / 1024 / 1024).toFixed(2) }} MB)
-                                </p>
-                            </div>
-                        </div>
-
-                        <button
-                            type="button"
-                            @click="removeTransferProof"
-                            class="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 transition-colors"
-                            title="Hapus file"
-                        >
-                            <X class="w-4 h-4" />
-                        </button>
-                    </div>
-
-                    <input
-                        ref="transferProofFileInput"
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp,application/pdf"
-                        @change="handleTransferProofUpload"
-                        class="hidden"
-                    />
-                    <InputError class="mt-1" :message="form.errors.transfer_proof" />
-                </div>
-            </div>
-
-            <!-- SECTION 4: KEAMANAN PASSWORD -->
+            <!-- SECTION 2: KEAMANAN PASSWORD -->
             <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 space-y-3.5">
                 <div class="text-[11px] font-black tracking-wider text-[#D4AF37] uppercase flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
                     <Lock class="w-3.5 h-3.5" />
-                    <span>4. Keamanan Akun Login</span>
+                    <span>2. Keamanan Akun Login</span>
                 </div>
 
                 <!-- Password -->
@@ -746,11 +426,11 @@ const submit = () => {
                 </div>
             </div>
 
-            <!-- SECTION 5: KODE REFERRAL / SPONSOR -->
+            <!-- SECTION 3: KODE REFERRAL / SPONSOR -->
             <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 space-y-3.5">
                 <div class="text-[11px] font-black tracking-wider text-[#D4AF37] uppercase flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
                     <KeyRound class="w-3.5 h-3.5" />
-                    <span>5. Kode Referral</span>
+                    <span>3. Kode Referral</span>
                 </div>
 
                 <!-- Input Kode Referral -->

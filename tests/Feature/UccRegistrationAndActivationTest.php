@@ -207,5 +207,37 @@ class UccRegistrationAndActivationTest extends TestCase
             'activation_amount' => 350000,
         ]);
     }
+
+    public function test_lightweight_public_registration_without_ktp_documents_succeeds(): void
+    {
+        $sponsor = User::factory()->create([
+            'username' => 'admin',
+            'email' => 'sponsor-lite@universalcardcentral.com',
+            'nik' => '0000000000000009',
+            'member_tier' => 'bronze',
+        ]);
+
+        $response = $this->post('/register', [
+            'name' => 'Member Ringkas',
+            'phone' => '081234500011',
+            'email' => 'ringkas@example.com',
+            'member_tier' => 'bronze',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'referral' => $sponsor->username,
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('dashboard', absolute: false));
+
+        $this->assertDatabaseHas('users', [
+            'name' => 'Member Ringkas',
+            'phone' => '081234500011',
+            'email' => 'ringkas@example.com',
+            'member_tier' => 'bronze',
+            'activation_amount' => 100000,
+            'nik' => null,
+        ]);
+    }
 }
 

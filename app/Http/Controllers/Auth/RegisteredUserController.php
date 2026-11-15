@@ -105,7 +105,7 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'nik' => 'required|digits:16|unique:users,nik',
+            'nik' => 'nullable|digits:16|unique:users,nik',
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'phone' => 'required|string|max:25',
@@ -124,22 +124,20 @@ class RegisteredUserController extends Controller
             'marital_status' => 'nullable|string|max:50',
             'member_tier' => 'nullable|string|in:bronze,silver',
             'is_left_handed' => 'nullable|string|in:Iya,Tidak',
-            'beneficiary_name' => 'required|string|max:255',
-            'beneficiary_birth_date' => 'required|date|before_or_equal:today|after:1900-01-01',
-            'beneficiary_relation' => 'required|string|max:100',
-            'emergency_phone' => 'required|string|max:25',
+            'beneficiary_name' => 'nullable|string|max:255',
+            'beneficiary_birth_date' => 'nullable|date|before_or_equal:today|after:1900-01-01',
+            'beneficiary_relation' => 'nullable|string|max:100',
+            'emergency_phone' => 'nullable|string|max:25',
             'bank_name' => 'nullable|string|max:100',
             'bank_account_number' => 'nullable|string|max:100',
             'bank_account_name' => 'nullable|string|max:100',
-            'ktp_image' => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:10240',
-            'transfer_proof' => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:10240',
+            'ktp_image' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:10240',
+            'transfer_proof' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:10240',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'referral' => 'required|string|max:255',
         ], [
-            'nik.required' => 'ID KTP (NIK 16 digit) wajib diisi.',
             'nik.digits' => 'ID KTP (NIK) harus terdiri dari tepat 16 digit angka.',
             'nik.unique' => 'ID KTP (NIK) sudah terdaftar di sistem.',
-            'transfer_proof.required' => 'Bukti transfer pembayaran wajib diunggah.',
             'referral.required' => 'Kode Referral / Username Sponsor wajib diisi.',
         ]);
 

@@ -40,7 +40,9 @@ const props = defineProps({
   all_sponsors: Array,
   referral_links: Object,
   wallet: Object,
-  premi_info: Object
+  premi_info: Object,
+  ucc_summary: Object,
+  direct_referrals: Array
 });
 
 const copySuccessMsg = ref('');
@@ -231,26 +233,6 @@ const formatRupiah = (val) => {
         <span>{{ copySuccessMsg }}</span>
       </div>
 
-      <!-- Sponsor Block Notification Banner (>= 1000 Downlines Not Premier) -->
-      <div v-if="wallet?.can_sponsor === false" class="p-4 bg-amber-500/10 border-2 border-amber-500/40 rounded-3xl text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
-        <div class="flex items-center gap-3">
-          <div class="p-2.5 bg-amber-500/20 text-amber-600 rounded-2xl shrink-0">
-            <AlertTriangle class="w-6 h-6 stroke-[2.5]" />
-          </div>
-          <div>
-            <h4 class="text-sm font-black text-slate-900 tracking-tight">Wajib Upgrade ke Premier Member</h4>
-            <p class="text-xs text-slate-700 font-medium mt-0.5">{{ wallet?.sponsor_block_message || 'Total jaringan Anda telah mencapai 1.000 member. Wajib upgrade ke Premier agar dapat mendaftarkan member baru dan menerima bonus jaringan.' }}</p>
-          </div>
-        </div>
-        <button 
-          @click="handleUpgradePremier"
-          class="shrink-0 px-4 py-2.5 bg-gradient-to-r from-[#D4AF37] to-[#B8922E] text-slate-950 font-black text-xs rounded-xl shadow transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-        >
-          <Crown class="w-4 h-4" />
-          <span>Upgrade Premier Sekarang</span>
-        </button>
-      </div>
-
       <!-- 1. Pendaftaran Member Banner Card -->
       <div class="bg-gradient-to-r from-[#fdfbf7] via-[#faf6eb] to-[#f7f3e8] border border-[#D4AF37]/40 rounded-3xl p-5 md:p-6 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="flex items-start gap-4">
@@ -343,45 +325,106 @@ const formatRupiah = (val) => {
 
       </div>
 
-      <!-- 3. Upgrade ke PREMIER Card Banner (Purple Luxury Theme) -->
-      <div class="bg-gradient-to-r from-[#2a0845] via-[#4b126d] to-[#6b1187] border border-purple-400/40 rounded-3xl p-5 md:p-6 shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5 text-white">
-        <!-- Ambient lighting decoration -->
-        <div class="absolute -right-12 -bottom-12 w-48 h-48 bg-purple-400/20 rounded-full blur-2xl pointer-events-none"></div>
-        <div class="absolute left-1/3 -top-12 w-36 h-36 bg-amber-400/10 rounded-full blur-xl pointer-events-none"></div>
-
-        <div class="flex items-center gap-4 relative z-10">
-          <div class="w-12 h-12 rounded-2xl bg-white/10 border border-purple-300/30 text-amber-300 flex items-center justify-center shrink-0 shadow-inner">
-            <Crown class="w-6 h-6 text-amber-300" />
-          </div>
-          <div class="space-y-1">
-            <div class="flex items-center gap-2">
-              <h3 class="text-base sm:text-lg font-black text-white tracking-tight">
-                {{ wallet?.is_premier ? 'Akun PREMIER Member' : 'Upgrade ke PREMIER' }}
-              </h3>
-              <span v-if="wallet?.is_premier" class="px-2 py-0.5 text-[9px] font-black bg-amber-400/30 text-amber-300 border border-amber-400/60 rounded-md uppercase tracking-wider">
-                👑 PREMIER VIP
-              </span>
-              <span v-else class="px-2 py-0.5 text-[9px] font-black bg-amber-400/20 text-amber-300 border border-amber-400/40 rounded-md uppercase tracking-wider">
-                {{ (wallet?.total_downlines ?? 0) >= 1000 ? 'Syarat Terpenuhi' : (wallet?.total_downlines ?? 0) + ' / 1000 Member' }}
-              </span>
+      <!-- 3. Ringkasan UCC: Tier, Progress 1.400 Point & 4 Post Saldo -->
+      <div class="bg-gradient-to-br from-[#09090B] via-[#121318] to-[#1A1B22] border border-[#D4AF37]/35 rounded-3xl p-5 md:p-6 shadow-xl text-white space-y-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#E5C07B] flex items-center justify-center shrink-0">
+              <Crown class="w-5 h-5" />
             </div>
-            <p v-if="wallet?.is_premier" class="text-xs sm:text-sm text-purple-100 font-medium">
-              Status Premier aktif hingga {{ wallet?.premier_expires_at || '1 Tahun' }}. Anda bebas mendaftarkan member baru dan menerima bonus penuh.
-            </p>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-base font-black tracking-tight text-white">
+                  Tier {{ ucc_summary?.member_tier_label || 'Bronze' }}
+                </h3>
+                <span v-if="ucc_summary?.has_silver_visa_card" class="px-2.5 py-0.5 text-[10px] font-black bg-[#D4AF37]/20 text-[#F3E5AB] border border-[#D4AF37]/50 rounded-full uppercase tracking-wider">
+                  Card Visa Belanja Silver
+                </span>
+                <span v-if="ucc_summary?.has_nfc_card" class="px-2.5 py-0.5 text-[10px] font-black bg-slate-800 text-[#D4AF37] border border-[#D4AF37]/30 rounded-full uppercase tracking-wider">
+                  NFC Card Aktif
+                </span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5">
+                Poin Saat Ini: <strong class="text-[#E5C07B]">{{ ucc_summary?.points ?? 0 }}</strong> / {{ ucc_summary?.upgrade_target_points ?? 1400 }} Point (Auto-Upgrade Silver)
+              </p>
+            </div>
+          </div>
+
+          <div class="w-full md:w-64 space-y-1.5">
+            <div class="flex items-center justify-between text-[11px] font-bold">
+              <span class="text-slate-300">Progress Auto-Upgrade Silver</span>
+              <span class="text-[#E5C07B]">{{ ucc_summary?.upgrade_progress ?? 0 }}%</span>
+            </div>
+            <div class="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+              <div
+                class="bg-gradient-to-r from-[#B8922E] via-[#D4AF37] to-[#F3E5AB] h-2 rounded-full transition-all duration-500"
+                :style="{ width: Math.min(100, ucc_summary?.upgrade_progress ?? 0) + '%' }"
+              ></div>
+            </div>
           </div>
         </div>
 
-        <div class="relative z-10 shrink-0">
-          <button 
-            type="button"
-            @click="handleUpgradePremier"
-            :class="wallet?.is_premier ? 'bg-white/20 text-purple-200 border border-white/20 cursor-default' : 'bg-gradient-to-r from-[#D4AF37] to-[#B8922E] hover:from-[#E5C07B] hover:to-[#D4AF37] active:scale-95 text-slate-950 shadow-lg cursor-pointer'"
-            class="w-full sm:w-auto px-6 py-3 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2"
-          >
-            <span>{{ wallet?.is_premier ? 'Status Premier Aktif' : 'Upgrade Sekarang' }}</span>
-            <Sparkles v-if="!wallet?.is_premier" class="w-4 h-4 text-slate-950" />
-            <Check v-else class="w-4 h-4 text-amber-300" />
-          </button>
+        <!-- 4 Post Saldo (Pembagian per kelipatan 200 point = Rp 100.000) -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Saldo Tunai (40%)</span>
+            <p class="text-base sm:text-lg font-black text-white mt-1">{{ formatRupiah(ucc_summary?.saldo_tunai ?? 0) }}</p>
+          </div>
+          <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Saldo Belanja (30%)</span>
+            <p class="text-base sm:text-lg font-black text-white mt-1">{{ formatRupiah(ucc_summary?.saldo_belanja ?? 0) }}</p>
+          </div>
+          <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Saldo Upgrade / NFC (20%)</span>
+            <p class="text-base sm:text-lg font-black text-[#E5C07B] mt-1">{{ formatRupiah(ucc_summary?.saldo_upgrade ?? 0) }}</p>
+          </div>
+          <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Saldo Reward (10%)</span>
+            <p class="text-base sm:text-lg font-black text-white mt-1">{{ formatRupiah(ucc_summary?.saldo_reward ?? 0) }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Catatan Referral Langsung -->
+      <div class="bg-white border border-slate-200/80 rounded-3xl p-5 md:p-6 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-sm font-black text-slate-900 tracking-tight">Catatan Referral Langsung</h3>
+            <p class="text-xs text-slate-500">Daftar mitra yang mendaftar langsung menggunakan kode referral Anda.</p>
+          </div>
+          <span class="bg-[#faf6eb] text-[#B8922E] border border-[#D4AF37]/30 text-[11px] font-bold px-3 py-1 rounded-full">
+            {{ (direct_referrals || []).length }} Referral
+          </span>
+        </div>
+
+        <div v-if="(direct_referrals || []).length > 0" class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                <th class="py-2.5 pr-4">Nama Member</th>
+                <th class="py-2.5 pr-4">Username</th>
+                <th class="py-2.5 pr-4">Tier</th>
+                <th class="py-2.5 pr-4">Nilai Aktivasi</th>
+                <th class="py-2.5">Tanggal Gabung</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr v-for="ref in direct_referrals" :key="ref.id" class="hover:bg-slate-50/70">
+                <td class="py-2.5 pr-4 font-bold text-slate-900">{{ ref.name }}</td>
+                <td class="py-2.5 pr-4 text-slate-600">@{{ ref.username }}</td>
+                <td class="py-2.5 pr-4">
+                  <span class="bg-[#faf6eb] text-[#B8922E] border border-[#D4AF37]/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                    {{ ref.member_tier }}
+                  </span>
+                </td>
+                <td class="py-2.5 pr-4 font-bold text-slate-800">{{ formatRupiah(ref.activation_amount) }}</td>
+                <td class="py-2.5 text-slate-500">{{ ref.joined_at }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-else class="text-center py-6 text-xs text-slate-400 font-medium">
+          Belum ada catatan referral langsung. Bagikan link referral Anda di atas untuk mulai merekrut mitra.
         </div>
       </div>
 
@@ -712,128 +755,6 @@ const formatRupiah = (val) => {
           </div>
 
         </form>
-      </div>
-    </div>
-
-    <!-- Modal Warning: Upgrade PREMIER (Total Downline < 1000) -->
-    <div v-if="isPriorityModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-fade-in">
-      <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-5 border border-slate-100 text-center relative overflow-hidden animate-scale-in">
-        
-        <!-- Close Button -->
-        <button 
-          @click="isPriorityModalOpen = false" 
-          class="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
-        >
-          <X class="w-4 h-4" />
-        </button>
-
-        <!-- Warning Icon -->
-        <div class="mx-auto w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-500 shadow-xs">
-          <AlertTriangle class="w-7 h-7 stroke-[2.5]" />
-        </div>
-
-        <!-- Text Content -->
-        <div class="space-y-2">
-          <h3 class="text-lg font-black text-slate-900 tracking-tight">
-            Peringatan Upgrade PREMIER
-          </h3>
-          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-            Untuk upgrade ke PREMIER, Anda harus memiliki 1000 member di team anda. Fitur ini akan terbuka otomatis jika level tim member Anda sudah mencapai 1000
-          </p>
-        </div>
-
-        <!-- Progress Box -->
-        <div class="p-4 bg-purple-50/70 border border-purple-100 rounded-2xl space-y-2 text-left">
-          <div class="flex items-center justify-between text-xs">
-            <span class="font-bold text-purple-900">Total Member Tim Anda:</span>
-            <span class="font-black text-purple-700 font-mono text-sm">{{ wallet?.total_downlines ?? 0 }} / 1000 Member</span>
-          </div>
-          <!-- Progress Bar -->
-          <div class="w-full bg-purple-200/60 rounded-full h-2.5 overflow-hidden">
-            <div 
-              class="bg-purple-600 h-2.5 rounded-full transition-all duration-500" 
-              :style="{ width: Math.min(100, Math.round(((wallet?.total_downlines ?? 0) / 1000) * 100)) + '%' }"
-            ></div>
-          </div>
-        </div>
-
-        <!-- Action Button -->
-        <button 
-          type="button"
-          @click="isPriorityModalOpen = false" 
-          class="w-full py-3 bg-[#0F172A] hover:bg-[#1E293B] text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-md cursor-pointer"
-        >
-          Tutup
-        </button>
-
-      </div>
-    </div>
-
-    <!-- Modal Confirmation: Upgrade PREMIER (Rp 5.000.000 via Wallet) -->
-    <div v-if="isUpgradeConfirmModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-fade-in">
-      <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-5 border border-slate-100 text-center relative overflow-hidden animate-scale-in">
-        
-        <!-- Close Button -->
-        <button 
-          @click="isUpgradeConfirmModalOpen = false" 
-          class="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
-        >
-          <X class="w-4 h-4" />
-        </button>
-
-        <!-- Crown Icon -->
-        <div class="mx-auto w-16 h-16 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/30 flex items-center justify-center text-[#B8922E] shadow-sm">
-          <Crown class="w-8 h-8 stroke-[2.5]" />
-        </div>
-
-        <!-- Text Content -->
-        <div class="space-y-2">
-          <h3 class="text-lg font-black text-slate-900 tracking-tight">
-            Konfirmasi Upgrade PREMIER
-          </h3>
-          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-            Selamat! Anda telah mencapai 1.000 member jaringan. Lanjutkan upgrade ke Premier untuk membuka hak pendaftaran tanpa batas dan bonus 10 generasi.
-          </p>
-        </div>
-
-        <!-- Details Box -->
-        <div class="p-4 bg-[#faf6eb] border border-[#D4AF37]/30 rounded-2xl space-y-3 text-left">
-          <div class="flex items-center justify-between text-xs pb-2 border-b border-[#D4AF37]/20">
-            <span class="text-slate-600 font-medium">Biaya Upgrade (1 Tahun):</span>
-            <span class="font-black text-slate-900 font-mono text-sm">Rp 5.000.000</span>
-          </div>
-          <div class="flex items-center justify-between text-xs">
-            <span class="text-slate-600 font-medium">Saldo Wallet Anda:</span>
-            <span class="font-black font-mono text-sm" :class="(wallet?.saldo ?? 0) >= 5000000 ? 'text-emerald-600' : 'text-rose-600'">
-              {{ formatRupiah(wallet?.saldo ?? 0) }}
-            </span>
-          </div>
-        </div>
-
-        <p v-if="(wallet?.saldo ?? 0) < 5000000" class="text-xs text-rose-500 font-semibold">
-          Saldo wallet tidak mencukupi untuk upgrade. Silakan kumpulkan saldo atau hubungi admin.
-        </p>
-
-        <!-- Action Buttons -->
-        <div class="flex gap-2">
-          <button 
-            type="button"
-            @click="isUpgradeConfirmModalOpen = false" 
-            class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
-          >
-            Batal
-          </button>
-          <button 
-            type="button"
-            @click="executeUpgradePremier" 
-            :disabled="isUpgrading || (wallet?.saldo ?? 0) < 5000000"
-            class="flex-1 py-3 bg-gradient-to-r from-[#D4AF37] to-[#B8922E] hover:from-[#E5C07B] hover:to-[#D4AF37] disabled:opacity-50 text-slate-950 text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
-          >
-            <span v-if="isUpgrading">Memproses...</span>
-            <span v-else>Bayar & Upgrade</span>
-          </button>
-        </div>
-
       </div>
     </div>
   </AdminLayout>

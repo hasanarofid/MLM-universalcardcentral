@@ -24,29 +24,23 @@
 
 ---
 
-## 2. Formulir Pendaftaran & Input Member Baru (Standard KTP)
+## 2. Formulir Pendaftaran & Input Member Baru
 
-Pendaftaran member baru (baik melalui halaman `/register` maupun menu Admin/Member Input `/admin/aktivasi-member`) mewajibkan pengisian data standar berbasis KTP dengan validasi ketat:
+### A. Registrasi Publik (`/register`) — Standar Ringkas
+Halaman `/register` dibuat ringkas agar calon member cepat mendaftar:
+1. **Nama Lengkap** *(Wajib)*
+2. **Nomor WhatsApp / HP** *(Wajib)*
+3. **Email** *(Wajib & unik)*
+4. **Paket Aktivasi Non-Card Member** (`Bronze` **Rp 100.000** / `Silver` **Rp 350.000**)
+5. **Password & Konfirmasi Password** *(Wajib)*
+6. **Kode Referral / Sponsor** *(Wajib jika bukan root)*
+7. **Data Verifikasi KTP, Alamat, Ahli Waris, Rekening & Bukti Transfer:** *(Opsional saat registrasi publik; dilengkapi setelah login ke dashboard member)*.
 
-### A. Data Identitas Sesuai KTP (Wajib)
-1. **ID KTP (NIK):** *(Wajib, 16 digit numerik, unik per member)*
-2. **Nama Lengkap Sesuai KTP:** *(Wajib)*
-3. **Nomor WhatsApp / HP:** *(Wajib, format nomor valid)*
-4. **Email:** *(Wajib, format email valid & unik)*
-5. **Alamat Lengkap (Sesuai KTP):** *(Wajib)*
-6. **Tempat & Tanggal Lahir / Jenis Kelamin:** *(Opsional / standar profil)*
-
-### B. Data Ahli Waris, Kontak Darurat & Rekening
-7. **Nama Ahli Waris, Tanggal Lahir & Hubungan:** *(Wajib pada registrasi publik, opsional pada input cepat admin)*
-8. **Nomor WhatsApp Kontak Darurat:** *(Wajib pada registrasi publik)*
-9. **Bank & Nomor Rekening:** *(Untuk pencairan Saldo Tunai / Withdrawal)*
-
-### C. Pilihan Paket Aktivasi, Dokumen & Bukti Pembayaran
-10. **Pilihan Paket Aktivasi (Non-Card Member):**
-    - `Bronze` — **Rp 100.000**
-    - `Silver` — **Rp 350.000**
-11. **Upload Foto ID KTP:** *(Wajib, format JPG/PNG/WEBP/PDF, maks. 10MB)*
-12. **Upload Bukti Transfer Aktivasi:** *(Wajib sesuai paket yang dipilih, format JPG/PNG/WEBP/PDF, maks. 10MB)*
+### B. Input Aktivasi Member (`/admin/aktivasi-member`) — Standard 14 Field KTP
+Menu input/aktivasi member oleh Admin/Member mewajibkan data kontak & 14 field standar KTP:
+1. **Kontak Utama (Bagian Atas):** Nomor WhatsApp / HP, Email, Kode Pos.
+2. **14 Data Diri Sesuai KTP:** NIK (16 digit, unik), Nama lengkap, Tempat lahir, Tanggal lahir, Jenis kelamin, Golongan darah, Alamat, RT / RW, Kelurahan / Desa, Kecamatan, Kabupaten / Kota, Provinsi, Agama, Status perkawinan.
+3. **Paket Aktivasi, Dokumen & Pembayaran:** Paket Aktivasi (`Bronze` Rp 100.000 / `Silver` Rp 350.000), Upload Foto KTP & Bukti Transfer (opsional / sesuai alur verifikasi).
 
 ### D. Keamanan Akun & Kode Referral / Sponsor
 13. **Password & Konfirmasi Password:** *(Wajib, minimal 8 karakter)*
@@ -112,7 +106,7 @@ Setiap terjadi keuntungan transaksi (`profit_amount`):
    - *(Sisa 30% dari Post Mitra disimpan pada cadangan mitra / cluster Gold & Platinum).*
 
 ### G. Navigasi & Struktur Dashboard Member
-- **Dashboard:** Menampilkan catatan **referral langsung**, status tier (`Bronze` / `Silver` / `Gold` / `Platinum`), progress poin menuju **1.400 point** (auto-upgrade Silver), status **Card Visa Belanja Silver** & **NFC Card**, serta rincian **4 Post Saldo** (`Saldo Tunai`, `Saldo Belanja`, `Saldo Upgrade`, `Saldo Reward`).
+- **Dashboard:** Menampilkan catatan **referral langsung**, status tier (`Bronze` / `Silver` / `Gold` / `Platinum`), progress poin menuju **1.400 point** (auto-upgrade Silver), status **Card Visa Belanja Silver** & **NFC Card**, serta rincian **4 Post Saldo** (`Saldo Tunai`, `Saldo Belanja`, `Saldo Upgrade`, `Saldo Reward`). Banner "Upgrade ke PREMIER (5.000.000)" dihapus sesuai revisi klien.
 
 ---
 
