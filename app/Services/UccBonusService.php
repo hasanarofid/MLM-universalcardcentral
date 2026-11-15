@@ -6,6 +6,7 @@ use App\Models\BonusLog;
 use App\Models\UccPointLedger;
 use App\Models\User;
 use App\Models\WalletTransaction;
+use App\Notifications\SystemActivityNotification;
 use Illuminate\Support\Facades\DB;
 
 class UccBonusService
@@ -278,6 +279,18 @@ class UccBonusService
             ]);
         }
 
+        SystemActivityNotification::sendSafe(
+            $recipient,
+            new SystemActivityNotification(
+                category: 'bonus',
+                title: 'Bonus & Poin Masuk',
+                message: "{$description} sebesar Rp " . number_format($amount, 0, ',', '.') . ($pointsEarned > 0 ? " (+{$pointsEarned} point)" : ''),
+                link: '/admin/laporan?tab=bonus',
+                roleTarget: 'member',
+                meta: ['amount' => $amount, 'points' => $pointsEarned, 'event_type' => $eventType]
+            )
+        );
+
         $this->checkAndProcessAutoUpgrade($recipient, $referenceCode);
     }
 
@@ -346,6 +359,24 @@ class UccBonusService
             sourceUser: $member,
             excludeUserId: $member->id,
             referenceCode: $referenceCode ?: 'UPG-' . $member->id
+        );
+
+        SystemActivityNotification::sendSafe(
+            $member,
+            new SystemActivityNotification(
+                category: 'upgrade',
+                title: 'Auto-Upgrade Silver Berhasil',
+                message: 'Selamat! Anda telah mencapai 1.400 point dan otomatis naik ke tier Silver serta berhak menerima Card Visa Belanja Silver.',
+                link: '/admin/dashboard',
+                roleTarget: 'member'
+            )
+        );
+
+        SystemActivityNotification::notifyAdmins(
+            category: 'upgrade',
+            title: 'Member Auto-Upgrade ke Silver',
+            message: "{$member->name} (@{$member->username}) mencapai 1.400 point dan otomatis upgrade ke Silver.",
+            link: '/admin/data-member'
         );
 
         return true;

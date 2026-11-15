@@ -44,6 +44,7 @@ const memberForm = useForm({
     nik: props.user?.nik || "",
     ktp_image: null,
     gender: props.user?.gender || "Laki-laki",
+    blood_type: props.user?.blood_type || "",
     birth_place: props.user?.birth_place || "",
     birth_date: props.user?.birth_date || "",
     religion: props.user?.religion || "Islam",
@@ -51,6 +52,7 @@ const memberForm = useForm({
     last_education: props.user?.last_education || "SMA / SMK / Sederajat",
     occupation: props.user?.occupation || "",
     address: props.user?.address || "",
+    rt_rw: props.user?.rt_rw || "",
     province: props.user?.province || "",
     city: props.user?.city || "",
     district: props.user?.district || "",
@@ -247,10 +249,10 @@ const saveBanks = () => {
             <!-- Flash Alert Notifications -->
             <div
                 v-if="flashSuccess"
-                class="p-4 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-2xl text-xs font-semibold flex items-center justify-between shadow-sm animate-fade-in"
+                class="p-4 bg-[#faf6eb] border border-[#D4AF37]/50 text-[#9A7B2C] rounded-2xl text-xs font-semibold flex items-center justify-between shadow-sm animate-fade-in"
             >
                 <div class="flex items-center gap-2">
-                    <CheckCircle2 class="w-4 h-4 text-emerald-500 shrink-0" />
+                    <CheckCircle2 class="w-4 h-4 text-[#D4AF37] shrink-0" />
                     <span>{{ flashSuccess }}</span>
                 </div>
             </div>
@@ -276,7 +278,7 @@ const saveBanks = () => {
                 >
                     <div class="flex items-start gap-3">
                         <div
-                            class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl shrink-0 mt-0.5"
+                            class="p-3 bg-[#faf6eb] text-[#B8922E] rounded-2xl shrink-0 mt-0.5"
                         >
                             <UserCheck class="w-6 h-6" />
                         </div>
@@ -301,7 +303,7 @@ const saveBanks = () => {
                             class="flex items-center justify-between border-b border-slate-200/70 pb-3"
                         >
                             <div class="flex items-center gap-2">
-                                <UserCheck class="w-4 h-4 text-emerald-600" />
+                                <UserCheck class="w-4 h-4 text-[#B8922E]" />
                                 <h3
                                     class="text-xs font-black text-slate-900 uppercase tracking-tight"
                                 >
@@ -340,9 +342,9 @@ const saveBanks = () => {
                                         </h4>
                                         <span
                                             v-if="ktpPreview"
-                                            class="px-2 py-0.5 text-[9px] font-extrabold bg-emerald-100 text-emerald-800 rounded-md border border-emerald-200 flex items-center gap-1"
+                                            class="px-2 py-0.5 text-[9px] font-extrabold bg-[#faf6eb] text-[#9A7B2C] rounded-md border border-[#D4AF37]/30 flex items-center gap-1"
                                         >
-                                            <Check class="w-3 h-3 text-emerald-600 stroke-[3]" /> KTP Terpasang
+                                            <Check class="w-3 h-3 text-[#B8922E] stroke-[3]" /> KTP Terpasang
                                         </span>
                                         <span
                                             v-else
@@ -394,7 +396,7 @@ const saveBanks = () => {
                                     type="text"
                                     maxlength="20"
                                     placeholder="cth: 3201234567890001"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-mono font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-mono font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                 />
                                 <p
                                     v-if="memberForm.errors.nik"
@@ -416,7 +418,7 @@ const saveBanks = () => {
                                     type="text"
                                     required
                                     placeholder="Masukkan nama lengkap Anda"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                 />
                                 <p
                                     v-if="memberForm.errors.name"
@@ -438,7 +440,7 @@ const saveBanks = () => {
                                     type="text"
                                     required
                                     placeholder="Username akun"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                 />
                                 <p
                                     v-if="memberForm.errors.username"
@@ -460,7 +462,7 @@ const saveBanks = () => {
                                     type="email"
                                     required
                                     placeholder="alamat.email@contoh.com"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                 />
                                 <p
                                     v-if="memberForm.errors.email"
@@ -481,7 +483,7 @@ const saveBanks = () => {
                                     v-model="memberForm.phone"
                                     type="text"
                                     placeholder="cth: 081234567890"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                 />
                             </div>
 
@@ -494,10 +496,30 @@ const saveBanks = () => {
                                 </label>
                                 <select
                                     v-model="memberForm.gender"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                 >
                                     <option value="Laki-laki">Laki-laki</option>
                                     <option value="Perempuan">Perempuan</option>
+                                </select>
+                            </div>
+
+                            <!-- GOLONGAN DARAH -->
+                            <div>
+                                <label
+                                    class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1"
+                                >
+                                    GOLONGAN DARAH
+                                </label>
+                                <select
+                                    v-model="memberForm.blood_type"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
+                                >
+                                    <option value="">- Pilih -</option>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="AB">AB</option>
+                                    <option value="O">O</option>
+                                    <option value="-">Tidak Tahu</option>
                                 </select>
                             </div>
 
@@ -512,7 +534,7 @@ const saveBanks = () => {
                                     v-model="memberForm.birth_place"
                                     type="text"
                                     placeholder="cth: Jakarta / Surabaya"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                 />
                             </div>
 
@@ -537,7 +559,7 @@ const saveBanks = () => {
                                 </label>
                                 <select
                                     v-model="memberForm.religion"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                 >
                                     <option
                                         v-for="rel in religions"
@@ -558,7 +580,7 @@ const saveBanks = () => {
                                 </label>
                                 <select
                                     v-model="memberForm.marital_status"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                 >
                                     <option
                                         v-for="ms in maritalStatuses"
@@ -579,7 +601,7 @@ const saveBanks = () => {
                                 </label>
                                 <select
                                     v-model="memberForm.last_education"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                 >
                                     <option
                                         v-for="edu in educationLevels"
@@ -602,7 +624,7 @@ const saveBanks = () => {
                                     v-model="memberForm.occupation"
                                     type="text"
                                     placeholder="cth: Wiraswasta / Karyawan / PNS"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                 />
                             </div>
                         </div>
@@ -616,7 +638,7 @@ const saveBanks = () => {
                             class="flex items-center justify-between border-b border-slate-200/70 pb-3"
                         >
                             <div class="flex items-center gap-2">
-                                <MapPin class="w-4 h-4 text-emerald-600" />
+                                <MapPin class="w-4 h-4 text-[#B8922E]" />
                                 <h3
                                     class="text-xs font-black text-slate-900 uppercase tracking-tight"
                                 >
@@ -636,9 +658,24 @@ const saveBanks = () => {
                                 <textarea
                                     v-model="memberForm.address"
                                     rows="2"
-                                    placeholder="cth: Jl. Merdeka No. 45 RT 02 / RW 05, Kelurahan Mulyaharja"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-medium focus:outline-none focus:border-emerald-500 transition-colors resize-none"
+                                    placeholder="cth: Jl. Merdeka No. 45, Kelurahan Mulyaharja"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-medium focus:outline-none focus:border-[#D4AF37] transition-colors resize-none"
                                 ></textarea>
+                            </div>
+
+                            <!-- RT / RW -->
+                            <div>
+                                <label
+                                    class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1"
+                                >
+                                    RT / RW
+                                </label>
+                                <input
+                                    v-model="memberForm.rt_rw"
+                                    type="text"
+                                    placeholder="Contoh: 002 / 005"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
+                                />
                             </div>
 
                             <div
@@ -655,7 +692,7 @@ const saveBanks = () => {
                                         v-model="memberForm.province"
                                         type="text"
                                         placeholder="cth: Jawa Barat"
-                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                     />
                                 </div>
 
@@ -670,7 +707,7 @@ const saveBanks = () => {
                                         v-model="memberForm.city"
                                         type="text"
                                         placeholder="cth: Kota Bogor"
-                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                     />
                                 </div>
 
@@ -685,7 +722,7 @@ const saveBanks = () => {
                                         v-model="memberForm.district"
                                         type="text"
                                         placeholder="cth: Bogor Selatan"
-                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                     />
                                 </div>
 
@@ -700,7 +737,7 @@ const saveBanks = () => {
                                         v-model="memberForm.village"
                                         type="text"
                                         placeholder="cth: Mulyaharja"
-                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                     />
                                 </div>
 
@@ -715,7 +752,7 @@ const saveBanks = () => {
                                         v-model="memberForm.postal_code"
                                         type="text"
                                         placeholder="cth: 16135"
-                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-mono font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-mono font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                     />
                                 </div>
                             </div>
@@ -795,15 +832,15 @@ const saveBanks = () => {
 
                     <!-- SECTION 4: REKENING BANK & VIRTUAL WALLET PENARIKAN SALDO -->
                     <div
-                        class="bg-emerald-50/50 border border-emerald-200/80 rounded-2xl p-5 md:p-6 space-y-5"
+                        class="bg-[#faf6eb]/70 border border-[#D4AF37]/30 rounded-2xl p-5 md:p-6 space-y-5"
                     >
                         <div
-                            class="flex items-center justify-between border-b border-emerald-200/70 pb-3"
+                            class="flex items-center justify-between border-b border-[#D4AF37]/30 pb-3"
                         >
                             <div class="flex items-center gap-2">
-                                <CreditCard class="w-4 h-4 text-emerald-600" />
+                                <CreditCard class="w-4 h-4 text-[#B8922E]" />
                                 <h3
-                                    class="text-xs font-black text-emerald-950 uppercase tracking-tight"
+                                    class="text-xs font-black text-slate-900 uppercase tracking-tight"
                                 >
                                     4. REKENING BANK
                                 </h3>
@@ -821,7 +858,7 @@ const saveBanks = () => {
                                     v-model="memberForm.bank_name"
                                     type="text"
                                     placeholder="cth: Bank Sinarmas / Mandiri / BCA"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                 />
                             </div>
 
@@ -835,7 +872,7 @@ const saveBanks = () => {
                                     v-model="memberForm.bank_account_number"
                                     type="text"
                                     placeholder="cth: 1234567890"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-mono font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-mono font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                 />
                             </div>
 
@@ -849,7 +886,7 @@ const saveBanks = () => {
                                     v-model="memberForm.bank_account_name"
                                     type="text"
                                     placeholder="cth: Nama Anda"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                                 />
                             </div>
                         </div>
@@ -880,7 +917,7 @@ const saveBanks = () => {
                                 v-model="memberForm.password"
                                 type="password"
                                 placeholder="Kosongkan jika tidak ingin mengubah password"
-                                class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                                class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37] transition-colors"
                             />
                             <p
                                 v-if="memberForm.errors.password"
@@ -908,7 +945,7 @@ const saveBanks = () => {
                 <div class="border-t border-slate-100 pt-8 space-y-4">
                     <div class="flex items-center justify-between flex-wrap gap-2">
                         <div class="flex items-center gap-2">
-                            <HeartHandshake class="w-5 h-5 text-emerald-600" />
+                            <HeartHandshake class="w-5 h-5 text-[#B8922E]" />
                             <h3 class="text-sm font-black text-slate-900 uppercase tracking-tight">
                                 TABEL RINGKASAN DATA ANGGOTA UNIVERSAL CARD CENTRAL TERDAFTAR
                             </h3>
@@ -928,7 +965,7 @@ const saveBanks = () => {
                                             <a :href="user.ktp_image_url" target="_blank" class="inline-block">
                                                 <img :src="user.ktp_image_url" alt="KTP" class="w-16 h-10 object-cover rounded border border-slate-200 hover:scale-105 transition-transform" />
                                             </a>
-                                            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Terunggah</span>
+                                            <span class="text-[10px] font-bold text-[#9A7B2C] bg-[#faf6eb] px-2 py-0.5 rounded border border-[#D4AF37]/30">Terunggah</span>
                                         </div>
                                         <span v-else class="text-slate-400 italic">Belum diunggah</span>
                                     </td>
@@ -976,9 +1013,9 @@ const saveBanks = () => {
                                     <td class="py-3 px-4 font-bold text-indigo-900 bg-indigo-50/30">Kontak Ahli Waris</td>
                                     <td class="py-3 px-4 font-bold text-indigo-950 bg-indigo-50/30">{{ user?.beneficiary_phone || '-' }}</td>
                                 </tr>
-                                <tr class="bg-emerald-50/30">
-                                    <td class="py-3 px-4 font-bold text-emerald-900">Rekening Pencairan (WD)</td>
-                                    <td class="py-3 px-4 font-bold text-emerald-950" colspan="3">
+                                <tr class="bg-[#faf6eb]/50">
+                                    <td class="py-3 px-4 font-bold text-[#9A7B2C]">Rekening Pencairan (WD)</td>
+                                    <td class="py-3 px-4 font-bold text-slate-900" colspan="3">
                                         {{ user?.bank_name || '-' }} - No. Rek: <span class="font-mono">{{ user?.bank_account_number || '-' }}</span> (a.n {{ user?.bank_account_name || '-' }})
                                     </td>
                                 </tr>
@@ -998,7 +1035,7 @@ const saveBanks = () => {
                     class="flex items-start gap-3 border-b border-slate-100 pb-5"
                 >
                     <div
-                        class="p-2.5 bg-emerald-50 text-emerald-600 rounded-2xl shrink-0 mt-0.5"
+                        class="p-2.5 bg-[#faf6eb] text-[#B8922E] rounded-2xl shrink-0 mt-0.5"
                     >
                         <Settings class="w-6 h-6" />
                     </div>
@@ -1180,7 +1217,7 @@ const saveBanks = () => {
                                     "
                                     :class="[
                                         accountType === 'bank'
-                                            ? 'bg-emerald-600 text-white'
+                                            ? 'bg-[#0F172A] text-[#D4AF37]'
                                             : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
                                         'px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer',
                                     ]"
@@ -1218,7 +1255,7 @@ const saveBanks = () => {
                                     </label>
                                     <select
                                         v-model="selectedProvider"
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-emerald-500"
+                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#D4AF37]"
                                     >
                                         <option
                                             v-for="p in accountType === 'bank'
@@ -1250,7 +1287,7 @@ const saveBanks = () => {
                                     <input
                                         v-model="customProvider"
                                         placeholder="Masukkan nama bank/e-wallet"
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500"
+                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#D4AF37]"
                                     />
                                 </div>
 
@@ -1272,7 +1309,7 @@ const saveBanks = () => {
                                                 ? 'cth: 806401000095564'
                                                 : 'cth: 081234567890'
                                         "
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:border-emerald-500"
+                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:border-[#D4AF37]"
                                     />
                                 </div>
 
@@ -1286,7 +1323,7 @@ const saveBanks = () => {
                                     <input
                                         v-model="newBank.account_name"
                                         placeholder="cth: Universal Card Central"
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-emerald-500"
+                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#D4AF37]"
                                     />
                                 </div>
                             </div>
@@ -1326,7 +1363,7 @@ const saveBanks = () => {
                             <div
                                 v-for="(b, idx) in banksList"
                                 :key="idx"
-                                class="p-3.5 bg-white border border-emerald-200/80 rounded-2xl flex items-center justify-between shadow-2xs"
+                                class="p-3.5 bg-white border border-[#D4AF37]/30 rounded-2xl flex items-center justify-between shadow-2xs"
                             >
                                 <div class="space-y-1">
                                     <div class="flex items-center gap-2">
@@ -1352,7 +1389,7 @@ const saveBanks = () => {
                                                     .toLowerCase()
                                                     .includes('qris')
                                                     ? 'bg-indigo-100 text-indigo-700 border-indigo-200'
-                                                    : 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                                                    : 'bg-[#faf6eb] text-[#9A7B2C] border-[#D4AF37]/30',
                                                 'px-2 py-0.5 text-[9px] font-extrabold rounded-md border uppercase tracking-wider',
                                             ]"
                                         >
@@ -1437,7 +1474,7 @@ const saveBanks = () => {
                                     v-model="form.username"
                                     type="text"
                                     required
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37]"
                                 />
                             </div>
 
@@ -1451,7 +1488,7 @@ const saveBanks = () => {
                                     v-model="form.name"
                                     type="text"
                                     required
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37]"
                                 />
                             </div>
 
@@ -1465,7 +1502,7 @@ const saveBanks = () => {
                                     v-model="form.email"
                                     type="email"
                                     required
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37]"
                                 />
                             </div>
 
@@ -1478,7 +1515,7 @@ const saveBanks = () => {
                                 <input
                                     v-model="form.phone"
                                     type="text"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37]"
                                 />
                             </div>
 
@@ -1492,7 +1529,7 @@ const saveBanks = () => {
                                     v-model="form.password"
                                     type="password"
                                     placeholder="Password Baru"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-emerald-500"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-[#D4AF37]"
                                 />
                                 <p
                                     v-if="form.errors.password"

@@ -40,100 +40,55 @@ class HandleInertiaRequests extends Middleware
             ],
             'notifications' => function () use ($request) {
                 $user = $request->user();
-                if (!$user) return [];
-
-                $notifications = [];
-
-                // 1. Recent Bonus Logs
-                $notifiedUsernames = [];
-                try {
-                    $bonusLogs = \App\Models\BonusLog::where('user_id', $user->id)
-                        ->with('sourceUser')
-                        ->latest()
-                        ->limit(4)
-                        ->get();
-
-                    foreach ($bonusLogs as $b) {
-                        if ($b->sourceUser && $b->sourceUser->username) {
-                            $notifiedUsernames[] = $b->sourceUser->username;
-                        }
-
-                        $notifications[] = [
-                            'id' => 'bonus_' . $b->id,
-                            'type' => 'bonus',
-                            'title' => 'Bonus Masuk',
-                            'message' => ($b->description ?: 'Bonus ' . ucfirst($b->category)) . ' sebesar Rp ' . number_format($b->amount, 0, ',', '.'),
-                            'time' => $b->created_at ? $b->created_at->diffForHumans() : 'Baru saja',
-                            'timestamp' => $b->created_at ? $b->created_at->timestamp : time(),
-                            'read' => false,
-                            'link' => '/admin/laporan?tab=bonus',
-                        ];
-                    }
-                } catch (\Throwable $e) {}
-
-                // 2. Recent Direct Downlines (Mitra Baru yang belum tercatat di bonus log)
-                try {
-                    $newDownlines = \App\Models\User::where('parent_id', $user->id)
-                        ->when(!empty($notifiedUsernames), function($q) use ($notifiedUsernames) {
-                            $q->whereNotIn('username', $notifiedUsernames);
-                        })
-                        ->latest()
-                        ->limit(3)
-                        ->get();
-
-                    foreach ($newDownlines as $d) {
-                        $notifications[] = [
-                            'id' => 'downline_' . $d->id,
-                            'type' => 'member',
-                            'title' => 'Mitra Baru Bergabung',
-                            'message' => $d->name . ' (@' . ($d->username ?: $d->id) . ') telah bergabung di jaringan Anda.',
-                            'time' => $d->created_at ? $d->created_at->diffForHumans() : 'Baru saja',
-                            'timestamp' => $d->created_at ? $d->created_at->timestamp : time(),
-                            'read' => false,
-                            'link' => '/admin/team',
-                        ];
-                    }
-                } catch (\Throwable $e) {}
-
-                // 3. Recent Withdrawals
-                try {
-                    $withdrawals = \App\Models\Withdrawal::where('user_id', $user->id)
-                        ->latest()
-                        ->limit(3)
-                        ->get();
-
-                    foreach ($withdrawals as $w) {
-                        $notifications[] = [
-                            'id' => 'wd_' . $w->id,
-                            'type' => 'withdrawal',
-                            'title' => 'Status Penarikan (WD)',
-                            'message' => 'Penarikan Rp ' . number_format($w->amount, 0, ',', '.') . ' berstatus ' . strtoupper($w->status) . '.',
-                            'time' => $w->created_at ? $w->created_at->diffForHumans() : 'Baru saja',
-                            'timestamp' => $w->created_at ? $w->created_at->timestamp : time(),
-                            'read' => false,
-                            'link' => '/admin/penarikan-saldo',
-                        ];
-                    }
-                } catch (\Throwable $e) {}
-
-                // 4. Default System Welcome Notification if empty
-                if (empty($notifications)) {
-                    $notifications[] = [
-                        'id' => 'system_welcome',
-                        'type' => 'system',
-                        'title' => 'Selamat Datang di Universal Card Central',
-                        'message' => 'Akun telah diaktifkan. Gunakan link referral Anda untuk mengajak orang bergabung bersama Universal Card Central',
-                        'time' => 'Sistem',
-                        'timestamp' => time(),
-                        'read' => false,
-                        'link' => '/admin/dashboard',
-                    ];
+                if (!$user) {
+                    return [];
                 }
 
-                // Sort by timestamp desc
-                usort($notifications, fn($a, $b) => $b['timestamp'] <=> $a['timestamp']);
+                try {
+                    if (\Illuminate\Support\Facades\Schema::hasTable('notifications')) {
+                        $hasSoftDelete = \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'deleted_at');
+                        $dbNotifs = $user->notifications()
+                            ->when($hasSoftDelete, fn ($q) => $q->whereNull('deleted_at'))
+                            ->latest()
+                            ->limit(15)
+                            ->get();
+                        if ($dbNotifs->isNotEmpty()) {
+                            return $dbNotifs->map(function ($n) {
+                                $data = is_array($n->data) ? $n->data : [];
+                                return [
+                                    'id' => $n->id,
+                                    'is_db' => true,
+                                    'type' => $data['category'] ?? 'system',
+                                    'title' => $data['title'] ?? 'Notifikasi Sistem',
+                                    'message' => $data['message'] ?? '',
+                                    'time' => $n->created_at ? $n->created_at->diffForHumans() : 'Baru saja',
+                                    'timestamp' => $n->created_at ? $n->created_at->timestamp : time(),
+                                    'is_read' => $n->read_at !== null,
+                                    'link' => $data['link'] ?? '/admin/notifikasi',
+                                ];
+                            })->values()->all();
+                        }
+                    }
+                } catch (\Throwable $e) {
+                }
 
-                return array_slice($notifications, 0, 8);
+                return [];
+            },
+            'unread_notifications_count' => function () use ($request) {
+                $user = $request->user();
+                if (!$user) {
+                    return 0;
+                }
+                try {
+                    if (\Illuminate\Support\Facades\Schema::hasTable('notifications')) {
+                        $hasSoftDelete = \Illuminate\Support\Facades\Schema::hasColumn('notifications', 'deleted_at');
+                        return $user->unreadNotifications()
+                            ->when($hasSoftDelete, fn ($q) => $q->whereNull('deleted_at'))
+                            ->count();
+                    }
+                } catch (\Throwable $e) {
+                }
+                return 0;
             },
         ];
     }

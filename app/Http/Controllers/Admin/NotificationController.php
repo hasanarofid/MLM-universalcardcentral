@@ -3,106 +3,77 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class NotificationController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
         $user = $request->user();
         $notifications = [];
 
-        // 1. Recent Bonus Logs
-        $notifiedUsernames = [];
-        $bonusLogs = \App\Models\BonusLog::where('user_id', $user->id)
-            ->with('sourceUser')
-            ->latest()
-            ->limit(30)
-            ->get();
-
-        foreach ($bonusLogs as $b) {
-            if ($b->sourceUser && $b->sourceUser->username) {
-                $notifiedUsernames[] = $b->sourceUser->username;
-            }
-
-            $notifications[] = [
-                'id' => 'bonus_' . $b->id,
-                'type' => 'bonus',
-                'title' => 'Bonus Masuk',
-                'message' => ($b->description ?: 'Bonus ' . ucfirst($b->category)) . ' sebesar Rp ' . number_format($b->amount, 0, ',', '.'),
-                'time' => $b->created_at ? $b->created_at->diffForHumans() : 'Baru saja',
-                'timestamp' => $b->created_at ? $b->created_at->timestamp : time(),
-            ];
+        if (Schema::hasTable('notifications')) {
+            $hasSoftDelete = Schema::hasColumn('notifications', 'deleted_at');
+            $notifications = $user->notifications()
+                ->when($hasSoftDelete, fn ($q) => $q->whereNull('deleted_at'))
+                ->latest()
+                ->limit(100)
+                ->get()
+                ->map(function ($n) {
+                    $data = is_array($n->data) ? $n->data : [];
+                    return [
+                        'id' => $n->id,
+                        'type' => $data['category'] ?? 'system',
+                        'title' => $data['title'] ?? 'Notifikasi Sistem',
+                        'message' => $data['message'] ?? '',
+                        'link' => $data['link'] ?? '/admin/dashboard',
+                        'is_read' => $n->read_at !== null,
+                        'time' => $n->created_at ? $n->created_at->diffForHumans() : 'Baru saja',
+                        'created_at_formatted' => $n->created_at ? $n->created_at->format('d M Y, H:i') : '',
+                        'timestamp' => $n->created_at ? $n->created_at->timestamp : time(),
+                    ];
+                })
+                ->values()
+                ->all();
         }
-
-        // 2. Recent Registered Members (Jaringan yang belum tercatat di bonus log)
-        $newMembers = \App\Models\User::where('parent_id', $user->id)
-            ->when(!empty($notifiedUsernames), function($q) use ($notifiedUsernames) {
-                $q->whereNotIn('username', $notifiedUsernames);
-            })
-            ->latest()
-            ->limit(20)
-            ->get();
-
-        foreach ($newMembers as $m) {
-            $notifications[] = [
-                'id' => 'member_' . $m->id,
-                'type' => 'network',
-                'title' => 'Mitra Baru Bergabung',
-                'message' => $m->name . ' (@' . $m->username . ') telah bergabung di jaringan Anda.',
-                'time' => $m->created_at ? $m->created_at->diffForHumans() : 'Baru saja',
-                'timestamp' => $m->created_at ? $m->created_at->timestamp : time(),
-            ];
-        }
-
-        // 3. Withdrawal Updates
-        $withdrawals = \App\Models\Withdrawal::where('user_id', $user->id)
-            ->latest()
-            ->limit(15)
-            ->get();
-
-        foreach ($withdrawals as $w) {
-            $title = 'Penarikan Saldo';
-            if ($w->status === 'approved') $title = 'Penarikan Disetujui';
-            if ($w->status === 'rejected') $title = 'Penarikan Ditolak';
-            
-            $notifications[] = [
-                'id' => 'wd_' . $w->id,
-                'type' => 'finance',
-                'title' => $title,
-                'message' => 'Penarikan Rp ' . number_format($w->amount, 0, ',', '.') . ' (' . ucfirst($w->status) . ')',
-                'time' => $w->updated_at ? $w->updated_at->diffForHumans() : 'Baru saja',
-                'timestamp' => $w->updated_at ? $w->updated_at->timestamp : time(),
-            ];
-        }
-        
-        // 4. Transfers (Wallet Transactions)
-        $transfers = \App\Models\WalletTransaction::where('user_id', $user->id)
-            ->whereIn('type', ['transfer_out', 'transfer_in'])
-            ->latest()
-            ->limit(15)
-            ->get();
-            
-        foreach ($transfers as $t) {
-            $title = $t->type === 'transfer_in' ? 'Dana Masuk' : 'Dana Keluar';
-            $notifications[] = [
-                'id' => 'tf_' . $t->id,
-                'type' => 'finance',
-                'title' => $title,
-                'message' => ($t->description ?: 'Transfer saldo') . ' Rp ' . number_format($t->amount, 0, ',', '.'),
-                'time' => $t->created_at ? $t->created_at->diffForHumans() : 'Baru saja',
-                'timestamp' => $t->created_at ? $t->created_at->timestamp : time(),
-            ];
-        }
-
-        // Sort by timestamp desc
-        usort($notifications, function ($a, $b) {
-            return $b['timestamp'] <=> $a['timestamp'];
-        });
 
         return Inertia::render('Admin/Notifications', [
-            'allNotifications' => array_slice($notifications, 0, 50)
+            'allNotifications' => $notifications,
         ]);
+    }
+
+    public function markAsRead(Request $request, string $id): RedirectResponse
+    {
+        $notification = $request->user()->notifications()->where('id', $id)->first();
+        if ($notification && $notification->read_at === null) {
+            $notification->markAsRead();
+        }
+
+        return back();
+    }
+
+    public function markAllAsRead(Request $request): RedirectResponse
+    {
+        $request->user()->unreadNotifications()->update(['read_at' => now()]);
+
+        return back()->with('success', 'Semua notifikasi telah ditandai dibaca.');
+    }
+
+    public function destroy(Request $request, string $id): RedirectResponse
+    {
+        $notification = $request->user()->notifications()->where('id', $id)->first();
+        if ($notification) {
+            if (Schema::hasColumn('notifications', 'deleted_at')) {
+                $notification->update(['deleted_at' => now()]);
+            } else {
+                $notification->delete();
+            }
+        }
+
+        return back()->with('success', 'Notifikasi berhasil dihapus.');
     }
 }

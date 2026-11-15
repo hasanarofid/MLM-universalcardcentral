@@ -252,6 +252,37 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        \App\Notifications\SystemActivityNotification::sendSafe(
+            $user,
+            new \App\Notifications\SystemActivityNotification(
+                category: 'system',
+                title: 'Selamat Datang di Universal Card Central',
+                message: 'Akun Anda berhasil didaftarkan. Silakan lengkapi data verifikasi KTP & rekening Anda di menu Profil.',
+                link: '/profile',
+                roleTarget: 'member'
+            )
+        );
+
+        if ($sponsor) {
+            \App\Notifications\SystemActivityNotification::sendSafe(
+                $sponsor,
+                new \App\Notifications\SystemActivityNotification(
+                    category: 'network',
+                    title: 'Mitra Baru Bergabung',
+                    message: "{$user->name} (@{$user->username}) bergabung melalui link referral Anda (Paket " . ucfirst($tier) . ").",
+                    link: '/admin/team',
+                    roleTarget: 'member'
+                )
+            );
+        }
+
+        \App\Notifications\SystemActivityNotification::notifyAdmins(
+            category: 'network',
+            title: 'Pendaftaran Member Baru',
+            message: "{$user->name} (@{$user->username}) mendaftar Paket " . ucfirst($tier) . " (" . ($user->phone ?: $user->email) . ").",
+            link: '/admin/data-member'
+        );
+
         Auth::login($user);
 
         return redirect()->route('dashboard');

@@ -79,44 +79,43 @@ const isSidebarCollapsed = ref(false);
 const isUserMenuOpen = ref(false);
 const isNotificationsOpen = ref(false);
 
-const readNotificationIds = ref(
-    (() => {
-        try {
-            return JSON.parse(localStorage.getItem("read_notifications") || "[]");
-        } catch (e) {
-            return [];
-        }
-    })()
-);
-
 const notifications = computed(() => {
-    const raw = page.props.notifications || [];
-    return raw.map((item) => ({
-        ...item,
-        is_read: readNotificationIds.value.includes(item.id),
-    }));
+    return page.props.notifications || [];
 });
 
 const unreadCount = computed(() => {
+    if (typeof page.props.unread_notifications_count === "number") {
+        return page.props.unread_notifications_count;
+    }
     return notifications.value.filter((n) => !n.is_read).length;
 });
 
 const markAllAsRead = () => {
-    const allIds = notifications.value.map((n) => n.id);
-    readNotificationIds.value = Array.from(new Set([...readNotificationIds.value, ...allIds]));
-    try {
-        localStorage.setItem("read_notifications", JSON.stringify(readNotificationIds.value));
-    } catch (e) {}
+    router.post(
+        route("admin.notifications.read-all"),
+        {},
+        {
+            preserveScroll: true,
+            preserveState: true,
+        }
+    );
 };
 
 const handleNotificationClick = (item) => {
-    if (!readNotificationIds.value.includes(item.id)) {
-        readNotificationIds.value.push(item.id);
-        try {
-            localStorage.setItem("read_notifications", JSON.stringify(readNotificationIds.value));
-        } catch (e) {}
-    }
     isNotificationsOpen.value = false;
+    if (item.is_db && !item.is_read) {
+        router.post(
+            route("admin.notifications.read", item.id),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    if (item.link) router.visit(item.link);
+                },
+            }
+        );
+        return;
+    }
     if (item.link) {
         router.visit(item.link);
     }

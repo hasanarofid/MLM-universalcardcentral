@@ -142,6 +142,25 @@ class WithdrawalController extends Controller
             \Illuminate\Support\Facades\Log::error('Gagal mengirim email permohonan penarikan saldo: ' . $e->getMessage());
         }
 
+        if ($withdrawal) {
+            \App\Notifications\SystemActivityNotification::sendSafe(
+                $user,
+                new \App\Notifications\SystemActivityNotification(
+                    category: 'finance',
+                    title: 'Pengajuan Penarikan Saldo',
+                    message: 'Permohonan penarikan saldo #' . $withdrawal->id . ' sebesar Rp ' . number_format($withdrawal->amount, 0, ',', '.') . ' sedang diproses.',
+                    link: '/admin/penarikan-saldo',
+                    roleTarget: 'member'
+                )
+            );
+            \App\Notifications\SystemActivityNotification::notifyAdmins(
+                category: 'finance',
+                title: 'Permohonan Penarikan Saldo Baru',
+                message: "{$user->name} (@{$user->username}) mengajukan penarikan Rp " . number_format($withdrawal->amount, 0, ',', '.') . ' ke ' . $withdrawal->bank_name . '.',
+                link: '/admin/penarikan-saldo'
+            );
+        }
+
         return back()->with('success', 'Permohonan penarikan saldo (WD) sebesar Rp ' . number_format($request->amount, 0, ',', '.') . ' berhasil dikirim! Biaya admin Rp ' . number_format($fee, 0, ',', '.') . ', dana diterima di rekening Rp ' . number_format($netAmount, 0, ',', '.') . '.');
     }
 
@@ -181,6 +200,19 @@ class WithdrawalController extends Controller
             }
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Gagal mengirim email persetujuan penarikan saldo: ' . $e->getMessage());
+        }
+
+        if ($withdrawal->user) {
+            \App\Notifications\SystemActivityNotification::sendSafe(
+                $withdrawal->user,
+                new \App\Notifications\SystemActivityNotification(
+                    category: 'finance',
+                    title: 'Penarikan Saldo Disetujui',
+                    message: 'Penarikan saldo #' . $withdrawal->id . ' sebesar Rp ' . number_format($withdrawal->amount, 0, ',', '.') . ' telah disetujui dan ditransfer.',
+                    link: '/admin/penarikan-saldo',
+                    roleTarget: 'member'
+                )
+            );
         }
 
         $net = max(0, $withdrawal->amount - ($withdrawal->fee ?? 10000));
@@ -228,6 +260,19 @@ class WithdrawalController extends Controller
             }
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Gagal mengirim email penolakan penarikan saldo: ' . $e->getMessage());
+        }
+
+        if ($withdrawal->user) {
+            \App\Notifications\SystemActivityNotification::sendSafe(
+                $withdrawal->user,
+                new \App\Notifications\SystemActivityNotification(
+                    category: 'finance',
+                    title: 'Penarikan Saldo Ditolak',
+                    message: 'Penarikan saldo #' . $withdrawal->id . ' sebesar Rp ' . number_format($withdrawal->amount, 0, ',', '.') . ' ditolak dan dana dikembalikan ke saldo Anda.',
+                    link: '/admin/penarikan-saldo',
+                    roleTarget: 'member'
+                )
+            );
         }
 
         return back()->with('success', 'Penarikan saldo #' . $withdrawal->id . ' ditolak dan dana telah dikembalikan ke saldo user.');

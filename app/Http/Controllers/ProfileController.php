@@ -47,6 +47,7 @@ class ProfileController extends Controller
                 'transfer_proof' => $user->transfer_proof ?? null,
                 'transfer_proof_url' => !empty($user->transfer_proof) ? (str_starts_with($user->transfer_proof, '/') ? $user->transfer_proof : '/' . $user->transfer_proof) : null,
                 'gender' => $user->gender ?? '',
+                'blood_type' => $user->blood_type ?? '',
                 'birth_place' => $user->birth_place ?? '',
                 'birth_date' => $user->birth_date ? (is_string($user->birth_date) ? substr($user->birth_date, 0, 10) : $user->birth_date->format('Y-m-d')) : '',
                 'religion' => $user->religion ?? '',
@@ -54,6 +55,7 @@ class ProfileController extends Controller
                 'last_education' => $user->last_education ?? '',
                 'occupation' => $user->occupation ?? '',
                 'address' => $user->address ?? '',
+                'rt_rw' => $user->rt_rw ?? '',
                 'province' => $user->province ?? '',
                 'city' => $user->city ?? '',
                 'district' => $user->district ?? '',
@@ -134,9 +136,11 @@ class ProfileController extends Controller
             $rules['company_copyright'] = 'required|string|max:255';
             $rules['site_logo'] = 'nullable|image|mimes:png,jpg,jpeg,svg,webp|max:2048';
         } else {
-            $rules['nik'] = 'nullable|string|max:20';
-            $rules['ktp_image'] = 'nullable|file|mimes:png,jpg,jpeg,webp|max:5120';
+            $rules['nik'] = 'nullable|digits:16|unique:users,nik,' . $user->id;
+            $rules['ktp_image'] = 'nullable|file|mimes:png,jpg,jpeg,webp,pdf|max:10240';
+            $rules['transfer_proof'] = 'nullable|file|mimes:png,jpg,jpeg,webp,pdf|max:10240';
             $rules['gender'] = 'nullable|string|max:20';
+            $rules['blood_type'] = 'nullable|string|max:10';
             $rules['birth_place'] = 'nullable|string|max:100';
             $rules['birth_date'] = 'nullable|date';
             $rules['religion'] = 'nullable|string|max:50';
@@ -144,6 +148,7 @@ class ProfileController extends Controller
             $rules['last_education'] = 'nullable|string|max:50';
             $rules['occupation'] = 'nullable|string|max:100';
             $rules['address'] = 'nullable|string|max:500';
+            $rules['rt_rw'] = 'nullable|string|max:30';
             $rules['province'] = 'nullable|string|max:100';
             $rules['city'] = 'nullable|string|max:100';
             $rules['district'] = 'nullable|string|max:100';
@@ -180,9 +185,9 @@ class ProfileController extends Controller
         }
 
         $foundationFields = [
-            'nik', 'gender', 'birth_place', 'birth_date', 'religion',
+            'nik', 'gender', 'blood_type', 'birth_place', 'birth_date', 'religion',
             'marital_status', 'last_education', 'occupation',
-            'address', 'province', 'city', 'district', 'village', 'postal_code',
+            'address', 'rt_rw', 'province', 'city', 'district', 'village', 'postal_code',
             'beneficiary_name', 'beneficiary_relation', 'beneficiary_phone',
             'bank_name', 'bank_account_number', 'bank_account_name'
         ];
@@ -202,6 +207,17 @@ class ProfileController extends Controller
             }
             $file->move($destination, $filename);
             $user->ktp_image = '/images/ktp/' . $filename;
+        }
+
+        if ($request->hasFile('transfer_proof') && \Illuminate\Support\Facades\Schema::hasColumn('users', 'transfer_proof')) {
+            $file = $request->file('transfer_proof');
+            $filename = 'proof_' . $user->id . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $destination = public_path('images/transfer_proofs');
+            if (!file_exists($destination)) {
+                mkdir($destination, 0755, true);
+            }
+            $file->move($destination, $filename);
+            $user->transfer_proof = '/images/transfer_proofs/' . $filename;
         }
 
         if (!empty($validated['password'])) {
