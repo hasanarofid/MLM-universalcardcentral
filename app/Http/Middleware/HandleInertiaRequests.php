@@ -121,8 +121,8 @@ class HandleInertiaRequests extends Middleware
                     $notifications[] = [
                         'id' => 'system_welcome',
                         'type' => 'system',
-                        'title' => 'Selamat Datang di Nexus Community',
-                        'message' => 'Akun telah diaktifkan. Gunakan link referral Anda untuk mengajak orang bergabung bersama Nexus Community',
+                        'title' => 'Selamat Datang di Universal Card Central',
+                        'message' => 'Akun telah diaktifkan. Gunakan link referral Anda untuk mengajak orang bergabung bersama Universal Card Central',
                         'time' => 'Sistem',
                         'timestamp' => time(),
                         'read' => false,

@@ -29,7 +29,7 @@ class PostSeeder extends Seeder
         );
 
         Post::updateOrCreate(
-            ['slug' => 'mengenal-program-kemitraan-dan-komisi-unilevel-nexus-community'],
+            ['slug' => 'mengenal-program-kemitraan-dan-aktivasi-universal-card-central'],
             [
                 'category_id' => $catBisnis->id,
                 'title' => 'Mengenal Program Kemitraan dan Komisi Unilevel UNIVERSAL CARD CENTRAL',

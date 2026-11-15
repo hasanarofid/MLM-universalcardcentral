@@ -25,7 +25,7 @@ class BackupController extends Controller
         }
 
         $isAdmin = $user->username === 'admin' 
-            || $user->email === 'admin@nexuscommunity.id' 
+            || $user->email === 'admin@universalcardcentral.com' 
             || (method_exists($user, 'hasRole') && $user->hasRole('admin'));
 
         if (!$isAdmin) {
@@ -44,7 +44,7 @@ class BackupController extends Controller
         $dbName = DB::getDatabaseName();
 
         $sql = "-- ==========================================================\n";
-        $sql .= "-- Database Backup: NEXUS COMMUNITY SYSTEM\n";
+        $sql .= "-- Database Backup: UNIVERSAL CARD CENTRAL SYSTEM\n";
         $sql .= "-- Exported At: " . now()->toDateTimeString() . "\n";
         $sql .= "-- Database Name: " . $dbName . "\n";
         $sql .= "-- ==========================================================\n\n";
@@ -90,7 +90,7 @@ class BackupController extends Controller
 
         $sql .= "SET FOREIGN_KEY_CHECKS = 1;\n";
 
-        $fileName = 'nexus_db_backup_' . date('Y-m-d_H-i-s') . '.sql';
+        $fileName = 'ucc_db_backup_' . date('Y-m-d_H-i-s') . '.sql';
 
         return response($sql, 200, [
             'Content-Type' => 'application/sql',
@@ -107,7 +107,7 @@ class BackupController extends Controller
 
         $backupData = [
             'app_info' => [
-                'name' => 'nexuscommunity.id',
+                'name' => 'universalcardcentral.com',
                 'version' => '2.4 Binary MLM',
                 'exported_at' => now()->toIso8601String(),
                 'exporter' => auth()->user() ? auth()->user()->username : 'admin',
@@ -123,7 +123,7 @@ class BackupController extends Controller
         ];
 
         $jsonContent = json_encode($backupData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        $fileName = 'nexus_database_backup_' . date('Y-m-d_H-i-s') . '.json';
+        $fileName = 'ucc_database_backup_' . date('Y-m-d_H-i-s') . '.json';
 
         return response($jsonContent, 200, [
             'Content-Type' => 'application/json',

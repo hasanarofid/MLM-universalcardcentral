@@ -101,7 +101,7 @@ class VoucherWalletController extends Controller
             : [
                 'bank_name' => 'Bank BRI',
                 'account_number' => '806401000095564',
-                'account_name' => 'PT.Nexus Community Punya Kita',
+                'account_name' => 'Universal Card Central',
             ];
 
         // Voucher Package Catalog for Conversion

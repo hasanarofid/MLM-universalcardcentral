@@ -14,10 +14,10 @@ use Inertia\Inertia;
 class DashboardController extends Controller
 {
     /**
-     * Display the admin binary MLM dashboard home based on NEXUS COMMUNITY PRD 2026.
+     * Display the admin binary MLM dashboard home based on Universal Card Central (UCC).
      */
     /**
-     * Display the admin & member dashboard based on NEXUS COMMUNITY PRD 2026.
+     * Display the admin & member dashboard based on Universal Card Central (UCC).
      */
     public function index()
     {
@@ -56,7 +56,7 @@ class DashboardController extends Controller
 
         $voucherAktif = $activeVouchers->count();
 
-        $isAdmin = ($user->username === 'admin' || $user->email === 'admin@nexuscommunity.id' || (method_exists($user, 'hasRole') && $user->hasRole('admin')));
+        $isAdmin = ($user->username === 'admin' || $user->email === 'admin@universalcardcentral.com' || (method_exists($user, 'hasRole') && $user->hasRole('admin')));
 
         $allSponsors = $isAdmin ? User::select('id', 'name', 'username')->get()->map(function ($u) {
             return [
@@ -75,8 +75,8 @@ class DashboardController extends Controller
                     'bank_name' => 'Bank BRI',
                     'bank_account_number' => '806401000095564',
                     'account_number' => '806401000095564',
-                    'bank_account_name' => 'PT.Nexus Community Punya Kita',
-                    'account_name' => 'PT.Nexus Community Punya Kita',
+                    'bank_account_name' => 'Universal Card Central',
+                    'account_name' => 'Universal Card Central',
                 ]
             ];
 
@@ -288,8 +288,8 @@ class DashboardController extends Controller
                     'bank_name' => 'Bank BRI',
                     'account_number' => '806401000095564',
                     'bank_account_number' => '806401000095564',
-                    'account_name' => 'PT.Nexus Community Punya Kita',
-                    'bank_account_name' => 'PT.Nexus Community Punya Kita',
+                    'account_name' => 'Universal Card Central',
+                    'bank_account_name' => 'Universal Card Central',
                 ]
             ];
 

@@ -18,7 +18,7 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $currentUser = auth()->user() ?: User::first();
-        $isAdmin = ($currentUser->username === 'admin' || $currentUser->email === 'admin@nexuscommunity.id' || (method_exists($currentUser, 'hasRole') && $currentUser->hasRole('admin')));
+        $isAdmin = ($currentUser->username === 'admin' || $currentUser->email === 'admin@universalcardcentral.com' || (method_exists($currentUser, 'hasRole') && $currentUser->hasRole('admin')));
 
         $type = $request->input('type', 'team');
         if (!in_array($type, ['team', 'bonus', 'withdrawal', 'mutasi'])) {
@@ -330,7 +330,7 @@ class ReportController extends Controller
     public function exportExcel(Request $request)
     {
         $currentUser = auth()->user() ?: User::first();
-        $isAdmin = ($currentUser->username === 'admin' || $currentUser->email === 'admin@nexuscommunity.id' || (method_exists($currentUser, 'hasRole') && $currentUser->hasRole('admin')));
+        $isAdmin = ($currentUser->username === 'admin' || $currentUser->email === 'admin@universalcardcentral.com' || (method_exists($currentUser, 'hasRole') && $currentUser->hasRole('admin')));
 
         $type = $request->input('type', 'team');
         if (!in_array($type, ['team', 'bonus', 'withdrawal', 'mutasi'])) {
@@ -365,7 +365,7 @@ class ReportController extends Controller
             default => 'LAPORAN SISTEM',
         };
 
-        $html .= '<div class="title">' . $titleLabel . ' - NEXUS COMMUNITY (' . date('d/m/Y H:i') . ')</div>';
+        $html .= '<div class="title">' . $titleLabel . ' - UNIVERSAL CARD CENTRAL (' . date('d/m/Y H:i') . ')</div>';
         $html .= '<p style="font-size:10px;color:#666;">User: ' . htmlspecialchars($currentUser->name) . ' (@' . htmlspecialchars($currentUser->username) . ')</p>';
         $html .= '<table>';
 
@@ -471,7 +471,7 @@ class ReportController extends Controller
     public function exportPdf(Request $request)
     {
         $currentUser = auth()->user() ?: User::first();
-        $isAdmin = ($currentUser->username === 'admin' || $currentUser->email === 'admin@nexuscommunity.id' || (method_exists($currentUser, 'hasRole') && $currentUser->hasRole('admin')));
+        $isAdmin = ($currentUser->username === 'admin' || $currentUser->email === 'admin@universalcardcentral.com' || (method_exists($currentUser, 'hasRole') && $currentUser->hasRole('admin')));
 
         $type = $request->input('type', 'team');
         if (!in_array($type, ['team', 'bonus', 'withdrawal', 'mutasi'])) {

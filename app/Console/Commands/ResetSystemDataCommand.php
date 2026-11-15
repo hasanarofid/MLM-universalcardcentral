@@ -77,8 +77,8 @@ class ResetSystemDataCommand extends Command
 
         // 2. Delete all non-admin member user accounts
         $deletedUsers = User::where('username', '!=', 'admin')
-            ->where('email', '!=', 'admin@nexuscommunity.com')
-            ->where('email', '!=', 'admin@nexuscommunity.id')
+            ->where('email', '!=', 'admin@universalcardcentral.com')
+            ->where('email', '!=', 'admin@universalcardcentral.com')
             ->where('id', '>', 1)
             ->delete();
 
@@ -86,8 +86,8 @@ class ResetSystemDataCommand extends Command
 
         // 3. Reset Admin user account stats to initial clean 0 state
         $admin = User::where('username', 'admin')
-            ->orWhere('email', 'admin@nexuscommunity.com')
-            ->orWhere('email', 'admin@nexuscommunity.id')
+            ->orWhere('email', 'admin@universalcardcentral.com')
+            ->orWhere('email', 'admin@universalcardcentral.com')
             ->orWhere('id', 1)
             ->first();
 

@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
         // 3. Seed ONLY President Director (Admin) User
         $admin = User::where('username', 'admin')
             ->orWhere('email', 'admin@universalcardcentral.com')
-            ->orWhere('email', 'admin@nexuscommunity.com')
+            ->orWhere('email', 'admin@universalcardcentral.com')
             ->orWhere('email', 'admin@universalcardcentral.com')
             ->orWhere('id', 1)
             ->first() ?: new User();
