@@ -266,3 +266,4 @@ class PinActivationController extends Controller
         return back()->with('success', "Member {$downline->name} (@{$downline->username}) berhasil diaktifkan sebagai Paket " . ucfirst($tier) . '!');
     }
 }
+
