@@ -1,6 +1,6 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { Head, useForm, usePage, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { 
   KeyRound, 
@@ -26,8 +26,47 @@ const props = defineProps({
   vouchers: Array,
   available_vouchers: Array,
   transfers: Array,
+  pin_requests: {
+    type: Array,
+    default: () => []
+  },
   is_admin: Boolean,
 });
+
+const pinOrderForm = useForm({
+  tier: 'bronze',
+  quantity: 1,
+  transfer_proof: null,
+});
+
+const submitPinOrder = () => {
+  pinOrderForm.post(route('admin.pin.request'), {
+    forceFormData: true,
+    preserveScroll: true,
+    onSuccess: () => pinOrderForm.reset(),
+  });
+};
+
+const adminGenForm = useForm({
+  recipient_username: '',
+  tier: 'bronze',
+  quantity: 1,
+});
+
+const submitAdminGeneratePin = () => {
+  adminGenForm.post(route('admin.pin.generate'), {
+    preserveScroll: true,
+    onSuccess: () => adminGenForm.reset('quantity', 'recipient_username'),
+  });
+};
+
+const approvePinRequest = (id) => {
+  router.post(route('admin.pin.approve', id), {}, { preserveScroll: true });
+};
+
+const rejectPinRequest = (id) => {
+  router.post(route('admin.pin.reject', id), { notes: 'Bukti transfer tidak valid.' }, { preserveScroll: true });
+};
 
 const page = usePage();
 const flashSuccess = computed(() => page.props.flash?.success);
@@ -154,17 +193,15 @@ const formatRupiah = (val) => {
                 </label>
                 <select 
                   v-model="buyForm.package_key"
-                  class="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 text-xs font-bold focus:ring-2 focus:ring-[#04bdb2]"
+                  class="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 text-xs font-bold focus:outline-none focus:border-[#D4AF37]"
                 >
-                  <optgroup v-for="group in ['Voucher Activation', 'Voucher RO', 'Voucher PO']" :key="group" :label="group">
-                    <option 
-                      v-for="pkg in convert_packages.filter(p => p.group === group)" 
-                      :key="pkg.key" 
-                      :value="pkg.key"
-                    >
-                      {{ pkg.name }}
-                    </option>
-                  </optgroup>
+                  <option
+                    v-for="pkg in convert_packages"
+                    :key="pkg.key"
+                    :value="pkg.key"
+                  >
+                    {{ pkg.name }}
+                  </option>
                 </select>
               </div>
 
@@ -407,6 +444,167 @@ const formatRupiah = (val) => {
 
         </div>
 
+      </div>
+
+      <!-- SECTION ORDER PIN & VERIFIKASI ADMIN (BRONZE / SILVER) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Admin: Generate & Kirim PIN Langsung -->
+        <div v-if="is_admin" class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
+          <div class="border-b border-slate-100 pb-3">
+            <h3 class="text-sm font-black text-slate-900">Generate &amp; Kirim PIN Aktivasi (Admin)</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Buat stok PIN Bronze (Rp 100.000) atau Silver (Rp 350.000) langsung ke akun member atau admin.</p>
+          </div>
+          <form @submit.prevent="submitAdminGeneratePin" class="space-y-3.5">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Username Penerima (Kosongkan = Stok Admin)</label>
+              <input
+                v-model="adminGenForm.recipient_username"
+                type="text"
+                placeholder="Contoh: member01"
+                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-[#D4AF37]"
+              />
+              <p v-if="adminGenForm.errors.recipient_username" class="text-[11px] text-rose-600 font-bold mt-1">{{ adminGenForm.errors.recipient_username }}</p>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tipe PIN</label>
+                <select v-model="adminGenForm.tier" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-[#D4AF37]">
+                  <option value="bronze">Bronze (Rp 100.000)</option>
+                  <option value="silver">Silver (Rp 350.000)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Jumlah PIN</label>
+                <input
+                  v-model="adminGenForm.quantity"
+                  type="number"
+                  min="1"
+                  max="100"
+                  required
+                  class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-[#D4AF37]"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              :disabled="adminGenForm.processing"
+              class="w-full bg-gradient-to-r from-[#B8922E] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-black text-xs uppercase tracking-wider py-3 rounded-2xl shadow-md cursor-pointer disabled:opacity-50"
+            >
+              {{ adminGenForm.processing ? 'Memproses...' : 'Generate & Kirim PIN' }}
+            </button>
+          </form>
+        </div>
+
+        <!-- Member: Beli PIN dengan Upload Bukti Transfer -->
+        <div v-else class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
+          <div class="border-b border-slate-100 pb-3">
+            <h3 class="text-sm font-black text-slate-900">Beli Stok PIN via Transfer Bank</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Upload bukti transfer ke rekening perusahaan. Admin akan memverifikasi &amp; mengirim PIN ke akun Anda.</p>
+          </div>
+          <form @submit.prevent="submitPinOrder" class="space-y-3.5">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tipe PIN</label>
+                <select v-model="pinOrderForm.tier" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-[#D4AF37]">
+                  <option value="bronze">Bronze (Rp 100.000)</option>
+                  <option value="silver">Silver (Rp 350.000)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Jumlah PIN</label>
+                <input
+                  v-model="pinOrderForm.quantity"
+                  type="number"
+                  min="1"
+                  max="100"
+                  required
+                  class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-[#D4AF37]"
+                />
+              </div>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Upload Bukti Transfer</label>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,application/pdf"
+                required
+                @change="(e) => pinOrderForm.transfer_proof = e.target.files[0]"
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700"
+              />
+            </div>
+            <button
+              type="submit"
+              :disabled="pinOrderForm.processing"
+              class="w-full bg-gradient-to-r from-[#B8922E] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-black text-xs uppercase tracking-wider py-3 rounded-2xl shadow-md cursor-pointer disabled:opacity-50"
+            >
+              {{ pinOrderForm.processing ? 'Mengirim...' : 'Kirim Order PIN ke Admin' }}
+            </button>
+          </form>
+        </div>
+
+        <!-- Daftar Order PIN & Verifikasi Admin -->
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
+          <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-black text-slate-900">{{ is_admin ? 'Verifikasi Order PIN Member' : 'Riwayat Order PIN Anda' }}</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Status permohonan pembelian PIN aktivasi.</p>
+            </div>
+            <span class="bg-[#faf6eb] text-[#B8922E] border border-[#D4AF37]/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+              {{ pin_requests.length }} Order
+            </span>
+          </div>
+
+          <div v-if="pin_requests.length > 0" class="divide-y divide-slate-100 max-h-80 overflow-y-auto">
+            <div v-for="req in pin_requests" :key="req.id" class="py-3 flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-xs font-black text-slate-900">#{{ req.id }} • {{ req.quantity }}x {{ req.tier }}</span>
+                  <span
+                    :class="[
+                      'text-[10px] font-bold px-2 py-0.5 rounded-full border',
+                      req.status === 'approved' ? 'bg-[#0F172A] text-[#D4AF37] border-[#D4AF37]/30' :
+                      req.status === 'rejected' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                      'bg-amber-50 text-amber-700 border-amber-200'
+                    ]"
+                  >
+                    {{ req.status.toUpperCase() }}
+                  </span>
+                </div>
+                <p class="text-[11px] text-slate-600 mt-0.5">
+                  {{ req.user_name }} (@{{ req.username }}) • {{ formatRupiah(req.total_amount) }}
+                </p>
+                <a
+                  v-if="req.transfer_proof"
+                  :href="req.transfer_proof"
+                  target="_blank"
+                  class="text-[11px] font-bold text-[#9A7B2C] hover:underline inline-block mt-0.5"
+                >
+                  Lihat Bukti Transfer
+                </a>
+              </div>
+
+              <div v-if="is_admin && req.status === 'pending'" class="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  @click="approvePinRequest(req.id)"
+                  class="px-3 py-1.5 bg-gradient-to-r from-[#B8922E] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-black text-[10px] uppercase rounded-lg cursor-pointer"
+                >
+                  Approve &amp; Kirim PIN
+                </button>
+                <button
+                  type="button"
+                  @click="rejectPinRequest(req.id)"
+                  class="px-2.5 py-1.5 bg-rose-50 text-rose-700 border border-rose-200 font-bold text-[10px] uppercase rounded-lg cursor-pointer hover:bg-rose-100"
+                >
+                  Tolak
+                </button>
+              </div>
+            </div>
+          </div>
+          <div v-else class="py-8 text-center text-xs text-slate-400">
+            Belum ada order pembelian PIN.
+          </div>
+        </div>
       </div>
 
     </div>

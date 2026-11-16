@@ -104,22 +104,29 @@ class VoucherWalletController extends Controller
                 'account_name' => 'Universal Card Central',
             ];
 
-        // Voucher Package Catalog for Conversion
+        // Voucher Package Catalog for Conversion (UCC Tahap 1 PIN Aktivasi)
         $convertPackages = [
-            // Activation Vouchers
-            ['key' => 'seller', 'group' => 'Voucher Activation', 'name' => 'Voucher Activation Seller (Rp 125.000)', 'price' => 125000, 'type' => 'activation'],
-            ['key' => 'star_seller', 'group' => 'Voucher Activation', 'name' => 'Voucher Activation Star Seller (Rp 550.000)', 'price' => 550000, 'type' => 'activation'],
-            ['key' => 'affiliate', 'group' => 'Voucher Activation', 'name' => 'Voucher Activation Affiliate (Rp 2.100.000)', 'price' => 2100000, 'type' => 'activation'],
-            ['key' => 'business', 'group' => 'Voucher Activation', 'name' => 'Voucher Activation Business (Rp 4.300.000)', 'price' => 4300000, 'type' => 'activation'],
-            ['key' => 'partner', 'group' => 'Voucher Activation', 'name' => 'Voucher Activation Partner (Rp 10.500.000)', 'price' => 10500000, 'type' => 'activation'],
-
-            // RO Voucher
-            ['key' => 'ro', 'group' => 'Voucher RO', 'name' => 'Voucher RO (Rp 125.000)', 'price' => 125000, 'type' => 'ro'],
-
-            // PO Vouchers
-            ['key' => 'po_star_seller', 'group' => 'Voucher PO', 'name' => 'Voucher PO Star Seller (Rp 550.000)', 'price' => 550000, 'type' => 'po_star_seller'],
-            ['key' => 'po_affiliate', 'group' => 'Voucher PO', 'name' => 'Voucher PO Affiliate (Rp 2.100.000)', 'price' => 2100000, 'type' => 'po_affiliate'],
+            ['key' => 'bronze', 'group' => 'PIN Aktivasi UCC', 'name' => 'PIN Aktivasi Bronze (Rp 100.000)', 'price' => 100000, 'type' => 'activation'],
+            ['key' => 'silver', 'group' => 'PIN Aktivasi UCC', 'name' => 'PIN Aktivasi Silver (Rp 350.000)', 'price' => 350000, 'type' => 'activation'],
         ];
+
+        $isAdmin = ($user->username === 'admin' || $user->email === 'admin@universalcardcentral.com' || $user->hasRole('admin'));
+        $pinRequestsQuery = \App\Models\PinRequest::with('user')->latest();
+        if (!$isAdmin) {
+            $pinRequestsQuery->where('user_id', $user->id);
+        }
+        $pinRequests = $pinRequestsQuery->limit(50)->get()->map(fn ($r) => [
+            'id' => $r->id,
+            'user_name' => $r->user?->name ?? 'Member',
+            'username' => $r->user?->username ?? '-',
+            'tier' => ucfirst($r->tier),
+            'quantity' => $r->quantity,
+            'total_amount' => (int) $r->total_amount,
+            'transfer_proof' => $r->transfer_proof,
+            'status' => $r->status,
+            'admin_notes' => $r->admin_notes,
+            'created_at' => $r->created_at?->format('d M Y H:i'),
+        ]);
 
         return Inertia::render('Admin/VoucherWallet', [
             'wallet' => [
@@ -132,7 +139,8 @@ class VoucherWalletController extends Controller
             'vouchers' => $vouchers,
             'available_vouchers' => $availableVouchers,
             'transfers' => $transfers,
-            'is_admin' => $user->hasRole('admin'),
+            'pin_requests' => $pinRequests,
+            'is_admin' => $isAdmin,
         ]);
     }
 
@@ -150,6 +158,8 @@ class VoucherWalletController extends Controller
         $qty = max(1, min(35, (int) $request->input('quantity', 1)));
 
         $catalog = [
+            'bronze' => ['name' => 'Bronze (Rp 100.000)', 'price' => 100000, 'type' => 'activation', 'prefix' => 'UCCB'],
+            'silver' => ['name' => 'Silver (Rp 350.000)', 'price' => 350000, 'type' => 'activation', 'prefix' => 'UCCS'],
             'seller' => ['name' => 'Seller (Rp 125.000)', 'price' => 125000, 'type' => 'activation', 'prefix' => 'PIN'],
             'starter' => ['name' => 'Seller (Rp 125.000)', 'price' => 125000, 'type' => 'activation', 'prefix' => 'PIN'],
             'star_seller' => ['name' => 'Star Seller (Rp 550.000)', 'price' => 550000, 'type' => 'activation', 'prefix' => 'PIN'],

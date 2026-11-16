@@ -49,15 +49,15 @@ class UccRegistrationAndActivationTest extends TestCase
             'nik' => '3201010101010002',
             'name' => 'Budi Santoso',
             'email' => 'budi@example.com',
-            'member_tier' => 'bronze',
-            'activation_amount' => 100000,
+            'activation_status' => 'inactive',
+            'activation_amount' => 0,
             'parent_id' => $sponsor->id,
         ]);
 
-        // Sponsor receives 10% recruit bonus (Rp 10.000) + 4% bronze cluster royalty (Rp 4.000) = Rp 14.000
+        // Free registration does NOT trigger bonus until PIN is activated
         $sponsor->refresh();
-        $this->assertEquals(14000, (float) $sponsor->total_bonus);
-        $this->assertEquals(14, (int) $sponsor->points); // 14000 / 1000 = 14 points
+        $this->assertEquals(0, (float) $sponsor->total_bonus);
+        $this->assertEquals(0, (int) $sponsor->points);
     }
 
     public function test_registration_requires_valid_16_digit_unique_nik(): void
@@ -242,8 +242,8 @@ class UccRegistrationAndActivationTest extends TestCase
             'name' => 'Member Ringkas',
             'phone' => '081234500011',
             'email' => 'ringkas@example.com',
-            'member_tier' => 'bronze',
-            'activation_amount' => 100000,
+            'activation_status' => 'inactive',
+            'activation_amount' => 0,
             'nik' => null,
         ]);
     }

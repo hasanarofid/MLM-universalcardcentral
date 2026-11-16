@@ -84,19 +84,34 @@ class DashboardController extends Controller
         $directReferrals = User::where('parent_id', $user->id)
             ->latest()
             ->take(20)
-            ->get(['id', 'name', 'username', 'nik', 'member_tier', 'activation_amount', 'created_at'])
+            ->get(['id', 'name', 'username', 'nik', 'member_tier', 'activation_status', 'activation_amount', 'position', 'created_at'])
             ->map(fn ($ref) => [
                 'id' => $ref->id,
                 'name' => $ref->name,
                 'username' => $ref->username,
                 'nik' => $ref->nik,
                 'member_tier' => ucfirst((string) ($ref->member_tier ?? 'bronze')),
+                'activation_status' => $ref->activation_status ?? 'active',
+                'position' => $ref->position,
                 'activation_amount' => (int) ($ref->activation_amount ?? 100000),
                 'joined_at' => $ref->created_at?->format('d M Y H:i'),
             ]);
 
+        $pendingPinRequest = \App\Models\PinRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
+
         return Inertia::render('Admin/Dashboard', [
             'is_admin' => $isAdmin,
+            'activation_status' => $user->activation_status ?? 'active',
+            'pending_pin_request' => $pendingPinRequest ? [
+                'id' => $pendingPinRequest->id,
+                'tier' => $pendingPinRequest->tier,
+                'quantity' => $pendingPinRequest->quantity,
+                'total_amount' => $pendingPinRequest->total_amount,
+                'created_at' => $pendingPinRequest->created_at?->format('d M Y H:i'),
+            ] : null,
             'current_user_username' => $user->username ?: 'user_' . $user->id,
             'vouchers' => $activeVouchers,
             'banks' => $banks,

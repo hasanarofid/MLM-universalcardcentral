@@ -117,35 +117,55 @@ class MemberActivationController extends Controller
             $request->merge(['sponsor_username' => $currentUser->username]);
         }
 
+        $usingPin = $request->filled('pin_code');
+        $pin = null;
+        if ($usingPin) {
+            $pinQuery = Voucher::where('code', strtoupper(trim($request->pin_code)))
+                ->where('status', 'active');
+            if (!$isAdmin) {
+                $pinQuery->where('user_id', $currentUser->id);
+            }
+            $pin = $pinQuery->first();
+            if (!$pin) {
+                throw ValidationException::withMessages([
+                    'pin_code' => 'Kode PIN tidak ditemukan, bukan milik Anda, atau sudah digunakan.',
+                ]);
+            }
+        }
+
+        $reqRule = $usingPin ? 'nullable' : 'required';
+
         $request->validate([
+            'pin_code' => 'nullable|string|max:50',
+            'position' => 'nullable|in:left,right',
             'phone' => 'required|string|max:25',
             'email' => 'required|string|lowercase|email|max:255|unique:users,email',
-            'postal_code' => 'required|string|max:10',
+            'postal_code' => $reqRule . '|string|max:10',
             'member_tier' => 'nullable|string|in:bronze,silver',
-            'nik' => 'required|digits:16|unique:users,nik',
+            'nik' => $reqRule . '|digits:16|unique:users,nik',
             'name' => 'required|string|max:255',
-            'birth_place' => 'required|string|max:100',
-            'birth_date' => 'required|date|before_or_equal:today|after:1900-01-01',
-            'gender' => 'required|string|in:Laki-laki,Perempuan',
+            'birth_place' => $reqRule . '|string|max:100',
+            'birth_date' => $reqRule . '|date|before_or_equal:today|after:1900-01-01',
+            'gender' => $reqRule . '|string|in:Laki-laki,Perempuan',
             'blood_type' => 'nullable|string|in:A,B,AB,O,-',
             'address' => 'required|string|max:500',
-            'rt_rw' => 'required|string|max:20',
-            'village' => 'required|string|max:100',
-            'district' => 'required|string|max:100',
-            'city' => 'required|string|max:100',
-            'province' => 'required|string|max:100',
-            'religion' => 'required|string|max:50',
-            'marital_status' => 'required|string|max:50',
+            'rt_rw' => $reqRule . '|string|max:20',
+            'village' => $reqRule . '|string|max:100',
+            'district' => $reqRule . '|string|max:100',
+            'city' => $reqRule . '|string|max:100',
+            'province' => $reqRule . '|string|max:100',
+            'religion' => $reqRule . '|string|max:50',
+            'marital_status' => $reqRule . '|string|max:50',
             'is_left_handed' => 'nullable|string|in:Iya,Tidak',
-            'beneficiary_name' => 'required|string|max:255',
-            'beneficiary_birth_date' => 'required|date|before_or_equal:today|after:1900-01-01',
-            'beneficiary_relation' => 'required|string|max:100',
-            'emergency_phone' => 'required|string|max:25',
+            'beneficiary_name' => $reqRule . '|string|max:255',
+            'beneficiary_birth_date' => $reqRule . '|date|before_or_equal:today|after:1900-01-01',
+            'beneficiary_relation' => $reqRule . '|string|max:100',
+            'emergency_phone' => $reqRule . '|string|max:25',
             'bank_name' => 'nullable|string|max:100',
             'bank_account_number' => 'nullable|string|max:100',
             'bank_account_name' => 'nullable|string|max:100',
-            'ktp_image' => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:10240',
-            'transfer_proof' => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:10240',
+            'ktp_image' => $reqRule . '|file|mimes:jpg,jpeg,png,webp,pdf|max:10240',
+            'transfer_proof' => $reqRule . '|file|mimes:jpg,jpeg,png,webp,pdf|max:10240',
             'password' => 'required|string|min:8|confirmed',
             'sponsor_username' => 'required|string|exists:users,username',
         ], [
@@ -204,9 +224,9 @@ class MemberActivationController extends Controller
         }
 
         $plainPassword = $request->password;
-        $tier = strtolower((string) $request->input('member_tier', 'bronze'));
+        $tier = $pin ? UccBonusService::resolveTierFromPin($pin) : strtolower((string) $request->input('member_tier', 'bronze'));
 
-        DB::transaction(function () use ($request, $sponsorUser, $username, $ktpPath, $transferProofPath, $plainPassword, $tier) {
+        DB::transaction(function () use ($request, $currentUser, $sponsorUser, $username, $ktpPath, $transferProofPath, $plainPassword, $tier, $pin) {
             // Create new member in UCC system (parent_id = sponsor_id)
             $newUser = User::create([
                 'nik' => $request->nik,
@@ -228,6 +248,9 @@ class MemberActivationController extends Controller
                 'religion' => $request->religion,
                 'marital_status' => $request->marital_status,
                 'member_tier' => $tier,
+                'activation_status' => 'active',
+                'activated_at' => now(),
+                'activated_by' => $currentUser->id,
                 'activation_amount' => UccBonusService::getActivationAmount($tier),
                 'is_left_handed' => $request->input('is_left_handed', 'Tidak'),
                 'beneficiary_name' => $request->beneficiary_name,
@@ -242,6 +265,7 @@ class MemberActivationController extends Controller
                 'transfer_proof' => $transferProofPath,
                 'password' => bcrypt($plainPassword),
                 'parent_id' => $sponsorUser->id,
+                'position' => $request->position,
             ]);
             try {
                 $newUser->assignRole('client');
@@ -256,7 +280,11 @@ class MemberActivationController extends Controller
                 \Illuminate\Support\Facades\Log::error('Gagal mengirim email aktivasi member: ' . $e->getMessage());
             }
 
-            app(UccBonusService::class)->processActivation($newUser, $sponsorUser, $tier);
+            if ($pin) {
+                app(UccBonusService::class)->activateMemberWithPin($newUser, $pin, $currentUser, $request->position);
+            } else {
+                app(UccBonusService::class)->processActivation($newUser, $sponsorUser, $tier);
+            }
         });
 
         $successMsg = "Mitra baru {$request->name} (@{$username}) berhasil didaftarkan di bawah Sponsor @{$sponsorUser->username}!";

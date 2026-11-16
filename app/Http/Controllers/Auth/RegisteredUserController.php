@@ -218,7 +218,9 @@ class RegisteredUserController extends Controller
                 'religion' => $request->religion,
                 'marital_status' => $request->marital_status,
                 'member_tier' => $tier,
-                'activation_amount' => UccBonusService::getActivationAmount($tier),
+                'activation_status' => 'inactive',
+                'package_name' => 'Free (Belum Aktivasi PIN)',
+                'activation_amount' => 0,
                 'is_left_handed' => $request->input('is_left_handed', 'Tidak'),
                 'beneficiary_name' => $request->beneficiary_name,
                 'beneficiary_birth_date' => $request->beneficiary_birth_date,
@@ -246,8 +248,6 @@ class RegisteredUserController extends Controller
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Log::error('Gagal mengirim email pendaftaran member: ' . $e->getMessage());
             }
-
-            app(UccBonusService::class)->processActivation($user, $sponsor, $tier);
         });
 
         event(new Registered($user));
@@ -256,9 +256,9 @@ class RegisteredUserController extends Controller
             $user,
             new \App\Notifications\SystemActivityNotification(
                 category: 'system',
-                title: 'Selamat Datang di Universal Card Central',
-                message: 'Akun Anda berhasil didaftarkan. Silakan lengkapi data verifikasi KTP & rekening Anda di menu Profil.',
-                link: '/profile',
+                title: 'Akun Free Berhasil Terdaftar (Belum Aktif)',
+                message: 'Silakan beli atau masukkan Kode PIN Aktivasi (Bronze Rp 100.000 / Silver Rp 350.000) di Dashboard untuk mengaktifkan ID Anda.',
+                link: '/admin/dashboard',
                 roleTarget: 'member'
             )
         );
@@ -268,8 +268,8 @@ class RegisteredUserController extends Controller
                 $sponsor,
                 new \App\Notifications\SystemActivityNotification(
                     category: 'network',
-                    title: 'Mitra Baru Bergabung',
-                    message: "{$user->name} (@{$user->username}) bergabung melalui link referral Anda (Paket " . ucfirst($tier) . ").",
+                    title: 'Calon Mitra Free Mendaftar',
+                    message: "{$user->name} (@{$user->username}) mendaftar melalui referral Anda (status: Belum Aktif). Anda dapat membantu mengaktifkan menggunakan stok PIN Anda.",
                     link: '/admin/team',
                     roleTarget: 'member'
                 )
@@ -278,8 +278,8 @@ class RegisteredUserController extends Controller
 
         \App\Notifications\SystemActivityNotification::notifyAdmins(
             category: 'network',
-            title: 'Pendaftaran Member Baru',
-            message: "{$user->name} (@{$user->username}) mendaftar Paket " . ucfirst($tier) . " (" . ($user->phone ?: $user->email) . ").",
+            title: 'Pendaftaran Member Free Baru',
+            message: "{$user->name} (@{$user->username}) mendaftar akun Free (" . ($user->phone ?: $user->email) . ").",
             link: '/admin/data-member'
         );
 

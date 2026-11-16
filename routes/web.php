@@ -110,6 +110,14 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/team-point-redemptions/{redemption}/approve', [\App\Http\Controllers\Admin\TeamPointRedemptionController::class, 'approve'])->name('team-point-redemptions.approve');
     Route::post('/team-point-redemptions/{redemption}/reject', [\App\Http\Controllers\Admin\TeamPointRedemptionController::class, 'reject'])->name('team-point-redemptions.reject');
 
+    // Aktivasi PIN & Order PIN (Bronze / Silver)
+    Route::post('/aktivasi-pin/self', [\App\Http\Controllers\Admin\PinActivationController::class, 'activateSelfWithPin'])->name('pin.activate-self');
+    Route::post('/aktivasi-pin/request', [\App\Http\Controllers\Admin\PinActivationController::class, 'requestPin'])->name('pin.request');
+    Route::post('/aktivasi-pin/activate-downline', [\App\Http\Controllers\Admin\PinActivationController::class, 'activateFreeDownline'])->name('pin.activate-downline');
+    Route::post('/pin-requests/generate', [\App\Http\Controllers\Admin\PinActivationController::class, 'adminGeneratePin'])->name('pin.generate');
+    Route::post('/pin-requests/{pinRequest}/approve', [\App\Http\Controllers\Admin\PinActivationController::class, 'approvePinRequest'])->name('pin.approve');
+    Route::post('/pin-requests/{pinRequest}/reject', [\App\Http\Controllers\Admin\PinActivationController::class, 'rejectPinRequest'])->name('pin.reject');
+
     // Notifications
     Route::get('/notifikasi', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifikasi/read-all', [\App\Http\Controllers\Admin\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');

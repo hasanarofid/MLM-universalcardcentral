@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\BonusLog;
 use App\Models\UccPointLedger;
 use App\Models\User;
+use App\Models\Voucher;
 use App\Models\WalletTransaction;
 use App\Notifications\SystemActivityNotification;
 use Illuminate\Support\Facades\DB;
@@ -403,5 +404,104 @@ class UccBonusService
         );
 
         return true;
+    }
+
+    /**
+     * Resolve UCC activation tier ('bronze' or 'silver') from PIN package_name.
+     */
+    public static function resolveTierFromPin(Voucher $pin): string
+    {
+        $pkg = strtolower((string) $pin->package_name);
+        if (str_contains($pkg, 'silver') || str_contains($pkg, '350')) {
+            return 'silver';
+        }
+
+        return 'bronze';
+    }
+
+    /**
+     * Activate a free/inactive member using an active PIN (Bronze/Silver),
+     * place them in the 2-leg binary tree (left/right), mark PIN as used,
+     * and trigger UCC Tahap 1 activation bonus & cluster royalty.
+     */
+    public function activateMemberWithPin(
+        User $member,
+        Voucher $pin,
+        ?User $activatedBy = null,
+        ?string $preferredPosition = null
+    ): string {
+        $tier = self::resolveTierFromPin($pin);
+
+        DB::transaction(function () use ($member, $pin, $activatedBy, $preferredPosition, $tier) {
+            $lockedPin = Voucher::where('id', $pin->id)->lockForUpdate()->firstOrFail();
+            if ($lockedPin->status !== 'active') {
+                throw new \RuntimeException('Kode PIN sudah digunakan atau tidak aktif.');
+            }
+
+            $sponsor = $member->parent_id ? User::find($member->parent_id) : null;
+            $position = $member->position;
+
+            // Place in 2-leg binary tree (left/right) under sponsor/upline if not yet assigned
+            if (empty($position) && $sponsor) {
+                $position = in_array($preferredPosition, ['left', 'right'], true)
+                    ? $preferredPosition
+                    : (($sponsor->left_count <= $sponsor->right_count) ? 'left' : 'right');
+            }
+
+            $lockedPin->update([
+                'status' => 'used',
+                'used_by_id' => $member->id,
+                'used_at' => now(),
+            ]);
+
+            $member->update([
+                'position' => $position ?: $member->position,
+                'activation_status' => 'active',
+                'activated_at' => now(),
+                'activated_by' => $activatedBy?->id ?? $member->id,
+            ]);
+
+            if ($sponsor && $position === 'left') {
+                $sponsor->increment('left_count');
+            } elseif ($sponsor && $position === 'right') {
+                $sponsor->increment('right_count');
+            }
+
+            $this->processActivation($member->fresh(), $sponsor, $tier);
+        });
+
+        SystemActivityNotification::sendSafe(
+            $member,
+            new SystemActivityNotification(
+                category: 'system',
+                title: 'ID Member Resmi Aktif!',
+                message: 'Selamat! Akun Anda telah aktif dengan Paket ' . ucfirst($tier) . ' menggunakan PIN ' . $pin->code . '. Silakan lengkapi data KTP & rekening Anda di menu Profil.',
+                link: '/profile',
+                roleTarget: 'member'
+            )
+        );
+
+        if ($member->parent_id) {
+            $sponsor = User::find($member->parent_id);
+            SystemActivityNotification::sendSafe(
+                $sponsor,
+                new SystemActivityNotification(
+                    category: 'network',
+                    title: 'Downline Resmi Aktif (' . ucfirst($tier) . ')',
+                    message: "{$member->name} (@{$member->username}) telah mengaktifkan ID Paket " . ucfirst($tier) . '.',
+                    link: '/admin/team',
+                    roleTarget: 'member'
+                )
+            );
+        }
+
+        SystemActivityNotification::notifyAdmins(
+            category: 'network',
+            title: 'Aktivasi PIN Member (' . ucfirst($tier) . ')',
+            message: "{$member->name} (@{$member->username}) resmi aktif menggunakan PIN {$pin->code}.",
+            link: '/admin/data-member'
+        );
+
+        return $tier;
     }
 }

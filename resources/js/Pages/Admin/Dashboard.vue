@@ -33,6 +33,14 @@ import {
 
 const props = defineProps({
   is_admin: Boolean,
+  activation_status: {
+    type: String,
+    default: 'active'
+  },
+  pending_pin_request: {
+    type: Object,
+    default: null
+  },
   current_user_username: String,
   vouchers: Array,
   banks: Array,
@@ -44,6 +52,55 @@ const props = defineProps({
   ucc_summary: Object,
   direct_referrals: Array
 });
+
+const pinForm = useForm({
+  pin_code: '',
+});
+
+const pinOrderForm = useForm({
+  tier: 'bronze',
+  quantity: 1,
+  transfer_proof: null,
+});
+
+const submitSelfPinActivation = () => {
+  pinForm.post(route('admin.pin.activate-self'), {
+    preserveScroll: true,
+    onSuccess: () => pinForm.reset(),
+  });
+};
+
+const submitPinOrder = () => {
+  pinOrderForm.post(route('admin.pin.request'), {
+    forceFormData: true,
+    preserveScroll: true,
+    onSuccess: () => pinOrderForm.reset(),
+  });
+};
+
+const activateDownlineModal = ref({ open: false, member: null });
+const activateDownlineForm = useForm({
+  member_id: '',
+  pin_code: '',
+  position: 'left',
+});
+
+const openActivateDownlineModal = (refMember) => {
+  activateDownlineForm.member_id = refMember.id;
+  activateDownlineForm.pin_code = props.vouchers?.[0]?.code || '';
+  activateDownlineForm.position = 'left';
+  activateDownlineModal.value = { open: true, member: refMember };
+};
+
+const submitActivateDownline = () => {
+  activateDownlineForm.post(route('admin.pin.activate-downline'), {
+    preserveScroll: true,
+    onSuccess: () => {
+      activateDownlineModal.value = { open: false, member: null };
+      activateDownlineForm.reset();
+    },
+  });
+};
 
 const copySuccessMsg = ref('');
 const isAddMitraModalOpen = ref(false);
@@ -233,6 +290,89 @@ const formatRupiah = (val) => {
         <span>{{ copySuccessMsg }}</span>
       </div>
 
+      <!-- 0. Panel Aktivasi ID Member (Untuk Akun Free / Belum Aktif) -->
+      <div
+        v-if="activation_status !== 'active' && !is_admin"
+        class="bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#09090B] border border-[#D4AF37]/50 rounded-3xl p-6 shadow-xl text-white space-y-5"
+      >
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+          <div class="flex items-start gap-3.5">
+            <div class="w-11 h-11 rounded-2xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 text-[#E5C07B] flex items-center justify-center shrink-0">
+              <KeyRound class="w-5 h-5" />
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-base font-black tracking-tight text-white">Status ID: Belum Aktif (Akun Free)</h3>
+                <span class="px-2.5 py-0.5 text-[10px] font-black uppercase rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40">
+                  {{ activation_status === 'pending' ? 'Menunggu Verifikasi Admin' : 'Perlu Aktivasi PIN' }}
+                </span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1">
+                Masukkan <strong>Kode PIN Aktivasi</strong> (Bronze Rp 100.000 / Silver Rp 350.000) dari Admin/Sponsor, atau unggah bukti pembayaran untuk mendapatkan PIN.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <!-- Form Input PIN Aktivasi -->
+          <form @submit.prevent="submitSelfPinActivation" class="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
+            <h4 class="text-xs font-black uppercase tracking-wider text-[#E5C07B]">1. Sudah Punya Kode PIN? Aktifkan ID Sekarang</h4>
+            <div class="flex flex-col sm:flex-row gap-2.5">
+              <input
+                v-model="pinForm.pin_code"
+                type="text"
+                required
+                placeholder="Masukkan Kode PIN (Contoh: UCCB-XXXXXXXX)"
+                class="flex-1 px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-xs font-mono font-bold text-white placeholder-slate-400 focus:outline-none focus:border-[#D4AF37]"
+              />
+              <button
+                type="submit"
+                :disabled="pinForm.processing"
+                class="bg-gradient-to-r from-[#B8922E] via-[#D4AF37] to-[#F3E5AB] hover:opacity-95 text-slate-950 font-black text-xs uppercase tracking-wider py-2.5 px-5 rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50 shrink-0"
+              >
+                {{ pinForm.processing ? 'Memproses...' : 'Aktifkan ID' }}
+              </button>
+            </div>
+            <p v-if="pinForm.errors.pin_code" class="text-[11px] font-bold text-rose-400">{{ pinForm.errors.pin_code }}</p>
+          </form>
+
+          <!-- Form Beli PIN & Upload Bukti Bayar ke Admin -->
+          <form @submit.prevent="submitPinOrder" class="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-black uppercase tracking-wider text-[#E5C07B]">2. Belum Punya PIN? Beli PIN &amp; Upload Bukti Bayar</h4>
+              <span v-if="pending_pin_request" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                Order #{{ pending_pin_request.id }} Menunggu Admin
+              </span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <select
+                v-model="pinOrderForm.tier"
+                class="px-3 py-2 bg-slate-900/80 border border-slate-700 rounded-xl text-xs font-bold text-white focus:outline-none focus:border-[#D4AF37]"
+              >
+                <option value="bronze">PIN Bronze — Rp 100.000</option>
+                <option value="silver">PIN Silver — Rp 350.000</option>
+              </select>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,application/pdf"
+                required
+                @change="(e) => pinOrderForm.transfer_proof = e.target.files[0]"
+                class="px-2.5 py-1.5 bg-slate-900/80 border border-slate-700 rounded-xl text-[11px] text-slate-300 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-[#D4AF37] file:text-slate-950 cursor-pointer"
+              />
+            </div>
+            <button
+              type="submit"
+              :disabled="pinOrderForm.processing"
+              class="w-full bg-[#0F172A] hover:bg-slate-800 text-[#D4AF37] font-extrabold text-xs py-2.5 px-4 rounded-xl border border-[#D4AF37]/40 transition-all cursor-pointer disabled:opacity-50"
+            >
+              {{ pinOrderForm.processing ? 'Mengirim Bukti...' : 'Kirim Bukti Transfer ke Admin' }}
+            </button>
+            <p v-if="pinOrderForm.errors.transfer_proof" class="text-[11px] font-bold text-rose-400">{{ pinOrderForm.errors.transfer_proof }}</p>
+          </form>
+        </div>
+      </div>
+
       <!-- 1. Pendaftaran Member Banner Card -->
       <div class="bg-gradient-to-r from-[#fdfbf7] via-[#faf6eb] to-[#f7f3e8] border border-[#D4AF37]/40 rounded-3xl p-5 md:p-6 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="flex items-start gap-4">
@@ -403,9 +543,11 @@ const formatRupiah = (val) => {
               <tr class="border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-400">
                 <th class="py-2.5 pr-4">Nama Member</th>
                 <th class="py-2.5 pr-4">Username</th>
-                <th class="py-2.5 pr-4">Tier</th>
+                <th class="py-2.5 pr-4">Status ID</th>
+                <th class="py-2.5 pr-4">Tier / Kaki</th>
                 <th class="py-2.5 pr-4">Nilai Aktivasi</th>
-                <th class="py-2.5">Tanggal Gabung</th>
+                <th class="py-2.5 pr-4">Tanggal Gabung</th>
+                <th class="py-2.5 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -413,12 +555,37 @@ const formatRupiah = (val) => {
                 <td class="py-2.5 pr-4 font-bold text-slate-900">{{ ref.name }}</td>
                 <td class="py-2.5 pr-4 text-slate-600">@{{ ref.username }}</td>
                 <td class="py-2.5 pr-4">
+                  <span
+                    v-if="ref.activation_status === 'active'"
+                    class="bg-[#0F172A] text-[#D4AF37] border border-[#D4AF37]/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full"
+                  >
+                    Aktif
+                  </span>
+                  <span
+                    v-else
+                    class="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full"
+                  >
+                    {{ ref.activation_status === 'pending' ? 'Menunggu' : 'Belum Aktif' }}
+                  </span>
+                </td>
+                <td class="py-2.5 pr-4">
                   <span class="bg-[#faf6eb] text-[#B8922E] border border-[#D4AF37]/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
-                    {{ ref.member_tier }}
+                    {{ ref.member_tier }}<template v-if="ref.position"> • {{ ref.position === 'left' ? 'Kiri' : 'Kanan' }}</template>
                   </span>
                 </td>
                 <td class="py-2.5 pr-4 font-bold text-slate-800">{{ formatRupiah(ref.activation_amount) }}</td>
-                <td class="py-2.5 text-slate-500">{{ ref.joined_at }}</td>
+                <td class="py-2.5 pr-4 text-slate-500">{{ ref.joined_at }}</td>
+                <td class="py-2.5 text-right">
+                  <button
+                    v-if="ref.activation_status !== 'active' && (vouchers || []).length > 0"
+                    type="button"
+                    @click="openActivateDownlineModal(ref)"
+                    class="px-3 py-1 bg-gradient-to-r from-[#B8922E] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-black text-[10px] uppercase rounded-lg cursor-pointer shadow-xs hover:opacity-95"
+                  >
+                    Aktifkan dgn PIN
+                  </button>
+                  <span v-else class="text-[11px] text-slate-400">-</span>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -754,6 +921,68 @@ const formatRupiah = (val) => {
             </button>
           </div>
 
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Aktifkan Downline Free dengan Stok PIN -->
+    <div v-if="activateDownlineModal.open" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm">
+      <div class="bg-white border border-[#D4AF37]/40 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
+        <div class="bg-gradient-to-r from-[#0F172A] to-[#1E293B] px-6 py-4 flex items-center justify-between text-white border-b border-[#D4AF37]/30">
+          <div>
+            <h3 class="text-sm font-black tracking-tight">Aktifkan Member dengan PIN</h3>
+            <p class="text-[11px] text-[#E5C07B] mt-0.5">{{ activateDownlineModal.member?.name }} (@{{ activateDownlineModal.member?.username }})</p>
+          </div>
+          <button type="button" @click="activateDownlineModal.open = false" class="p-1.5 rounded-lg hover:bg-white/10 text-slate-300 cursor-pointer">
+            <X class="w-4 h-4" />
+          </button>
+        </div>
+
+        <form @submit.prevent="submitActivateDownline" class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">Pilih Stok PIN Anda (Bronze / Silver)</label>
+            <select
+              v-model="activateDownlineForm.pin_code"
+              required
+              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-[#D4AF37]"
+            >
+              <option v-for="v in vouchers" :key="v.code" :value="v.code">{{ v.label }}</option>
+            </select>
+            <p v-if="activateDownlineForm.errors.pin_code" class="text-[11px] text-rose-600 font-bold mt-1">{{ activateDownlineForm.errors.pin_code }}</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">Penempatan Jaringan 2 Kaki</label>
+            <div class="grid grid-cols-2 gap-2.5">
+              <label
+                class="cursor-pointer rounded-xl border p-3 text-center text-xs font-black transition-all"
+                :class="activateDownlineForm.position === 'left' ? 'border-[#D4AF37] bg-[#faf6eb] text-slate-900' : 'border-slate-200 bg-white text-slate-600'"
+              >
+                <input type="radio" v-model="activateDownlineForm.position" value="left" class="sr-only" />
+                Kaki Kiri
+              </label>
+              <label
+                class="cursor-pointer rounded-xl border p-3 text-center text-xs font-black transition-all"
+                :class="activateDownlineForm.position === 'right' ? 'border-[#D4AF37] bg-[#faf6eb] text-slate-900' : 'border-slate-200 bg-white text-slate-600'"
+              >
+                <input type="radio" v-model="activateDownlineForm.position" value="right" class="sr-only" />
+                Kaki Kanan
+              </label>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+            <button type="button" @click="activateDownlineModal.open = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl cursor-pointer">
+              Batal
+            </button>
+            <button
+              type="submit"
+              :disabled="activateDownlineForm.processing"
+              class="bg-gradient-to-r from-[#B8922E] via-[#D4AF37] to-[#F3E5AB] text-slate-950 font-black text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-md cursor-pointer disabled:opacity-50"
+            >
+              {{ activateDownlineForm.processing ? 'Mengaktifkan...' : 'Aktifkan Sekarang' }}
+            </button>
+          </div>
         </form>
       </div>
     </div>

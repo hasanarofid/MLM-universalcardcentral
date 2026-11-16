@@ -283,36 +283,10 @@ const submit = () => {
                     <InputError class="mt-1" :message="form.errors.name" />
                 </div>
 
-                <!-- Pilihan Tier Aktivasi -->
-                <div class="form-group">
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                        Paket Aktivasi Non-Card Member <span class="text-rose-500">*</span>
-                    </label>
-                    <div class="grid grid-cols-2 gap-2.5">
-                        <label
-                            class="cursor-pointer rounded-xl border p-3 transition-all flex flex-col gap-0.5"
-                            :class="form.member_tier === 'bronze' ? 'border-[#D4AF37] bg-[#faf6eb] text-slate-900 shadow-sm' : 'border-slate-200 bg-white text-slate-600'"
-                        >
-                            <input type="radio" v-model="form.member_tier" value="bronze" class="sr-only" />
-                            <span class="text-xs font-black uppercase tracking-wider text-[#B8922E]">Bronze</span>
-                            <span class="text-sm font-extrabold">Rp 100.000</span>
-                        </label>
-                        <label
-                            class="cursor-pointer rounded-xl border p-3 transition-all flex flex-col gap-0.5"
-                            :class="form.member_tier === 'silver' ? 'border-[#D4AF37] bg-[#faf6eb] text-slate-900 shadow-sm' : 'border-slate-200 bg-white text-slate-600'"
-                        >
-                            <input type="radio" v-model="form.member_tier" value="silver" class="sr-only" />
-                            <span class="text-xs font-black uppercase tracking-wider text-slate-700">Silver</span>
-                            <span class="text-sm font-extrabold">Rp 350.000</span>
-                        </label>
-                    </div>
-                    <InputError class="mt-1" :message="form.errors.member_tier" />
-                </div>
-
                 <!-- Whatsapp -->
                 <div class="form-group">
                     <label for="phone" class="block text-xs font-bold text-slate-700 mb-1">
-                        Whatsapp <span class="text-rose-500">*</span>
+                        No. HP / WhatsApp <span class="text-rose-500">*</span>
                     </label>
                     <div class="auth-input-wrap">
                         <span class="auth-input-icon">
@@ -323,7 +297,7 @@ const submit = () => {
                             type="tel"
                             v-model="form.phone"
                             required
-                            placeholder="Jawaban Anda (Contoh: 081234567890)"
+                            placeholder="Contoh: 081234567890"
                             class="w-full text-sm"
                         />
                     </div>
@@ -345,17 +319,38 @@ const submit = () => {
                             v-model="form.email"
                             required
                             autocomplete="email"
-                            placeholder="Jawaban Anda (nama@email.com)"
+                            placeholder="nama@email.com"
                             class="w-full text-sm"
                         />
                     </div>
                     <InputError class="mt-1" :message="form.errors.email" />
                 </div>
 
+                <!-- Alamat Lengkap -->
+                <div class="form-group">
+                    <label for="address" class="block text-xs font-bold text-slate-700 mb-1">
+                        Alamat Lengkap <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon">
+                            <FileText class="w-4.5 h-4.5 text-slate-400" />
+                        </span>
+                        <input
+                            id="address"
+                            type="text"
+                            v-model="form.address"
+                            required
+                            placeholder="Alamat domisili saat ini"
+                            class="w-full text-sm"
+                        />
+                    </div>
+                    <InputError class="mt-1" :message="form.errors.address" />
+                </div>
+
             </div>
 
             <div class="rounded-2xl border border-[#D4AF37]/30 bg-[#faf6eb] px-4 py-3 text-xs text-slate-700 leading-relaxed">
-                <span class="font-bold text-[#9A7B2C]">Catatan Verifikasi:</span> Data KTP, alamat lengkap, ahli waris, rekening bank, serta bukti transfer aktivasi dapat dilengkapi setelah Anda login ke dashboard member.
+                <span class="font-bold text-[#9A7B2C]">Daftar Free (Belum Aktif ID):</span> Pendaftaran akun gratis. Untuk mengaktifkan ID (Bronze Rp 100.000 / Silver Rp 350.000), silakan beli atau masukkan <strong>Kode PIN Aktivasi</strong> di Dashboard setelah login. Data KTP &amp; rekening bank dapat dilengkapi setelah aktivasi PIN.
             </div>
 
             <!-- SECTION 2: KEAMANAN PASSWORD -->
