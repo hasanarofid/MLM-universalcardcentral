@@ -42,32 +42,35 @@ class MemberActivationController extends Controller
             ];
         });
 
-        // Calculate voucher stock count per package type
-        $voucherStocks = [
-            'seller' => 0,
-            'star_seller' => 0,
-            'affiliate' => 0,
-            'business' => 0,
-            'partner' => 0,
+        $pinStocks = [
+            'bronze' => 0,
+            'silver' => 0,
         ];
 
         foreach ($activeVouchersRaw as $v) {
-            $pkg = strtolower($v->package_name ?? '');
-            if (str_contains($pkg, 'partner') || str_contains($pkg, 'ultimate') || str_contains($pkg, '10.500') || str_contains($pkg, '10500')) {
-                $voucherStocks['partner']++;
-            } elseif (str_contains($pkg, 'business') || str_contains($pkg, 'pro') || str_contains($pkg, '4.300') || str_contains($pkg, '4300')) {
-                $voucherStocks['business']++;
-            } elseif (str_contains($pkg, 'affiliate') || str_contains($pkg, 'medium') || str_contains($pkg, '2.100') || str_contains($pkg, '2100')) {
-                $voucherStocks['affiliate']++;
-            } elseif (str_contains($pkg, 'star') || str_contains($pkg, 'basic') || str_contains($pkg, '550')) {
-                $voucherStocks['star_seller']++;
+            if (UccBonusService::resolveTierFromPin($v) === 'silver') {
+                $pinStocks['silver']++;
             } else {
-                $voucherStocks['seller']++;
+                $pinStocks['bronze']++;
             }
         }
 
-        $currentUser = auth()->user() ?: User::first();
         $isAdmin = ($currentUser->username === 'admin' || $currentUser->email === 'admin@universalcardcentral.com' || (method_exists($currentUser, 'hasRole') && $currentUser->hasRole('admin')));
+
+        $freeDownlinesQuery = User::where('activation_status', '!=', 'active')->latest();
+        if (!$isAdmin) {
+            $freeDownlinesQuery->where('parent_id', $currentUser->id);
+        }
+        $freeDownlines = $freeDownlinesQuery->take(50)->get(['id', 'name', 'username', 'email', 'phone', 'activation_status'])
+            ->map(fn ($u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'username' => $u->username,
+                'email' => $u->email,
+                'phone' => $u->phone,
+                'activation_status' => $u->activation_status,
+                'label' => $u->name . ' (@' . $u->username . ') — ' . ($u->activation_status === 'pending' ? 'Menunggu' : 'Belum Aktif'),
+            ]);
 
         // List of all active users to choose as Sponsor Langsung (Khusus Admin)
         $allUsers = $isAdmin ? User::select('id', 'name', 'username', 'email')->get()->map(function ($u) {
@@ -97,7 +100,8 @@ class MemberActivationController extends Controller
             'is_admin' => $isAdmin,
             'current_user_name' => $currentUser->name,
             'vouchers' => $vouchers,
-            'voucher_stocks' => $voucherStocks,
+            'pin_stocks' => $pinStocks,
+            'free_downlines' => $freeDownlines,
             'banks' => $banks,
             'registration_fee' => 100000,
             'users' => $allUsers,

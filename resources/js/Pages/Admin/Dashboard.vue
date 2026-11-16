@@ -394,13 +394,21 @@ const formatRupiah = (val) => {
             <span>Copy Link Referral</span>
           </button>
           
-          <button 
-            @click="isAddMitraModalOpen = true"
-            class="px-4 py-2.5 bg-[#0F172A] hover:bg-[#1E293B] text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-black rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-md hover:shadow-lg"
+          <Link
+            :href="route('admin.voucher-wallet.index')"
+            class="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-800 border border-[#D4AF37]/40 text-xs font-extrabold rounded-xl transition-all flex items-center gap-1.5 shadow-xs"
+          >
+            <KeyRound class="w-3.5 h-3.5 text-[#B8922E]" />
+            <span>Stok PIN ({{ wallet?.voucher_aktif ?? 0 }})</span>
+          </Link>
+
+          <Link
+            :href="route('admin.activation.index')"
+            class="px-4 py-2.5 bg-[#0F172A] hover:bg-[#1E293B] text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-black rounded-xl transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
           >
             <UserPlus class="w-4 h-4 stroke-[2.5]" />
             <span>+ Tambah Member</span>
-          </button>
+          </Link>
         </div>
       </div>
 

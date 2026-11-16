@@ -2,7 +2,7 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import BirthDatePicker from '@/Components/BirthDatePicker.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { 
   UserPlus, 
@@ -26,9 +26,59 @@ import {
 const props = defineProps({
   is_admin: Boolean,
   current_user_name: String,
+  vouchers: {
+    type: Array,
+    default: () => []
+  },
+  pin_stocks: {
+    type: Object,
+    default: () => ({ bronze: 0, silver: 0 })
+  },
+  free_downlines: {
+    type: Array,
+    default: () => []
+  },
   users: Array,
   default_sponsor: String,
 });
+
+const activationMode = ref('pin_quick'); // 'pin_quick' | 'activate_free' | 'ktp_full'
+
+const pinQuickForm = useForm({
+  pin_code: props.vouchers?.[0]?.code || '',
+  position: 'left',
+  name: '',
+  email: '',
+  phone: '',
+  address: '',
+  password: '',
+  password_confirmation: '',
+  sponsor_username: props.default_sponsor || 'admin',
+});
+
+const submitPinQuick = () => {
+  pinQuickForm.post(route('admin.activation.store'), {
+    preserveScroll: true,
+    onSuccess: () => {
+      pinQuickForm.reset('name', 'email', 'phone', 'address', 'password', 'password_confirmation');
+    },
+  });
+};
+
+const activateFreeForm = useForm({
+  member_id: props.free_downlines?.[0]?.id || '',
+  pin_code: props.vouchers?.[0]?.code || '',
+  position: 'left',
+});
+
+const submitActivateFree = () => {
+  activateFreeForm.post(route('admin.pin.activate-downline'), {
+    preserveScroll: true,
+    onSuccess: () => {
+      activateFreeForm.reset('member_id');
+    },
+  });
+};
 
 const showPassword = ref(false);
 const showPasswordConfirm = ref(false);
@@ -236,20 +286,236 @@ const submitForm = () => {
       <!-- Main Card Container -->
       <div class="bg-white border border-slate-200/80 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
         
-        <!-- Header -->
+        <!-- Header & Stok PIN -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
           <div class="space-y-1">
             <div class="flex items-center gap-2.5">
               <div class="p-2.5 bg-[#D4AF37]/15 text-[#B8922E] rounded-2xl">
                 <UserPlus class="w-5 h-5" />
               </div>
-              <h2 class="text-lg font-black text-slate-900 tracking-tight">Form Pendaftaran Member Baru</h2>
+              <div>
+                <h2 class="text-lg font-black text-slate-900 tracking-tight">Pendaftaran &amp; Aktivasi PIN Member</h2>
+                <p class="text-xs text-slate-500">Gunakan stok PIN Bronze / Silver untuk mendaftarkan member baru atau mengaktifkan member Free.</p>
+              </div>
             </div>
+          </div>
+
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="bg-[#faf6eb] text-[#B8922E] border border-[#D4AF37]/30 text-[11px] font-black px-3 py-1.5 rounded-xl">
+              PIN Bronze: {{ pin_stocks?.bronze ?? 0 }}
+            </span>
+            <span class="bg-[#0F172A] text-[#D4AF37] border border-[#D4AF37]/30 text-[11px] font-black px-3 py-1.5 rounded-xl">
+              PIN Silver: {{ pin_stocks?.silver ?? 0 }}
+            </span>
+            <Link
+              :href="route('admin.voucher-wallet.index')"
+              class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold rounded-xl transition-colors"
+            >
+              + Beli / Kelola PIN
+            </Link>
           </div>
         </div>
 
-        <!-- Form -->
-        <form @submit.prevent="submitForm" class="space-y-5 pt-1">
+        <!-- Mode Switcher Tabs -->
+        <div class="flex flex-wrap gap-2">
+          <button
+            type="button"
+            @click="activationMode = 'pin_quick'"
+            :class="[
+              'px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border',
+              activationMode === 'pin_quick'
+                ? 'bg-[#0F172A] text-[#D4AF37] border-[#D4AF37]/40 shadow-sm'
+                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+            ]"
+          >
+            1. Daftarkan Member Pakai Stok PIN
+          </button>
+          <button
+            type="button"
+            @click="activationMode = 'activate_free'"
+            :class="[
+              'px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border',
+              activationMode === 'activate_free'
+                ? 'bg-[#0F172A] text-[#D4AF37] border-[#D4AF37]/40 shadow-sm'
+                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+            ]"
+          >
+            2. Aktifkan Member Free ({{ free_downlines.length }})
+          </button>
+          <button
+            type="button"
+            @click="activationMode = 'ktp_full'"
+            :class="[
+              'px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border',
+              activationMode === 'ktp_full'
+                ? 'bg-[#0F172A] text-[#D4AF37] border-[#D4AF37]/40 shadow-sm'
+                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+            ]"
+          >
+            3. Input Lengkap 14 Field KTP
+          </button>
+        </div>
+
+        <!-- TAB 1: DAFTAR PAKAI STOK PIN (RINGKAS + 2 KAKI) -->
+        <form v-if="activationMode === 'pin_quick'" @submit.prevent="submitPinQuick" class="space-y-5 pt-1">
+          <div v-if="vouchers.length === 0" class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <span>Anda belum memiliki stok PIN aktif (Bronze / Silver). Silakan beli atau minta Admin mengirim PIN terlebih dahulu.</span>
+            <Link
+              :href="route('admin.voucher-wallet.index')"
+              class="px-4 py-2 bg-[#0F172A] text-[#D4AF37] font-black text-[11px] uppercase rounded-xl shrink-0 text-center"
+            >
+              Buka Stok PIN &amp; Order
+            </Link>
+          </div>
+
+          <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-4">
+            <div class="text-[11px] font-black tracking-wider text-[#D4AF37] uppercase flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
+              <KeyRound class="w-3.5 h-3.5" />
+              <span>PIN Aktivasi &amp; Posisi Jaringan 2 Kaki</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Stok PIN Aktivasi <span class="text-rose-500">*</span></label>
+                <select
+                  v-model="pinQuickForm.pin_code"
+                  required
+                  class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-[#D4AF37]"
+                >
+                  <option value="" disabled>-- Pilih PIN Bronze / Silver --</option>
+                  <option v-for="v in vouchers" :key="v.code" :value="v.code">{{ v.label }}</option>
+                </select>
+                <InputError class="mt-1" :message="pinQuickForm.errors.pin_code" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Penempatan 2 Kaki <span class="text-rose-500">*</span></label>
+                <div class="grid grid-cols-2 gap-2.5">
+                  <label
+                    class="cursor-pointer rounded-xl border p-2.5 text-center text-xs font-black transition-all"
+                    :class="pinQuickForm.position === 'left' ? 'border-[#D4AF37] bg-[#faf6eb] text-slate-900' : 'border-slate-200 bg-white text-slate-600'"
+                  >
+                    <input type="radio" v-model="pinQuickForm.position" value="left" class="sr-only" />
+                    Kaki Kiri
+                  </label>
+                  <label
+                    class="cursor-pointer rounded-xl border p-2.5 text-center text-xs font-black transition-all"
+                    :class="pinQuickForm.position === 'right' ? 'border-[#D4AF37] bg-[#faf6eb] text-slate-900' : 'border-slate-200 bg-white text-slate-600'"
+                  >
+                    <input type="radio" v-model="pinQuickForm.position" value="right" class="sr-only" />
+                    Kaki Kanan
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-4">
+            <div class="text-[11px] font-black tracking-wider text-[#D4AF37] uppercase flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
+              <User class="w-3.5 h-3.5" />
+              <span>Data Dasar Member Baru (Profil KTP &amp; Bank Dilengkapi Setelah Login)</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap <span class="text-rose-500">*</span></label>
+                <input v-model="pinQuickForm.name" type="text" required placeholder="Nama Lengkap" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-[#D4AF37]" />
+                <InputError class="mt-1" :message="pinQuickForm.errors.name" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">No. HP / WhatsApp <span class="text-rose-500">*</span></label>
+                <input v-model="pinQuickForm.phone" type="tel" required placeholder="081234567890" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-[#D4AF37]" />
+                <InputError class="mt-1" :message="pinQuickForm.errors.phone" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Email <span class="text-rose-500">*</span></label>
+                <input v-model="pinQuickForm.email" type="email" required placeholder="email@contoh.com" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-[#D4AF37]" />
+                <InputError class="mt-1" :message="pinQuickForm.errors.email" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Alamat Lengkap <span class="text-rose-500">*</span></label>
+                <input v-model="pinQuickForm.address" type="text" required placeholder="Alamat domisili saat ini" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-[#D4AF37]" />
+                <InputError class="mt-1" :message="pinQuickForm.errors.address" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Password Login <span class="text-rose-500">*</span></label>
+                <input v-model="pinQuickForm.password" type="password" required minlength="8" placeholder="Minimal 8 karakter" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-[#D4AF37]" />
+                <InputError class="mt-1" :message="pinQuickForm.errors.password" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Konfirmasi Password <span class="text-rose-500">*</span></label>
+                <input v-model="pinQuickForm.password_confirmation" type="password" required minlength="8" placeholder="Ulangi password" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-[#D4AF37]" />
+              </div>
+            </div>
+
+            <div v-if="is_admin">
+              <label class="block text-xs font-bold text-slate-700 mb-1">Sponsor Langsung</label>
+              <select v-model="pinQuickForm.sponsor_username" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-[#D4AF37]">
+                <option v-for="u in users" :key="u.username" :value="u.username">{{ u.label }}</option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            :disabled="pinQuickForm.processing || vouchers.length === 0"
+            class="w-full bg-gradient-to-r from-[#B8922E] via-[#D4AF37] to-[#F3E5AB] hover:opacity-95 text-slate-950 font-black text-xs uppercase tracking-wider py-3.5 px-6 rounded-2xl shadow-md transition-all cursor-pointer disabled:opacity-50"
+          >
+            {{ pinQuickForm.processing ? 'Memproses Aktivasi PIN...' : 'Daftarkan & Aktifkan Member dengan PIN' }}
+          </button>
+        </form>
+
+        <!-- TAB 2: AKTIFKAN MEMBER FREE -->
+        <form v-else-if="activationMode === 'activate_free'" @submit.prevent="submitActivateFree" class="space-y-5 pt-1">
+          <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-4">
+            <div class="text-[11px] font-black tracking-wider text-[#D4AF37] uppercase flex items-center gap-1.5 border-b border-slate-200/60 pb-2">
+              <KeyRound class="w-3.5 h-3.5" />
+              <span>Aktifkan Akun Member Free Menggunakan Stok PIN Anda</span>
+            </div>
+
+            <div v-if="free_downlines.length === 0" class="text-xs text-slate-500 py-4 text-center">
+              Tidak ada member berstatus Belum Aktif di jaringan Anda saat ini.
+            </div>
+            <div v-else class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Member Free (Belum Aktif) <span class="text-rose-500">*</span></label>
+                <select v-model="activateFreeForm.member_id" required class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-[#D4AF37]">
+                  <option v-for="m in free_downlines" :key="m.id" :value="m.id">{{ m.label }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Stok PIN Anda <span class="text-rose-500">*</span></label>
+                <select v-model="activateFreeForm.pin_code" required class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-[#D4AF37]">
+                  <option v-for="v in vouchers" :key="v.code" :value="v.code">{{ v.label }}</option>
+                </select>
+                <InputError class="mt-1" :message="activateFreeForm.errors.pin_code" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Penempatan 2 Kaki</label>
+                <div class="grid grid-cols-2 gap-2.5">
+                  <label class="cursor-pointer rounded-xl border p-2.5 text-center text-xs font-black" :class="activateFreeForm.position === 'left' ? 'border-[#D4AF37] bg-[#faf6eb] text-slate-900' : 'border-slate-200 bg-white text-slate-600'">
+                    <input type="radio" v-model="activateFreeForm.position" value="left" class="sr-only" />
+                    Kaki Kiri
+                  </label>
+                  <label class="cursor-pointer rounded-xl border p-2.5 text-center text-xs font-black" :class="activateFreeForm.position === 'right' ? 'border-[#D4AF37] bg-[#faf6eb] text-slate-900' : 'border-slate-200 bg-white text-slate-600'">
+                    <input type="radio" v-model="activateFreeForm.position" value="right" class="sr-only" />
+                    Kaki Kanan
+                  </label>
+                </div>
+              </div>
+              <button
+                type="submit"
+                :disabled="activateFreeForm.processing || vouchers.length === 0"
+                class="w-full bg-gradient-to-r from-[#B8922E] via-[#D4AF37] to-[#F3E5AB] hover:opacity-95 text-slate-950 font-black text-xs uppercase tracking-wider py-3.5 px-6 rounded-2xl shadow-md transition-all cursor-pointer disabled:opacity-50"
+              >
+                {{ activateFreeForm.processing ? 'Mengaktifkan...' : 'Aktifkan Member Sekarang' }}
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- TAB 3: FORM LENGKAP 14 FIELD KTP -->
+        <form v-else @submit.prevent="submitForm" class="space-y-5 pt-1">
           
           <!-- SECTION 0: KONTAK & PAKET AKTIVASI (PALING ATAS) -->
           <div class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 space-y-4">

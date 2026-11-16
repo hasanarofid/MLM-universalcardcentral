@@ -160,6 +160,12 @@ const navigation = computed(() => {
                 current: route().current("admin.activation.index"),
             },
             {
+                name: "Stok PIN & Order",
+                href: route("admin.voucher-wallet.index"),
+                icon: KeyRound,
+                current: route().current("admin.voucher-wallet.index"),
+            },
+            {
                 name: "Team Member",
                 href: route("admin.team"),
                 icon: GitFork,
@@ -212,6 +218,12 @@ const navigation = computed(() => {
             href: route("admin.activation.index"),
             icon: UserPlus,
             current: route().current("admin.activation.index"),
+        },
+        {
+            name: "Stok PIN & Order",
+            href: route("admin.voucher-wallet.index"),
+            icon: KeyRound,
+            current: route().current("admin.voucher-wallet.index"),
         },
         {
             name: "Team Member",
