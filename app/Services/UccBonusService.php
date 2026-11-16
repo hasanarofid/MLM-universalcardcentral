@@ -19,8 +19,11 @@ class UccBonusService
     public const UPGRADE_TO_SILVER_COST = 350000;
     public const UPGRADE_TRIGGER_POINTS = 1400;
     public const POINT_BLOCK_SIZE = 200;
-    public const POINT_BLOCK_VALUE_IDR = 100000; // 200 point = Rp 100.000 (Rp 500/point)
-    public const IDR_PER_POINT = 500;
+    public const POINT_BLOCK_TOTAL_VALUE_IDR = 200000; // Prinsip dasar: 1 point = Rp 1.000, 200 point = Rp 200.000
+    public const POINT_BLOCK_MITRA_VALUE_IDR = 100000; // Post Mitra per 200 point = Rp 100.000 (4 post saldo)
+    public const POINT_BLOCK_INDUK_VALUE_IDR = 100000; // Post Induk per 200 point = Rp 100.000 (Lumbung Anggaran Kompleks & sniper cost)
+    public const POINT_BLOCK_VALUE_IDR = self::POINT_BLOCK_MITRA_VALUE_IDR;
+    public const IDR_PER_POINT = 1000;
 
     public const CLUSTER_ROYALTY_RATES = [
         'platinum' => 0.01,
@@ -228,15 +231,20 @@ class UccBonusService
         $belanjaAdded = 0.0;
         $upgradeAdded = 0.0;
         $rewardAdded = 0.0;
+        $indukAdded = 0.0;
 
-        // Pecah ke 4 post saldo setiap kelipatan 200 point (senilai Rp 100.000)
+        // Setiap kelipatan 200 point (nilai total Rp 200.000 @ Rp 1.000/point):
+        // - Rp 100.000 (Post Mitra) dipecah ke 4 post saldo (40% Tunai, 30% Belanja, 20% Upgrade, 10% Reward)
+        // - Rp 100.000 (Post Induk) dicatat ke Lumbung Anggaran Kompleks (termasuk sniper cost upgrade)
         $blocks = intdiv((int) $recipient->pending_points, self::POINT_BLOCK_SIZE);
         if ($blocks > 0) {
-            $splitAmount = $blocks * self::POINT_BLOCK_VALUE_IDR;
-            $tunaiAdded = round($splitAmount * self::SALDO_SPLIT_RATES['tunai'], 2);
-            $belanjaAdded = round($splitAmount * self::SALDO_SPLIT_RATES['belanja'], 2);
-            $upgradeAdded = round($splitAmount * self::SALDO_SPLIT_RATES['upgrade'], 2);
-            $rewardAdded = round($splitAmount * self::SALDO_SPLIT_RATES['reward'], 2);
+            $mitraSplitAmount = $blocks * self::POINT_BLOCK_MITRA_VALUE_IDR;
+            $indukAdded = (float) ($blocks * self::POINT_BLOCK_INDUK_VALUE_IDR);
+
+            $tunaiAdded = round($mitraSplitAmount * self::SALDO_SPLIT_RATES['tunai'], 2);
+            $belanjaAdded = round($mitraSplitAmount * self::SALDO_SPLIT_RATES['belanja'], 2);
+            $upgradeAdded = round($mitraSplitAmount * self::SALDO_SPLIT_RATES['upgrade'], 2);
+            $rewardAdded = round($mitraSplitAmount * self::SALDO_SPLIT_RATES['reward'], 2);
 
             $recipient->decrement('pending_points', $blocks * self::POINT_BLOCK_SIZE);
             $recipient->increment('saldo_tunai', $tunaiAdded);
@@ -244,6 +252,7 @@ class UccBonusService
             $recipient->increment('saldo_belanja', $belanjaAdded);
             $recipient->increment('saldo_upgrade', $upgradeAdded);
             $recipient->increment('saldo_reward', $rewardAdded);
+            $recipient->increment('saldo_induk', $indukAdded);
         }
 
         UccPointLedger::create([
@@ -256,6 +265,7 @@ class UccBonusService
             'saldo_belanja_added' => $belanjaAdded,
             'saldo_upgrade_added' => $upgradeAdded,
             'saldo_reward_added' => $rewardAdded,
+            'saldo_induk_added' => $indukAdded,
             'description' => $description,
             'reference_code' => $referenceCode,
         ]);
@@ -314,8 +324,15 @@ class UccBonusService
         }
 
         $upgradeCost = self::UPGRADE_TO_SILVER_COST;
-        if ((float) $member->saldo_upgrade >= $upgradeCost) {
-            $member->decrement('saldo_upgrade', $upgradeCost);
+        $saldoUpgradeUsed = min((float) $member->saldo_upgrade, $upgradeCost);
+        $sniperCostRequired = round($upgradeCost - $saldoUpgradeUsed, 2);
+        $sniperCostDeducted = min((float) $member->saldo_induk, $sniperCostRequired);
+
+        if ($saldoUpgradeUsed > 0) {
+            $member->decrement('saldo_upgrade', $saldoUpgradeUsed);
+        }
+        if ($sniperCostDeducted > 0) {
+            $member->decrement('saldo_induk', $sniperCostDeducted);
         }
 
         $member->update([
@@ -331,7 +348,13 @@ class UccBonusService
             'event_type' => 'auto_upgrade',
             'gross_amount' => $upgradeCost,
             'points_added' => 0,
-            'description' => 'Auto Upgrade Bronze ke Silver (Berhak Card Visa Belanja Silver)',
+            'saldo_upgrade_added' => $saldoUpgradeUsed > 0 ? -$saldoUpgradeUsed : 0,
+            'saldo_induk_added' => $sniperCostDeducted > 0 ? -$sniperCostDeducted : 0,
+            'description' => 'Auto Upgrade Bronze ke Silver (Saldo Upgrade: Rp '
+                . number_format($saldoUpgradeUsed, 0, ',', '.')
+                . ', Sniper Cost Post Induk: Rp '
+                . number_format($sniperCostRequired, 0, ',', '.')
+                . ')',
             'reference_code' => $referenceCode ?: 'UPG-' . $member->id . '-' . time(),
         ]);
 

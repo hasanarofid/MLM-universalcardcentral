@@ -364,7 +364,7 @@ const formatRupiah = (val) => {
           </div>
         </div>
 
-        <!-- 4 Post Saldo (Pembagian per kelipatan 200 point = Rp 100.000) -->
+        <!-- 4 Post Saldo Mitra (Rp 100.000 per kelipatan 200 point; Rp 100.000 lainnya dikelola Post Induk) -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5">
             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Saldo Tunai (40%)</span>

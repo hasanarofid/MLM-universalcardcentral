@@ -57,7 +57,7 @@ class UccRegistrationAndActivationTest extends TestCase
         // Sponsor receives 10% recruit bonus (Rp 10.000) + 4% bronze cluster royalty (Rp 4.000) = Rp 14.000
         $sponsor->refresh();
         $this->assertEquals(14000, (float) $sponsor->total_bonus);
-        $this->assertEquals(28, (int) $sponsor->points); // 14000 / 500 = 28 points
+        $this->assertEquals(14, (int) $sponsor->points); // 14000 / 1000 = 14 points
     }
 
     public function test_registration_requires_valid_16_digit_unique_nik(): void
@@ -104,8 +104,10 @@ class UccRegistrationAndActivationTest extends TestCase
 
         $service = app(UccBonusService::class);
 
-        // Credit Rp 100.000 (200 points) -> splits 40% tunai, 30% belanja, 20% upgrade, 10% reward
-        $service->creditMemberIncome($bronzeMember, 100000, 'recruit_activation', 'Test 200 point split');
+        // Credit Rp 200.000 (200 points @ Rp 1.000/point):
+        // - Rp 100.000 Post Mitra -> splits 40% tunai, 30% belanja, 20% upgrade, 10% reward
+        // - Rp 100.000 Post Induk -> Lumbung Anggaran Kompleks (saldo_induk)
+        $service->creditMemberIncome($bronzeMember, 200000, 'recruit_activation', 'Test 200 point split');
         $bronzeMember->refresh();
 
         $this->assertEquals(200, (int) $bronzeMember->points);
@@ -114,19 +116,25 @@ class UccRegistrationAndActivationTest extends TestCase
         $this->assertEquals(30000, (float) $bronzeMember->saldo_belanja);
         $this->assertEquals(20000, (float) $bronzeMember->saldo_upgrade);
         $this->assertEquals(10000, (float) $bronzeMember->saldo_reward);
+        $this->assertEquals(100000, (float) $bronzeMember->saldo_induk);
         $this->assertEquals('bronze', $bronzeMember->member_tier);
 
-        // Credit another Rp 600.000 (1200 points) -> total 1400 points -> auto upgrade to Silver
-        $service->creditMemberIncome($bronzeMember, 600000, 'royalty_transaction', 'Reach 1400 points');
+        // Credit another Rp 1.200.000 (1200 points) -> total 1400 points (7 blocks) -> auto upgrade to Silver
+        // 7 blocks produce saldo_upgrade = Rp 140.000 & saldo_induk = Rp 700.000
+        // Upgrade cost Rp 350.000 uses Rp 140.000 saldo_upgrade + Rp 210.000 sniper cost from saldo_induk (leaving Rp 490.000)
+        $service->creditMemberIncome($bronzeMember, 1200000, 'royalty_transaction', 'Reach 1400 points');
         $bronzeMember->refresh();
         $sponsor->refresh();
 
         $this->assertEquals('silver', $bronzeMember->member_tier);
         $this->assertTrue((bool) $bronzeMember->has_silver_visa_card);
         $this->assertNotNull($bronzeMember->upgraded_to_silver_at);
+        $this->assertEquals(0, (float) $bronzeMember->saldo_upgrade);
+        $this->assertEquals(490000, (float) $bronzeMember->saldo_induk);
 
         // Sponsor gets 10% upgrade bonus (Rp 35.000) + 3% silver cluster royalty (Rp 10.500) = Rp 45.500
         $this->assertEquals(45500, (float) $sponsor->total_bonus);
+        $this->assertEquals(45, (int) $sponsor->points); // floor(45500 / 1000) = 45 points
     }
 
     public function test_transaction_profit_splits_50_50_and_distributes_40_bronze_30_silver(): void

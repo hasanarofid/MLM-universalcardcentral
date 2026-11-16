@@ -74,13 +74,14 @@ Total **10% × Nilai Aktivasi** dialokasikan dan dibagi rata ke seluruh anggota 
    3. Royalty Transaksi
    4. Cashback Belanja
 2. **Konversi Poin & Kelipatan Pembonusan:**
-   - Standar dasar poin: **1 point = Rp 1.000** *(dalam tampilan pencairan/pembonusan per kelipatan **200 point = Rp 100.000**)*.
-   - Setiap kali akumulasi poin/bonus member mencapai kelipatan minimum **200 point (senilai Rp 100.000)**, dana didistribusikan ke **4 Post Saldo Member**:
-     - **A. Saldo Tunai (`saldo_tunai`):** **40%** *(dapat ditarik tunai / withdrawal)*
-     - **B. Saldo Belanja (`saldo_belanja`):** **30%**
-     - **C. Saldo Upgrade (`saldo_upgrade`):** **20%** *(digunakan untuk auto-upgrade & dapat digunakan untuk menebus NFC Card)*
-     - **D. Saldo Reward (`saldo_reward`):** **10%**
-   *(Catatan arsitektur: Pada skema awal sebelum split 4 post, setiap 200 point juga mendukung pencatatan porsi Post Induk; pastikan seluruh alokasi tercatat transparan di `ucc_point_ledgers` dan `wallet_transactions`).*
+   - Standar dasar poin: **1 point = Rp 1.000** *(prinsipnya **200 point = Rp 200.000** total nilai)*.
+   - Setiap kali akumulasi poin/bonus member mencapai kelipatan minimum **200 point (senilai Rp 200.000)**, dana dibagi dua post:
+     1. **Post Mitra (Rp 100.000 / 50%)** — didistribusikan ke **4 Post Saldo Member**:
+        - **A. Saldo Tunai (`saldo_tunai`):** **40%** *(Rp 40.000 — dapat ditarik tunai / withdrawal)*
+        - **B. Saldo Belanja (`saldo_belanja`):** **30%** *(Rp 30.000)*
+        - **C. Saldo Upgrade (`saldo_upgrade`):** **20%** *(Rp 20.000 — digunakan untuk auto-upgrade & menebus NFC Card)*
+        - **D. Saldo Reward (`saldo_reward`):** **10%** *(Rp 10.000)*
+     2. **Post Induk / Lumbung Anggaran Kompleks (Rp 100.000 / 50%)** — dicatat pada `saldo_induk` dan `ucc_point_ledgers.saldo_induk_added`, dikelola oleh Induk untuk Lumbung Anggaran Kompleks termasuk *sniper cost* bagi akun yang dipicu untuk upgrade.
 
 ### E. Auto-Upgrade Role System (`Bronze` -> `Silver`)
 1. **Asumsi Awal & Target Upgrade:**
