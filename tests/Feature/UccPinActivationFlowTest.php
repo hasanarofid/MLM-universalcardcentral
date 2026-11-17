@@ -50,7 +50,7 @@ class UccPinActivationFlowTest extends TestCase
 
         $pinRequest = PinRequest::where('user_id', $member->id)->firstOrFail();
         $this->assertEquals('pending', $pinRequest->status);
-        $this->assertEquals(350000, (int) $pinRequest->total_amount);
+        $this->assertEquals(400000, (int) $pinRequest->total_amount);
 
         // 3. Admin approves -> generates UCCS- PIN for member
         $this->actingAs($admin)
@@ -61,7 +61,7 @@ class UccPinActivationFlowTest extends TestCase
         $pin = Voucher::where('user_id', $member->id)->where('status', 'active')->firstOrFail();
         $this->assertStringStartsWith('UCCS-', $pin->code);
 
-        // 4. Member inputs PIN to activate ID -> Silver + 10% sponsor bonus (Rp 35.000)
+        // 4. Member inputs PIN to activate ID -> Silver (400k) + Cashback Saldo Belanja 50k + 10% sponsor bonus (40k) + 1% plat (4k)
         $this->actingAs($member)
             ->post(route('admin.pin.activate-self'), [
                 'pin_code' => $pin->code,
@@ -72,10 +72,11 @@ class UccPinActivationFlowTest extends TestCase
         $admin->refresh();
         $this->assertEquals('active', $member->activation_status);
         $this->assertEquals('silver', $member->member_tier);
+        $this->assertEquals(50000, (float) $member->saldo_belanja);
         $this->assertTrue((bool) $member->has_silver_visa_card);
         $this->assertContains($member->position, ['left', 'right']);
         $this->assertEquals('used', $pin->fresh()->status);
-        $this->assertEquals(38500, (float) $admin->total_bonus); // 10% (35k) + 1% Platinum royalty (3.5k)
+        $this->assertEquals(44000, (float) $admin->total_bonus); // 10% (40k) + 1% Platinum royalty (4k)
     }
 
     public function test_recruiter_can_register_and_activate_member_with_pin_stock_in_two_legs(): void
@@ -114,5 +115,99 @@ class UccPinActivationFlowTest extends TestCase
         $this->assertEquals('used', $pin->fresh()->status);
         $this->assertEquals(1, (int) $recruiter->fresh()->right_count);
         $this->assertEquals(14000, (float) $recruiter->fresh()->total_bonus); // 10% (10k) + 4% Bronze royalty (4k)
+    }
+
+    public function test_stokis_and_mobile_stokis_promo_requirements_pin_bundle_and_fees(): void
+    {
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $admin = User::factory()->create([
+            'username' => 'admin',
+            'email' => 'admin-stokis@universalcardcentral.com',
+            'nik' => '0000000000000001',
+            'member_tier' => 'platinum',
+            'activation_status' => 'active',
+        ]);
+        $admin->assignRole($adminRole);
+
+        $bronzeMember = User::factory()->create([
+            'username' => 'bronzeguy',
+            'email' => 'bronzeguy@example.com',
+            'nik' => '3201010101010501',
+            'member_tier' => 'bronze',
+            'activation_status' => 'active',
+        ]);
+
+        // Bronze member cannot order Stokis / Mobile Stokis
+        $this->actingAs($bronzeMember)->post(route('admin.pin.request'), [
+            'tier' => 'stokis',
+            'quantity' => 1,
+            'transfer_proof' => UploadedFile::fake()->image('s.jpg'),
+        ])->assertSessionHasErrors('tier');
+
+        // Silver member orders Stokis (Rp 5.000.000 -> 50 PIN Bronze, Fee 3%)
+        $stokisUser = User::factory()->create([
+            'username' => 'stokis01',
+            'email' => 'stokis01@example.com',
+            'nik' => '3201010101010502',
+            'member_tier' => 'silver',
+            'activation_status' => 'active',
+        ]);
+
+        $this->actingAs($stokisUser)->post(route('admin.pin.request'), [
+            'tier' => 'stokis',
+            'quantity' => 1,
+            'transfer_proof' => UploadedFile::fake()->image('stokis.jpg'),
+        ])->assertRedirect();
+
+        $stokisReq = PinRequest::where('user_id', $stokisUser->id)->firstOrFail();
+        $this->assertEquals(5000000, (int) $stokisReq->total_amount);
+
+        $this->actingAs($admin)->post(route('admin.pin.approve', $stokisReq->id))->assertRedirect();
+
+        $stokisUser->refresh();
+        $this->assertEquals('stokis', $stokisUser->stokis_type);
+        $this->assertTrue((bool) $stokisUser->stokis_fee_eligible);
+        $this->assertEquals(50, Voucher::where('user_id', $stokisUser->id)->where('status', 'active')->count());
+
+        // Silver member orders Mobile Stokis (Rp 1.000.000 -> 1 PIN Silver + 6 PIN Bronze, Fee 2%)
+        $miniUser = User::factory()->create([
+            'username' => 'ministokis01',
+            'email' => 'ministokis01@example.com',
+            'nik' => '3201010101010503',
+            'member_tier' => 'silver',
+            'activation_status' => 'active',
+        ]);
+
+        $this->actingAs($miniUser)->post(route('admin.pin.request'), [
+            'tier' => 'mini_stokis',
+            'quantity' => 1,
+            'transfer_proof' => UploadedFile::fake()->image('mini.jpg'),
+        ])->assertRedirect();
+
+        $miniReq = PinRequest::where('user_id', $miniUser->id)->firstOrFail();
+        $this->assertEquals(1000000, (int) $miniReq->total_amount);
+
+        $this->actingAs($admin)->post(route('admin.pin.approve', $miniReq->id))->assertRedirect();
+
+        $miniUser->refresh();
+        $this->assertEquals('mini_stokis', $miniUser->stokis_type);
+        $this->assertTrue((bool) $miniUser->stokis_fee_eligible);
+        $this->assertEquals(7, Voucher::where('user_id', $miniUser->id)->where('status', 'active')->count());
+
+        // Stokis activates a new member with 1 Bronze PIN -> gets 10% sponsor (10k) + 3% Stokis fee (3k) = 13k
+        $stokisPin = Voucher::where('user_id', $stokisUser->id)->where('status', 'active')->firstOrFail();
+        $this->actingAs($stokisUser)->post(route('admin.activation.store'), [
+            'name' => 'Member Stokis',
+            'email' => 'memberstokis@example.com',
+            'phone' => '081234560555',
+            'address' => 'Jl. Stokis No. 1',
+            'pin_code' => $stokisPin->code,
+            'position' => 'left',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ])->assertRedirect();
+
+        // 10% sponsor (10k) + 3% Silver cluster / 2 silver (1.5k) + 3% Fee Stokis (3k) = 14.500
+        $this->assertEquals(14500, (float) $stokisUser->fresh()->total_bonus);
     }
 }

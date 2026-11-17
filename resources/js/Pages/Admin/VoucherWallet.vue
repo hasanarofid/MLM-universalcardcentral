@@ -31,6 +31,11 @@ const props = defineProps({
     default: () => []
   },
   is_admin: Boolean,
+  is_minimal_silver: Boolean,
+  stokis_type: {
+    type: String,
+    default: 'none'
+  },
 });
 
 const pinOrderForm = useForm({
@@ -452,7 +457,7 @@ const formatRupiah = (val) => {
         <div v-if="is_admin" class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
           <div class="border-b border-slate-100 pb-3">
             <h3 class="text-sm font-black text-slate-900">Generate &amp; Kirim PIN Aktivasi (Admin)</h3>
-            <p class="text-xs text-slate-500 mt-0.5">Buat stok PIN Bronze (Rp 100.000) atau Silver (Rp 350.000) langsung ke akun member atau admin.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Buat stok PIN Bronze (Rp 100.000) atau Silver (Rp 400.000) langsung ke akun member atau admin.</p>
           </div>
           <form @submit.prevent="submitAdminGeneratePin" class="space-y-3.5">
             <div>
@@ -470,7 +475,7 @@ const formatRupiah = (val) => {
                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tipe PIN</label>
                 <select v-model="adminGenForm.tier" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-[#D4AF37]">
                   <option value="bronze">Bronze (Rp 100.000)</option>
-                  <option value="silver">Silver (Rp 350.000)</option>
+                  <option value="silver">Silver (Rp 400.000)</option>
                 </select>
               </div>
               <div>
@@ -495,23 +500,31 @@ const formatRupiah = (val) => {
           </form>
         </div>
 
-        <!-- Member: Beli PIN dengan Upload Bukti Transfer -->
+        <!-- Member: Beli PIN & Paket Promo Stokis via Transfer Bank -->
         <div v-else class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
           <div class="border-b border-slate-100 pb-3">
-            <h3 class="text-sm font-black text-slate-900">Beli Stok PIN via Transfer Bank</h3>
-            <p class="text-xs text-slate-500 mt-0.5">Upload bukti transfer ke rekening perusahaan. Admin akan memverifikasi &amp; mengirim PIN ke akun Anda.</p>
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="text-sm font-black text-slate-900">Beli Stok PIN &amp; Paket Promo Stokis</h3>
+              <span v-if="stokis_type !== 'none'" class="bg-[#0F172A] text-[#D4AF37] text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">
+                {{ stokis_type === 'stokis' ? 'Stokis (Fee 3%)' : 'Mobile Stokis (Fee 2%)' }}
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">Promo Stokis (10 tercepat) &amp; Mobile Stokis (100 tercepat) s.d. 1 Des 2026. Syarat min. Silver ID.</p>
           </div>
           <form @submit.prevent="submitPinOrder" class="space-y-3.5">
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tipe PIN</label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="sm:col-span-2">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Paket / Tipe PIN</label>
                 <select v-model="pinOrderForm.tier" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-[#D4AF37]">
-                  <option value="bronze">Bronze (Rp 100.000)</option>
-                  <option value="silver">Silver (Rp 350.000)</option>
+                  <option value="bronze">PIN Bronze (Rp 100.000 — Non Cashback)</option>
+                  <option value="silver">PIN Silver (Rp 400.000 — Cashback Belanja Rp 50rb)</option>
+                  <option value="mini_stokis" :disabled="!is_minimal_silver">Mobile Stokis (Rp 1 Juta: 1 Silver + 6 Bronze • Fee 2%)</option>
+                  <option value="stokis" :disabled="!is_minimal_silver">Stokis (Rp 5 Juta: 50 PIN Bronze • Fee 3%)</option>
                 </select>
+                <p v-if="pinOrderForm.errors.tier" class="text-[11px] text-rose-600 font-bold mt-1">{{ pinOrderForm.errors.tier }}</p>
               </div>
               <div>
-                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Jumlah PIN</label>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Jumlah Paket</label>
                 <input
                   v-model="pinOrderForm.quantity"
                   type="number"

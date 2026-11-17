@@ -45,12 +45,22 @@ class PinActivationController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'tier' => 'required|in:bronze,silver',
+            'tier' => 'required|in:bronze,silver,stokis,mini_stokis',
             'quantity' => 'required|integer|min:1|max:100',
             'transfer_proof' => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:10240',
         ]);
 
-        $unitPrice = UccBonusService::getActivationAmount($validated['tier']);
+        if (in_array($validated['tier'], ['stokis', 'mini_stokis'], true) && !$user->isMinimalSilver()) {
+            return back()->withErrors([
+                'tier' => 'Syarat menjadi Stokis / Mobile Stokis minimal memiliki ID Silver.',
+            ]);
+        }
+
+        $unitPrice = match ($validated['tier']) {
+            'stokis' => UccBonusService::STOKIS_PACKAGE_PRICE,
+            'mini_stokis' => UccBonusService::MINI_STOKIS_PACKAGE_PRICE,
+            default => UccBonusService::getActivationAmount($validated['tier']),
+        };
         $totalAmount = $unitPrice * (int) $validated['quantity'];
 
         $file = $request->file('transfer_proof');
@@ -102,24 +112,30 @@ class PinActivationController extends Controller
 
         $generatedCodes = [];
         DB::transaction(function () use ($pinRequest, $admin, &$generatedCodes) {
-            $prefix = $pinRequest->tier === 'silver' ? 'UCCS-' : 'UCCB-';
-            $packageLabel = $pinRequest->tier === 'silver'
-                ? 'Silver (Rp 350.000)'
-                : 'Bronze (Rp 100.000)';
-
-            for ($i = 0; $i < $pinRequest->quantity; $i++) {
-                do {
-                    $code = $prefix . strtoupper(Str::random(8));
-                } while (Voucher::where('code', $code)->exists());
-
-                Voucher::create([
-                    'code' => $code,
-                    'user_id' => $pinRequest->user_id,
-                    'package_name' => $packageLabel,
-                    'voucher_type' => 'activation',
-                    'status' => 'active',
+            if ($pinRequest->tier === 'stokis') {
+                // 5 juta -> 50 PIN Bronze per paket
+                $generatedCodes = $this->createPinCodes($pinRequest->user_id, 'bronze', 50 * $pinRequest->quantity);
+                $promoActive = now()->lte(UccBonusService::STOKIS_PROMO_DEADLINE)
+                    && User::where('stokis_type', 'stokis')->where('stokis_fee_eligible', true)->count() < UccBonusService::STOKIS_PROMO_LIMIT;
+                $pinRequest->user?->update([
+                    'stokis_type' => 'stokis',
+                    'stokis_activated_at' => now(),
+                    'stokis_fee_eligible' => $promoActive || (bool) $pinRequest->user?->stokis_fee_eligible,
                 ]);
-                $generatedCodes[] = $code;
+            } elseif ($pinRequest->tier === 'mini_stokis') {
+                // 1 juta -> 1 PIN Silver + 6 PIN Bronze per paket
+                $silverCodes = $this->createPinCodes($pinRequest->user_id, 'silver', 1 * $pinRequest->quantity);
+                $bronzeCodes = $this->createPinCodes($pinRequest->user_id, 'bronze', 6 * $pinRequest->quantity);
+                $generatedCodes = array_merge($silverCodes, $bronzeCodes);
+                $promoActive = now()->lte(UccBonusService::STOKIS_PROMO_DEADLINE)
+                    && User::where('stokis_type', 'mini_stokis')->where('stokis_fee_eligible', true)->count() < UccBonusService::MINI_STOKIS_PROMO_LIMIT;
+                $pinRequest->user?->update([
+                    'stokis_type' => 'mini_stokis',
+                    'stokis_activated_at' => now(),
+                    'stokis_fee_eligible' => $promoActive || (bool) $pinRequest->user?->stokis_fee_eligible,
+                ]);
+            } else {
+                $generatedCodes = $this->createPinCodes($pinRequest->user_id, $pinRequest->tier, $pinRequest->quantity);
             }
 
             $pinRequest->update([
@@ -195,25 +211,7 @@ class PinActivationController extends Controller
 
         $generatedCodes = [];
         DB::transaction(function () use ($validated, $recipient, &$generatedCodes) {
-            $prefix = $validated['tier'] === 'silver' ? 'UCCS-' : 'UCCB-';
-            $packageLabel = $validated['tier'] === 'silver'
-                ? 'Silver (Rp 350.000)'
-                : 'Bronze (Rp 100.000)';
-
-            for ($i = 0; $i < (int) $validated['quantity']; $i++) {
-                do {
-                    $code = $prefix . strtoupper(Str::random(8));
-                } while (Voucher::where('code', $code)->exists());
-
-                Voucher::create([
-                    'code' => $code,
-                    'user_id' => $recipient->id,
-                    'package_name' => $packageLabel,
-                    'voucher_type' => 'activation',
-                    'status' => 'active',
-                ]);
-                $generatedCodes[] = $code;
-            }
+            $generatedCodes = $this->createPinCodes($recipient->id, $validated['tier'], (int) $validated['quantity']);
         });
 
         if ($recipient->id !== $admin->id) {
@@ -264,6 +262,32 @@ class PinActivationController extends Controller
         );
 
         return back()->with('success', "Member {$downline->name} (@{$downline->username}) berhasil diaktifkan sebagai Paket " . ucfirst($tier) . '!');
+    }
+
+    private function createPinCodes(int $userId, string $pinTier, int $count): array
+    {
+        $codes = [];
+        $prefix = $pinTier === 'silver' ? 'UCCS-' : 'UCCB-';
+        $packageLabel = $pinTier === 'silver'
+            ? 'Silver (Rp 400.000)'
+            : 'Bronze (Rp 100.000)';
+
+        for ($i = 0; $i < $count; $i++) {
+            do {
+                $code = $prefix . strtoupper(Str::random(8));
+            } while (Voucher::where('code', $code)->exists());
+
+            Voucher::create([
+                'code' => $code,
+                'user_id' => $userId,
+                'package_name' => $packageLabel,
+                'voucher_type' => 'activation',
+                'status' => 'active',
+            ]);
+            $codes[] = $code;
+        }
+
+        return $codes;
     }
 }
 

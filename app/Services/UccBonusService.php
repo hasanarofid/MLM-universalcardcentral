@@ -14,10 +14,18 @@ class UccBonusService
 {
     public const TIER_ACTIVATION_AMOUNTS = [
         'bronze' => 100000,
-        'silver' => 350000,
+        'silver' => 400000,
     ];
 
-    public const UPGRADE_TO_SILVER_COST = 350000;
+    public const UPGRADE_TO_SILVER_COST = 400000;
+    public const SILVER_CASHBACK_BELANJA = 50000;
+    public const STOKIS_PACKAGE_PRICE = 5000000;       // 5 juta -> 50 PIN Bronze
+    public const MINI_STOKIS_PACKAGE_PRICE = 1000000; // 1 juta -> 1 PIN Silver + 6 PIN Bronze
+    public const STOKIS_FEE_RATE = 0.03;              // 3% x nilai aktivasi (10 stokis tercepat s.d. 1 Des 2026)
+    public const MINI_STOKIS_FEE_RATE = 0.02;         // 2% x nilai aktivasi (100 mini stokis s.d. 1 Des 2026)
+    public const STOKIS_PROMO_LIMIT = 10;
+    public const MINI_STOKIS_PROMO_LIMIT = 100;
+    public const STOKIS_PROMO_DEADLINE = '2026-12-01 23:59:59';
     public const UPGRADE_TRIGGER_POINTS = 1400;
     public const POINT_BLOCK_SIZE = 200;
     public const POINT_BLOCK_TOTAL_VALUE_IDR = 200000; // Prinsip dasar: 1 point = Rp 1.000, 200 point = Rp 200.000
@@ -68,6 +76,22 @@ class UccBonusService
                 'package_name' => ucfirst($normalizedTier) . ' (Rp ' . number_format($activationAmount, 0, ',', '.') . ')',
                 'has_silver_visa_card' => $normalizedTier === 'silver' ? true : (bool) $newMember->has_silver_visa_card,
             ]);
+
+            // Cashback Saldo Belanja Rp 50.000 khusus Aktivasi Silver (Bronze non cashback)
+            if ($normalizedTier === 'silver') {
+                $newMember->increment('saldo_belanja', self::SILVER_CASHBACK_BELANJA);
+
+                UccPointLedger::create([
+                    'user_id' => $newMember->id,
+                    'source_user_id' => $newMember->id,
+                    'event_type' => 'silver_cashback',
+                    'gross_amount' => self::SILVER_CASHBACK_BELANJA,
+                    'points_added' => 0,
+                    'saldo_belanja_added' => self::SILVER_CASHBACK_BELANJA,
+                    'description' => 'Cashback Saldo Belanja Aktivasi Silver (Rp 50.000)',
+                    'reference_code' => $refCode,
+                ]);
+            }
 
             // 1. Bonus Rekrut Aktivasi: 10% x nilai aktivasi untuk sponsor langsung
             if ($sponsor) {
@@ -412,7 +436,7 @@ class UccBonusService
     public static function resolveTierFromPin(Voucher $pin): string
     {
         $pkg = strtolower((string) $pin->package_name);
-        if (str_contains($pkg, 'silver') || str_contains($pkg, '350')) {
+        if (str_contains($pkg, 'silver') || str_contains($pkg, '400') || str_contains($pkg, '350')) {
             return 'silver';
         }
 
@@ -448,6 +472,8 @@ class UccBonusService
                     : (($sponsor->left_count <= $sponsor->right_count) ? 'left' : 'right');
             }
 
+            $pinOwner = $lockedPin->user_id ? User::find($lockedPin->user_id) : $activatedBy;
+
             $lockedPin->update([
                 'status' => 'used',
                 'used_by_id' => $member->id,
@@ -468,6 +494,28 @@ class UccBonusService
             }
 
             $this->processActivation($member->fresh(), $sponsor, $tier);
+
+            // Promo Fee Stokis (3%) & Mobile/Mini Stokis (2%) s.d. 1 Desember 2026
+            if ($pinOwner && $pinOwner->stokis_fee_eligible && now()->lte(self::STOKIS_PROMO_DEADLINE)) {
+                $activationAmount = self::getActivationAmount($tier);
+                $feeRate = match ($pinOwner->stokis_type) {
+                    'stokis' => self::STOKIS_FEE_RATE,
+                    'mini_stokis' => self::MINI_STOKIS_FEE_RATE,
+                    default => 0.0,
+                };
+                if ($feeRate > 0) {
+                    $feeAmount = round($activationAmount * $feeRate, 2);
+                    $feeLabel = $pinOwner->stokis_type === 'stokis' ? 'Fee Stokis (3%)' : 'Fee Mini Stokis (2%)';
+                    $this->creditMemberIncome(
+                        recipient: $pinOwner,
+                        amount: $feeAmount,
+                        eventType: $pinOwner->stokis_type === 'stokis' ? 'stokis_fee' : 'mini_stokis_fee',
+                        description: "{$feeLabel} aktivasi {$tier} (@{$member->username})",
+                        sourceUser: $member,
+                        referenceCode: 'STOKIS-' . $member->id . '-' . time()
+                    );
+                }
+            }
         });
 
         SystemActivityNotification::sendSafe(

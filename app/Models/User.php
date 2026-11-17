@@ -18,7 +18,7 @@ use Spatie\Permission\Traits\HasRoles;
     'address', 'rt_rw', 'province', 'city', 'district', 'village', 'postal_code',
     'beneficiary_name', 'beneficiary_birth_date', 'beneficiary_relation', 'beneficiary_phone', 'emergency_phone',
     'parent_id', 'position', 'left_count', 'right_count', 'left_points', 'right_points', 
-    'team_points', 'ro_points', 'po_points', 'package_name', 'member_tier', 'activation_status', 'activated_at', 'activated_by', 'activation_amount',
+    'team_points', 'ro_points', 'po_points', 'package_name', 'member_tier', 'stokis_type', 'stokis_activated_at', 'stokis_fee_eligible', 'activation_status', 'activated_at', 'activated_by', 'activation_amount',
     'points', 'pending_points', 'is_premier', 'premier_activated_at', 'premier_expires_at',
     'saldo', 'saldo_tunai', 'saldo_belanja', 'saldo_upgrade', 'saldo_reward', 'saldo_induk',
     'has_silver_visa_card', 'has_nfc_card', 'upgraded_to_silver_at', 'auto_save_saldo', 
@@ -48,7 +48,14 @@ class User extends Authenticatable
             'has_nfc_card' => 'boolean',
             'upgraded_to_silver_at' => 'datetime',
             'activated_at' => 'datetime',
+            'stokis_activated_at' => 'datetime',
+            'stokis_fee_eligible' => 'boolean',
         ];
+    }
+
+    public function isMinimalSilver(): bool
+    {
+        return in_array(strtolower((string) ($this->member_tier ?? 'bronze')), ['silver', 'gold', 'platinum'], true);
     }
 
     public function isActiveMember(): bool

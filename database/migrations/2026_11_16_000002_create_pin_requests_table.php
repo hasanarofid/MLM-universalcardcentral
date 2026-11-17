@@ -12,7 +12,7 @@ return new class extends Migration
             Schema::create('pin_requests', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-                $table->enum('tier', ['bronze', 'silver'])->default('bronze');
+                $table->string('tier', 30)->default('bronze');
                 $table->unsignedInteger('quantity')->default(1);
                 $table->unsignedBigInteger('unit_price');
                 $table->unsignedBigInteger('total_amount');

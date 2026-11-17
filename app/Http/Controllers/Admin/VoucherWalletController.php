@@ -107,7 +107,7 @@ class VoucherWalletController extends Controller
         // Voucher Package Catalog for Conversion (UCC Tahap 1 PIN Aktivasi)
         $convertPackages = [
             ['key' => 'bronze', 'group' => 'PIN Aktivasi UCC', 'name' => 'PIN Aktivasi Bronze (Rp 100.000)', 'price' => 100000, 'type' => 'activation'],
-            ['key' => 'silver', 'group' => 'PIN Aktivasi UCC', 'name' => 'PIN Aktivasi Silver (Rp 350.000)', 'price' => 350000, 'type' => 'activation'],
+            ['key' => 'silver', 'group' => 'PIN Aktivasi UCC', 'name' => 'PIN Aktivasi Silver (Rp 400.000 • Cashback Saldo Belanja Rp 50.000)', 'price' => 400000, 'type' => 'activation'],
         ];
 
         $isAdmin = ($user->username === 'admin' || $user->email === 'admin@universalcardcentral.com' || $user->hasRole('admin'));
@@ -141,6 +141,8 @@ class VoucherWalletController extends Controller
             'transfers' => $transfers,
             'pin_requests' => $pinRequests,
             'is_admin' => $isAdmin,
+            'is_minimal_silver' => $user->isMinimalSilver(),
+            'stokis_type' => $user->stokis_type ?? 'none',
         ]);
     }
 
@@ -159,7 +161,7 @@ class VoucherWalletController extends Controller
 
         $catalog = [
             'bronze' => ['name' => 'Bronze (Rp 100.000)', 'price' => 100000, 'type' => 'activation', 'prefix' => 'UCCB'],
-            'silver' => ['name' => 'Silver (Rp 350.000)', 'price' => 350000, 'type' => 'activation', 'prefix' => 'UCCS'],
+            'silver' => ['name' => 'Silver (Rp 400.000)', 'price' => 400000, 'type' => 'activation', 'prefix' => 'UCCS'],
             'seller' => ['name' => 'Seller (Rp 125.000)', 'price' => 125000, 'type' => 'activation', 'prefix' => 'PIN'],
             'starter' => ['name' => 'Seller (Rp 125.000)', 'price' => 125000, 'type' => 'activation', 'prefix' => 'PIN'],
             'star_seller' => ['name' => 'Star Seller (Rp 550.000)', 'price' => 550000, 'type' => 'activation', 'prefix' => 'PIN'],

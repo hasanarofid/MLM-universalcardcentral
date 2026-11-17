@@ -1,0 +1,1 @@
+import{O as e,y as t}from"./app-D6wwV1De.js";import{t as n}from"./_plugin-vue_export-helper-BDNMzG2s.js";var r={},i={src:`/images/logo-ucc.avif`,alt:`Universal Card Central Logo`,class:`h-10 w-auto object-contain rounded-lg ring-1 ring-[#D4AF37]/40`};function a(n,r){return e(),t(`img`,i)}var o=n(r,[[`render`,a]]);export{o as t};

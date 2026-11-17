@@ -308,7 +308,7 @@ const formatRupiah = (val) => {
                 </span>
               </div>
               <p class="text-xs text-slate-300 mt-1">
-                Masukkan <strong>Kode PIN Aktivasi</strong> (Bronze Rp 100.000 / Silver Rp 350.000) dari Admin/Sponsor, atau unggah bukti pembayaran untuk mendapatkan PIN.
+                Masukkan <strong>Kode PIN Aktivasi</strong> (Bronze Rp 100.000 / Silver Rp 400.000 • Cashback Saldo Belanja Rp 50.000) dari Admin/Sponsor, atau unggah bukti pembayaran untuk mendapatkan PIN.
               </p>
             </div>
           </div>
@@ -350,8 +350,8 @@ const formatRupiah = (val) => {
                 v-model="pinOrderForm.tier"
                 class="px-3 py-2 bg-slate-900/80 border border-slate-700 rounded-xl text-xs font-bold text-white focus:outline-none focus:border-[#D4AF37]"
               >
-                <option value="bronze">PIN Bronze — Rp 100.000</option>
-                <option value="silver">PIN Silver — Rp 350.000</option>
+                <option value="bronze">PIN Bronze — Rp 100.000 (Non Cashback)</option>
+                <option value="silver">PIN Silver — Rp 400.000 (Cashback Belanja Rp 50rb)</option>
               </select>
               <input
                 type="file"

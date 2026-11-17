@@ -350,7 +350,7 @@ const submit = () => {
             </div>
 
             <div class="rounded-2xl border border-[#D4AF37]/30 bg-[#faf6eb] px-4 py-3 text-xs text-slate-700 leading-relaxed">
-                <span class="font-bold text-[#9A7B2C]">Daftar Free (Belum Aktif ID):</span> Pendaftaran akun gratis. Untuk mengaktifkan ID (Bronze Rp 100.000 / Silver Rp 350.000), silakan beli atau masukkan <strong>Kode PIN Aktivasi</strong> di Dashboard setelah login. Data KTP &amp; rekening bank dapat dilengkapi setelah aktivasi PIN.
+                <span class="font-bold text-[#9A7B2C]">Daftar Free (Belum Aktif ID):</span> Pendaftaran akun gratis. Untuk mengaktifkan ID (Bronze Rp 100.000 / Silver Rp 400.000 • Cashback Saldo Belanja Rp 50.000), silakan beli atau masukkan <strong>Kode PIN Aktivasi</strong> di Dashboard setelah login. Data KTP &amp; rekening bank dapat dilengkapi setelah aktivasi PIN.
             </div>
 
             <!-- SECTION 2: KEAMANAN PASSWORD -->

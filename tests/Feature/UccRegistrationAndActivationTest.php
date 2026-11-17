@@ -121,7 +121,7 @@ class UccRegistrationAndActivationTest extends TestCase
 
         // Credit another Rp 1.200.000 (1200 points) -> total 1400 points (7 blocks) -> auto upgrade to Silver
         // 7 blocks produce saldo_upgrade = Rp 140.000 & saldo_induk = Rp 700.000
-        // Upgrade cost Rp 350.000 uses Rp 140.000 saldo_upgrade + Rp 210.000 sniper cost from saldo_induk (leaving Rp 490.000)
+        // Upgrade cost Rp 400.000 uses Rp 140.000 saldo_upgrade + Rp 260.000 sniper cost from saldo_induk (leaving Rp 440.000)
         $service->creditMemberIncome($bronzeMember, 1200000, 'royalty_transaction', 'Reach 1400 points');
         $bronzeMember->refresh();
         $sponsor->refresh();
@@ -130,11 +130,11 @@ class UccRegistrationAndActivationTest extends TestCase
         $this->assertTrue((bool) $bronzeMember->has_silver_visa_card);
         $this->assertNotNull($bronzeMember->upgraded_to_silver_at);
         $this->assertEquals(0, (float) $bronzeMember->saldo_upgrade);
-        $this->assertEquals(490000, (float) $bronzeMember->saldo_induk);
+        $this->assertEquals(440000, (float) $bronzeMember->saldo_induk);
 
-        // Sponsor gets 10% upgrade bonus (Rp 35.000) + 3% silver cluster royalty (Rp 10.500) = Rp 45.500
-        $this->assertEquals(45500, (float) $sponsor->total_bonus);
-        $this->assertEquals(45, (int) $sponsor->points); // floor(45500 / 1000) = 45 points
+        // Sponsor gets 10% upgrade bonus (Rp 40.000) + 3% silver cluster royalty (Rp 12.000) = Rp 52.000
+        $this->assertEquals(52000, (float) $sponsor->total_bonus);
+        $this->assertEquals(52, (int) $sponsor->points); // floor(52000 / 1000) = 52 points
     }
 
     public function test_transaction_profit_splits_50_50_and_distributes_40_bronze_30_silver(): void
@@ -212,7 +212,7 @@ class UccRegistrationAndActivationTest extends TestCase
             'marital_status' => 'Kawin',
             'postal_code' => '60111',
             'member_tier' => 'silver',
-            'activation_amount' => 350000,
+            'activation_amount' => 400000,
         ]);
     }
 

@@ -576,7 +576,7 @@ const submitForm = () => {
                   class="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/40 focus:border-[#D4AF37]"
                 >
                   <option value="bronze">Bronze — Rp 100.000</option>
-                  <option value="silver">Silver — Rp 350.000</option>
+                  <option value="silver">Silver — Rp 400.000 (Cashback Belanja Rp 50rb)</option>
                 </select>
                 <InputError class="mt-1" :message="form.errors.member_tier" />
               </div>

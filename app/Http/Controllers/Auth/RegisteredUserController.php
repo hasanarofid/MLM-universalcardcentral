@@ -257,7 +257,7 @@ class RegisteredUserController extends Controller
             new \App\Notifications\SystemActivityNotification(
                 category: 'system',
                 title: 'Akun Free Berhasil Terdaftar (Belum Aktif)',
-                message: 'Silakan beli atau masukkan Kode PIN Aktivasi (Bronze Rp 100.000 / Silver Rp 350.000) di Dashboard untuk mengaktifkan ID Anda.',
+                message: 'Silakan beli atau masukkan Kode PIN Aktivasi (Bronze Rp 100.000 / Silver Rp 400.000) di Dashboard untuk mengaktifkan ID Anda.',
                 link: '/admin/dashboard',
                 roleTarget: 'member'
             )
