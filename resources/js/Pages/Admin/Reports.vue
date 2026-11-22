@@ -202,8 +202,8 @@ const reportTabs = [
           <p class="text-sm font-black text-white mt-0.5">{{ formatRupiah(summary?.saldo_reward) }}</p>
         </div>
         <div class="col-span-2 sm:col-span-1 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-2xl p-3">
-          <span class="text-[10px] font-bold uppercase text-[#E5C07B]">Poin Pending (&lt;200 pt)</span>
-          <p class="text-sm font-black text-white mt-0.5">{{ summary?.pending_points ?? 0 }} Point</p>
+          <span class="text-[10px] font-bold uppercase text-[#E5C07B]">Total 4 Post Saldo</span>
+          <p class="text-sm font-black text-white mt-0.5">{{ formatRupiah((summary?.saldo_tunai ?? 0) + (summary?.saldo_belanja ?? 0) + (summary?.saldo_upgrade ?? 0) + (summary?.saldo_reward ?? 0)) }}</p>
         </div>
       </div>
 

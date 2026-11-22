@@ -156,8 +156,8 @@ const formatRupiah = (val) => {
                   {{ formatRupiah(wallet?.total_bonus_cair || 0) }}
                 </h2>
                 <p class="text-[11px] text-slate-300">
-                  Menunggu genap 200 point untuk dipecah ke 4 Post Saldo:
-                  <strong class="text-[#E5C07B]">{{ wallet?.pending_points ?? 0 }} / 200 pt ({{ formatRupiah(wallet?.pending_bonus_idr ?? 0) }})</strong>
+                  Terdistribusi otomatis ke 4 Post Saldo:
+                  <strong class="text-[#E5C07B]">40% Tunai • 30% Belanja • 20% Upgrade • 10% Reward</strong>
                 </p>
               </div>
 

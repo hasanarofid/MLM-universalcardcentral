@@ -248,36 +248,24 @@ class UccBonusService
         $recipient->increment('total_bonus', $amount);
         if ($pointsEarned > 0) {
             $recipient->increment('points', $pointsEarned);
-            $recipient->increment('pending_points', $pointsEarned);
         }
         $recipient->refresh();
 
-        $tunaiAdded = 0.0;
-        $belanjaAdded = 0.0;
-        $upgradeAdded = 0.0;
-        $rewardAdded = 0.0;
+        // Langsung distribusikan setiap bonus masuk ke 4 Post Saldo:
+        // 40% Saldo Tunai (masuk E-Wallet), 30% Saldo Belanja, 20% Saldo Upgrade, 10% Saldo Reward
+        $tunaiAdded = round($amount * self::SALDO_SPLIT_RATES['tunai'], 2);
+        $belanjaAdded = round($amount * self::SALDO_SPLIT_RATES['belanja'], 2);
+        $upgradeAdded = round($amount * self::SALDO_SPLIT_RATES['upgrade'], 2);
+        $rewardAdded = round($amount - $tunaiAdded - $belanjaAdded - $upgradeAdded, 2);
         $indukAdded = 0.0;
 
-        // Setiap kelipatan 200 point (nilai total Rp 200.000 @ Rp 1.000/point):
-        // - Rp 100.000 (Post Mitra) dipecah ke 4 post saldo (40% Tunai, 30% Belanja, 20% Upgrade, 10% Reward)
-        // - Rp 100.000 (Post Induk) dicatat ke Lumbung Anggaran Kompleks (termasuk sniper cost upgrade)
-        $blocks = intdiv((int) $recipient->pending_points, self::POINT_BLOCK_SIZE);
-        if ($blocks > 0) {
-            $mitraSplitAmount = $blocks * self::POINT_BLOCK_MITRA_VALUE_IDR;
-            $indukAdded = (float) ($blocks * self::POINT_BLOCK_INDUK_VALUE_IDR);
-
-            $tunaiAdded = round($mitraSplitAmount * self::SALDO_SPLIT_RATES['tunai'], 2);
-            $belanjaAdded = round($mitraSplitAmount * self::SALDO_SPLIT_RATES['belanja'], 2);
-            $upgradeAdded = round($mitraSplitAmount * self::SALDO_SPLIT_RATES['upgrade'], 2);
-            $rewardAdded = round($mitraSplitAmount * self::SALDO_SPLIT_RATES['reward'], 2);
-
-            $recipient->decrement('pending_points', $blocks * self::POINT_BLOCK_SIZE);
-            $recipient->increment('saldo_tunai', $tunaiAdded);
-            $recipient->increment('saldo', $tunaiAdded);
-            $recipient->increment('saldo_belanja', $belanjaAdded);
-            $recipient->increment('saldo_upgrade', $upgradeAdded);
-            $recipient->increment('saldo_reward', $rewardAdded);
-            $recipient->increment('saldo_induk', $indukAdded);
+        $recipient->increment('saldo_tunai', $tunaiAdded);
+        $recipient->increment('saldo', $tunaiAdded);
+        $recipient->increment('saldo_belanja', $belanjaAdded);
+        $recipient->increment('saldo_upgrade', $upgradeAdded);
+        $recipient->increment('saldo_reward', $rewardAdded);
+        if ((int) $recipient->pending_points > 0) {
+            $recipient->update(['pending_points' => 0]);
         }
 
         UccPointLedger::create([
@@ -310,7 +298,7 @@ class UccBonusService
                 'type' => 'in',
                 'category' => $eventType,
                 'amount' => $tunaiAdded,
-                'description' => "{$description} (40% Saldo Tunai dari pencairan 200 point)",
+                'description' => "{$description} (40% Saldo Tunai)",
             ]);
         }
 

@@ -104,24 +104,19 @@ class UccRegistrationAndActivationTest extends TestCase
 
         $service = app(UccBonusService::class);
 
-        // Credit Rp 200.000 (200 points @ Rp 1.000/point):
-        // - Rp 100.000 Post Mitra -> splits 40% tunai, 30% belanja, 20% upgrade, 10% reward
-        // - Rp 100.000 Post Induk -> Lumbung Anggaran Kompleks (saldo_induk)
+        // Credit Rp 200.000 (200 points @ Rp 1.000/point) -> immediately splits 40% tunai, 30% belanja, 20% upgrade, 10% reward
         $service->creditMemberIncome($bronzeMember, 200000, 'recruit_activation', 'Test 200 point split');
         $bronzeMember->refresh();
 
         $this->assertEquals(200, (int) $bronzeMember->points);
         $this->assertEquals(0, (int) $bronzeMember->pending_points);
-        $this->assertEquals(40000, (float) $bronzeMember->saldo_tunai);
-        $this->assertEquals(30000, (float) $bronzeMember->saldo_belanja);
-        $this->assertEquals(20000, (float) $bronzeMember->saldo_upgrade);
-        $this->assertEquals(10000, (float) $bronzeMember->saldo_reward);
-        $this->assertEquals(100000, (float) $bronzeMember->saldo_induk);
+        $this->assertEquals(80000, (float) $bronzeMember->saldo_tunai);
+        $this->assertEquals(60000, (float) $bronzeMember->saldo_belanja);
+        $this->assertEquals(40000, (float) $bronzeMember->saldo_upgrade);
+        $this->assertEquals(20000, (float) $bronzeMember->saldo_reward);
         $this->assertEquals('bronze', $bronzeMember->member_tier);
 
-        // Credit another Rp 1.200.000 (1200 points) -> total 1400 points (7 blocks) -> auto upgrade to Silver
-        // 7 blocks produce saldo_upgrade = Rp 140.000 & saldo_induk = Rp 700.000
-        // Upgrade cost Rp 400.000 uses Rp 140.000 saldo_upgrade + Rp 260.000 sniper cost from saldo_induk (leaving Rp 440.000)
+        // Credit another Rp 1.200.000 (1200 points) -> total 1400 points -> auto upgrade to Silver
         $service->creditMemberIncome($bronzeMember, 1200000, 'royalty_transaction', 'Reach 1400 points');
         $bronzeMember->refresh();
         $sponsor->refresh();
@@ -130,7 +125,6 @@ class UccRegistrationAndActivationTest extends TestCase
         $this->assertTrue((bool) $bronzeMember->has_silver_visa_card);
         $this->assertNotNull($bronzeMember->upgraded_to_silver_at);
         $this->assertEquals(0, (float) $bronzeMember->saldo_upgrade);
-        $this->assertEquals(440000, (float) $bronzeMember->saldo_induk);
 
         // Sponsor gets 10% upgrade bonus (Rp 40.000) + 3% silver cluster royalty (Rp 12.000) = Rp 52.000
         $this->assertEquals(52000, (float) $sponsor->total_bonus);
