@@ -318,6 +318,68 @@ class UccBonusService
     }
 
     /**
+     * Ensure any existing accumulated total_bonus not yet reflected in the 4 Post Saldo
+     * (e.g., from before immediate distribution) is synced idempotently.
+     */
+    public static function syncUndistributedBonus(?User $user): void
+    {
+        if (!$user || (float) ($user->total_bonus ?? 0) <= 0) {
+            return;
+        }
+
+        $alreadyDistributed = (float) ($user->saldo_tunai ?? 0)
+            + (float) ($user->saldo_belanja ?? 0)
+            + (float) ($user->saldo_upgrade ?? 0)
+            + (float) ($user->saldo_reward ?? 0);
+
+        $undistributed = round((float) $user->total_bonus - $alreadyDistributed, 2);
+        if ($undistributed <= 0.01) {
+            return;
+        }
+
+        DB::transaction(function () use ($user, $undistributed) {
+            $locked = User::where('id', $user->id)->lockForUpdate()->first();
+            if (!$locked) {
+                return;
+            }
+
+            $distributedNow = (float) ($locked->saldo_tunai ?? 0)
+                + (float) ($locked->saldo_belanja ?? 0)
+                + (float) ($locked->saldo_upgrade ?? 0)
+                + (float) ($locked->saldo_reward ?? 0);
+
+            $diff = round((float) $locked->total_bonus - $distributedNow, 2);
+            if ($diff <= 0.01) {
+                return;
+            }
+
+            $tunai = round($diff * self::SALDO_SPLIT_RATES['tunai'], 2);
+            $belanja = round($diff * self::SALDO_SPLIT_RATES['belanja'], 2);
+            $upgrade = round($diff * self::SALDO_SPLIT_RATES['upgrade'], 2);
+            $reward = round($diff - $tunai - $belanja - $upgrade, 2);
+
+            $locked->increment('saldo_tunai', $tunai);
+            $locked->increment('saldo', $tunai);
+            $locked->increment('saldo_belanja', $belanja);
+            $locked->increment('saldo_upgrade', $upgrade);
+            $locked->increment('saldo_reward', $reward);
+            $locked->update(['pending_points' => 0]);
+
+            if ($tunai > 0) {
+                WalletTransaction::create([
+                    'user_id' => $locked->id,
+                    'type' => 'in',
+                    'category' => 'bonus_distribution',
+                    'amount' => $tunai,
+                    'description' => 'Distribusi otomatis 40% Saldo Tunai dari akumulasi bonus',
+                ]);
+            }
+        });
+
+        $user->refresh();
+    }
+
+    /**
      * Auto-upgrade Bronze member to Silver when reaching 1.400 points (or Rp 350.000 saldo_upgrade).
      * Grants Silver Visa Card and distributes 10% sponsor upgrade bonus + 10% cluster royalty upgrade.
      */

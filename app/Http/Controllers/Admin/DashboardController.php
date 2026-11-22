@@ -22,6 +22,7 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
+        \App\Services\UccBonusService::syncUndistributedBonus($user);
 
         $saldoWD = (float) ($user->saldo ?? 0);
         $autoSaveSaldo = (float) ($user->auto_save_saldo ?? 0);

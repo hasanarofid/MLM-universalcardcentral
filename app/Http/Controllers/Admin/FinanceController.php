@@ -17,6 +17,7 @@ class FinanceController extends Controller
     public function index()
     {
         $user = auth()->user();
+        \App\Services\UccBonusService::syncUndistributedBonus($user);
 
         // Get transactions for current user (or all if admin)
         $query = WalletTransaction::with(['user', 'relatedUser'])->latest();
