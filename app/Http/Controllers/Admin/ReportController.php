@@ -57,6 +57,12 @@ class ReportController extends Controller
                 'total_bonus' => $totalBonus,
                 'total_withdrawal' => $totalWd,
                 'saldo_wallet' => $totalSaldo,
+                'saldo_tunai' => (float) User::sum('saldo_tunai'),
+                'saldo_belanja' => (float) User::sum('saldo_belanja'),
+                'saldo_upgrade' => (float) User::sum('saldo_upgrade'),
+                'saldo_reward' => (float) User::sum('saldo_reward'),
+                'saldo_induk' => (float) User::sum('saldo_induk'),
+                'pending_points' => (int) User::sum('pending_points'),
             ];
         }
 
@@ -71,6 +77,12 @@ class ReportController extends Controller
             'total_bonus' => $totalBonus,
             'total_withdrawal' => $totalWd,
             'saldo_wallet' => $saldoWallet,
+            'saldo_tunai' => (float) ($currentUser->saldo_tunai ?? 0),
+            'saldo_belanja' => (float) ($currentUser->saldo_belanja ?? 0),
+            'saldo_upgrade' => (float) ($currentUser->saldo_upgrade ?? 0),
+            'saldo_reward' => (float) ($currentUser->saldo_reward ?? 0),
+            'saldo_induk' => (float) ($currentUser->saldo_induk ?? 0),
+            'pending_points' => (int) ($currentUser->pending_points ?? 0),
         ];
     }
 

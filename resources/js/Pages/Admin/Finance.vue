@@ -126,10 +126,10 @@ const formatRupiah = (val) => {
         <!-- LEFT COLUMN: Wallet Cards & Action Forms (6 Cols) -->
         <div class="lg:col-span-6 space-y-6">
           
-          <!-- 1. SALDO E-WALLET AKTIF CARD (Dark Midnight Card matching Mockup) -->
-          <div class="bg-[#0d131d] text-white rounded-3xl p-6 shadow-xl relative overflow-hidden border border-slate-800 flex items-center justify-between gap-4">
+          <!-- 1. SALDO E-WALLET AKTIF CARD -->
+          <div class="bg-[#0d131d] text-white rounded-3xl p-6 shadow-xl relative overflow-hidden border border-[#D4AF37]/30 flex items-center justify-between gap-4">
             <div class="space-y-2">
-              <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-400 flex items-center gap-1.5">
+              <span class="text-[10px] font-extrabold uppercase tracking-widest text-[#D4AF37] flex items-center gap-1.5">
                 SALDO E-WALLET AKTIF
               </span>
               <h2 class="text-3xl md:text-4xl font-black text-white tracking-tight">
@@ -140,33 +140,49 @@ const formatRupiah = (val) => {
               </p>
             </div>
 
-            <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+            <div class="w-14 h-14 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#D4AF37] flex items-center justify-center shrink-0">
               <Wallet class="w-7 h-7" />
             </div>
           </div>
 
-          <!-- 2. TOTAL BONUS CAIR CARD (Forest Green Card matching Mockup) -->
-          <div class="bg-[#064e3b] text-white rounded-3xl p-6 shadow-xl relative overflow-hidden border border-emerald-800/60 flex items-center justify-between gap-4">
-            <div class="space-y-2">
-              <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-200">
-                TOTAL BONUS CAIR
-              </span>
-              <h2 class="text-3xl font-black text-white tracking-tight">
-                {{ formatRupiah(wallet?.total_bonus_cair || 0) }}
-              </h2>
-              <div class="pt-1">
-                <button 
-                  @click="submitCashout"
-                  :disabled="cashoutForm.processing"
-                  class="px-4 py-2 bg-[#0F172A] hover:bg-slate-800 text-[#D4AF37] text-xs font-black rounded-xl shadow-md border border-[#D4AF37]/30 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                >
-                  <span>Cairkan ke E-Wallet</span>
-                </button>
+          <!-- 2. TOTAL BONUS & DISTRIBUSI 4 POST SALDO -->
+          <div class="bg-gradient-to-br from-[#0F172A] via-[#121318] to-[#1A1B22] text-white rounded-3xl p-6 shadow-xl relative overflow-hidden border border-[#D4AF37]/35 space-y-4">
+            <div class="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
+              <div class="space-y-1">
+                <span class="text-[10px] font-extrabold uppercase tracking-widest text-[#E5C07B]">
+                  TOTAL AKUMULASI BONUS ({{ wallet?.points ?? 0 }} POINT)
+                </span>
+                <h2 class="text-3xl font-black text-white tracking-tight">
+                  {{ formatRupiah(wallet?.total_bonus_cair || 0) }}
+                </h2>
+                <p class="text-[11px] text-slate-300">
+                  Menunggu genap 200 point untuk dipecah ke 4 Post Saldo:
+                  <strong class="text-[#E5C07B]">{{ wallet?.pending_points ?? 0 }} / 200 pt ({{ formatRupiah(wallet?.pending_bonus_idr ?? 0) }})</strong>
+                </p>
+              </div>
+
+              <div class="w-12 h-12 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/30 text-[#E5C07B] flex items-center justify-center shrink-0">
+                <TrendingUp class="w-6 h-6" />
               </div>
             </div>
 
-            <div class="w-14 h-14 rounded-2xl bg-white/10 text-emerald-200 flex items-center justify-center shrink-0">
-              <TrendingUp class="w-7 h-7" />
+            <div class="grid grid-cols-2 gap-2.5 text-xs">
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
+                <span class="text-[10px] font-bold uppercase text-slate-400">Saldo Tunai (40%)</span>
+                <p class="text-sm font-black text-[#E5C07B] mt-0.5">{{ formatRupiah(wallet?.saldo_tunai ?? 0) }}</p>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
+                <span class="text-[10px] font-bold uppercase text-slate-400">Saldo Belanja (30%)</span>
+                <p class="text-sm font-black text-white mt-0.5">{{ formatRupiah(wallet?.saldo_belanja ?? 0) }}</p>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
+                <span class="text-[10px] font-bold uppercase text-slate-400">Saldo Upgrade / NFC (20%)</span>
+                <p class="text-sm font-black text-[#E5C07B] mt-0.5">{{ formatRupiah(wallet?.saldo_upgrade ?? 0) }}</p>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
+                <span class="text-[10px] font-bold uppercase text-slate-400">Saldo Reward (10%)</span>
+                <p class="text-sm font-black text-white mt-0.5">{{ formatRupiah(wallet?.saldo_reward ?? 0) }}</p>
+              </div>
             </div>
           </div>
 

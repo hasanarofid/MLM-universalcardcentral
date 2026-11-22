@@ -494,6 +494,8 @@ const formatRupiah = (val) => {
               </div>
               <p class="text-xs text-slate-400 mt-0.5">
                 Poin Saat Ini: <strong class="text-[#E5C07B]">{{ ucc_summary?.points ?? 0 }}</strong> / {{ ucc_summary?.upgrade_target_points ?? 1400 }} Point (Auto-Upgrade Silver)
+                <span class="mx-1.5 text-slate-600">•</span>
+                Poin Pending 4 Post Saldo: <strong class="text-white">{{ ucc_summary?.pending_points ?? 0 }} / 200 pt</strong>
               </p>
             </div>
           </div>

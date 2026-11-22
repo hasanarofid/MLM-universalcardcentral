@@ -64,11 +64,26 @@ class FinanceController extends Controller
             ];
         });
 
+        $pendingPoints = (int) ($user->pending_points ?? 0);
+        $pendingBonusIdr = $pendingPoints * \App\Services\UccBonusService::IDR_PER_POINT;
+        $distributedPostSaldo = (float) ($user->saldo_tunai ?? 0)
+            + (float) ($user->saldo_belanja ?? 0)
+            + (float) ($user->saldo_upgrade ?? 0)
+            + (float) ($user->saldo_reward ?? 0);
+
         return Inertia::render('Admin/Finance', [
             'wallet' => [
-                'saldo' => (float) ($user->saldo ?? 2500000),
+                'saldo' => (float) ($user->saldo ?? 0),
                 'total_bonus_cair' => (float) ($user->total_bonus ?? 0),
-                'bonus_uncashed' => (float) ($user->bonus_uncashed ?? 0),
+                'saldo_tunai' => (float) ($user->saldo_tunai ?? 0),
+                'saldo_belanja' => (float) ($user->saldo_belanja ?? 0),
+                'saldo_upgrade' => (float) ($user->saldo_upgrade ?? 0),
+                'saldo_reward' => (float) ($user->saldo_reward ?? 0),
+                'saldo_induk' => (float) ($user->saldo_induk ?? 0),
+                'points' => (int) ($user->points ?? 0),
+                'pending_points' => $pendingPoints,
+                'pending_bonus_idr' => $pendingBonusIdr,
+                'distributed_post_saldo' => $distributedPostSaldo,
                 'max_daily_withdrawal' => 50000000,
             ],
             'transactions' => $transactions,
@@ -138,27 +153,8 @@ class FinanceController extends Controller
     public function cashoutBonus()
     {
         $user = auth()->user();
-        $uncashed = (float) ($user->bonus_uncashed ?? 0);
 
-        if ($uncashed <= 0) {
-            return back()->with('error', 'Tidak ada bonus yang dapat dicairkan saat ini.');
-        }
-
-        DB::transaction(function () use ($user, $uncashed) {
-            $user->increment('saldo', $uncashed);
-            $user->increment('total_bonus', $uncashed);
-            $user->update(['bonus_uncashed' => 0]);
-
-            WalletTransaction::create([
-                'user_id' => $user->id,
-                'type' => 'in',
-                'category' => 'payout',
-                'amount' => $uncashed,
-                'description' => 'Cairkan bonus ke E-Wallet',
-            ]);
-        });
-
-        return back()->with('success', 'Berhasil mencairkan bonus sebesar Rp ' . number_format($uncashed, 0, ',', '.') . ' ke E-Wallet!');
+        return back()->with('success', 'Pencairan otomatis: Setiap kelipatan 200 point (Rp 200.000), 40% Saldo Tunai otomatis masuk ke E-Wallet Anda. Poin pending saat ini: ' . (int) ($user->pending_points ?? 0) . ' / 200 point.');
     }
 
     /**

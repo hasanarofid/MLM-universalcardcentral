@@ -137,7 +137,7 @@ const reportTabs = [
       </div>
 
       <!-- 2. SUMMARY METRICS CARDS -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Card 1: Total Team Member -->
         <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs flex items-center gap-4 relative overflow-hidden">
           <div class="w-12 h-12 rounded-2xl bg-[#0F172A] text-[#D4AF37] flex items-center justify-center flex-shrink-0 shadow-sm border border-[#D4AF37]/30">
@@ -155,9 +155,55 @@ const reportTabs = [
             <Wallet class="w-6 h-6" />
           </div>
           <div>
-            <p class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Saldo Wallet</p>
+            <p class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Saldo E-Wallet</p>
             <h3 class="text-lg font-black text-[#D4AF37] tracking-tight">{{ formatRupiah(summary?.saldo_wallet) }}</h3>
           </div>
+        </div>
+
+        <!-- Card 3: Total Bonus Tercatat -->
+        <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs flex items-center gap-4 relative overflow-hidden">
+          <div class="w-12 h-12 rounded-2xl bg-[#faf6eb] text-[#B8922E] border border-[#D4AF37]/30 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <Award class="w-6 h-6" />
+          </div>
+          <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Bonus Tercatat</p>
+            <h3 class="text-lg font-black text-slate-900 tracking-tight">{{ formatRupiah(summary?.total_bonus) }}</h3>
+          </div>
+        </div>
+
+        <!-- Card 4: Total Withdrawal Disetujui -->
+        <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs flex items-center gap-4 relative overflow-hidden">
+          <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <ArrowUpRight class="w-6 h-6" />
+          </div>
+          <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Withdrawal</p>
+            <h3 class="text-lg font-black text-slate-900 tracking-tight">{{ formatRupiah(summary?.total_withdrawal) }}</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2B. RINGKASAN 4 POST SALDO & POIN PENDING -->
+      <div class="bg-gradient-to-r from-[#0F172A] via-[#121318] to-[#1A1B22] border border-[#D4AF37]/30 rounded-3xl p-5 text-white grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
+          <span class="text-[10px] font-bold uppercase text-slate-400">Saldo Tunai (40%)</span>
+          <p class="text-sm font-black text-[#E5C07B] mt-0.5">{{ formatRupiah(summary?.saldo_tunai) }}</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
+          <span class="text-[10px] font-bold uppercase text-slate-400">Saldo Belanja (30%)</span>
+          <p class="text-sm font-black text-white mt-0.5">{{ formatRupiah(summary?.saldo_belanja) }}</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
+          <span class="text-[10px] font-bold uppercase text-slate-400">Saldo Upgrade (20%)</span>
+          <p class="text-sm font-black text-[#E5C07B] mt-0.5">{{ formatRupiah(summary?.saldo_upgrade) }}</p>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
+          <span class="text-[10px] font-bold uppercase text-slate-400">Saldo Reward (10%)</span>
+          <p class="text-sm font-black text-white mt-0.5">{{ formatRupiah(summary?.saldo_reward) }}</p>
+        </div>
+        <div class="col-span-2 sm:col-span-1 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-2xl p-3">
+          <span class="text-[10px] font-bold uppercase text-[#E5C07B]">Poin Pending (&lt;200 pt)</span>
+          <p class="text-sm font-black text-white mt-0.5">{{ summary?.pending_points ?? 0 }} Point</p>
         </div>
       </div>
 
