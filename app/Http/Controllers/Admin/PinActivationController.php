@@ -199,6 +199,12 @@ class PinActivationController extends Controller
             return back()->with('error', 'Hanya Admin yang dapat generate PIN.');
         }
 
+        if ($request->filled('recipient_username')) {
+            $request->merge([
+                'recipient_username' => ltrim(trim((string) $request->recipient_username), '@'),
+            ]);
+        }
+
         $validated = $request->validate([
             'recipient_username' => 'nullable|string|exists:users,username',
             'tier' => 'required|in:bronze,silver',

@@ -25,6 +25,10 @@ const props = defineProps({
   company_bank: Object,
   vouchers: Array,
   available_vouchers: Array,
+  pin_stocks: {
+    type: Object,
+    default: () => ({ bronze: 0, silver: 0 })
+  },
   transfers: Array,
   pin_requests: {
     type: Array,
@@ -111,8 +115,11 @@ const submitProduce = () => {
   });
 };
 
-// Form Transfer Voucher
+// Form Transfer Voucher / PIN (Bulk atau Satuan)
 const transferForm = useForm({
+  mode: 'bulk',
+  tier: 'bronze',
+  quantity: 1,
   voucher_id: '',
   recipient_username: '',
 });
@@ -120,7 +127,7 @@ const transferForm = useForm({
 const submitTransfer = () => {
   transferForm.post(route('admin.voucher-wallet.transfer'), {
     preserveScroll: true,
-    onSuccess: () => transferForm.reset(),
+    onSuccess: () => transferForm.reset('quantity', 'voucher_id', 'recipient_username'),
   });
 };
 
@@ -292,31 +299,87 @@ const formatRupiah = (val) => {
             </form>
           </div>
 
-          <!-- 3. TRANSFER VOUCHER CARD -->
+          <!-- 3. TRANSFER / KIRIM STOK PIN (BULK & SATUAN) -->
           <div class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-4">
             <div class="flex items-start gap-3">
-              <div class="p-2.5 bg-teal-50 text-[#04bdb2] rounded-2xl shrink-0 border border-[#04bdb2]/20">
+              <div class="p-2.5 bg-[#faf6eb] text-[#B8922E] rounded-2xl shrink-0 border border-[#D4AF37]/30">
                 <ArrowRightLeft class="w-5 h-5" />
               </div>
               <div>
-                <h3 class="text-base font-black text-slate-900 uppercase tracking-tight">TRANSFER VOUCHER</h3>
+                <h3 class="text-base font-black text-slate-900 uppercase tracking-tight">KIRIM / TRANSFER STOK PIN</h3>
                 <p class="text-xs text-slate-500 mt-0.5 leading-relaxed font-medium">
-                  Kirim voucher yang tersedia ke tim Anda, baik Voucher Activation, Voucher RO atau Voucher PO agar mereka bisa melakukan aktivasi secara mandiri.
+                  Kirim PIN secara langsung (1 s.d. 100 PIN sekaligus) atau satuan ke username member/stokis lain.
                 </p>
               </div>
             </div>
 
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                @click="transferForm.mode = 'bulk'"
+                :class="[
+                  'py-2 px-3 rounded-xl text-xs font-black border cursor-pointer transition-all',
+                  transferForm.mode === 'bulk'
+                    ? 'bg-[#0F172A] text-[#D4AF37] border-[#D4AF37]/40'
+                    : 'bg-slate-50 text-slate-600 border-slate-200'
+                ]"
+              >
+                Kirim Banyak (Bulk)
+              </button>
+              <button
+                type="button"
+                @click="transferForm.mode = 'single'"
+                :class="[
+                  'py-2 px-3 rounded-xl text-xs font-black border cursor-pointer transition-all',
+                  transferForm.mode === 'single'
+                    ? 'bg-[#0F172A] text-[#D4AF37] border-[#D4AF37]/40'
+                    : 'bg-slate-50 text-slate-600 border-slate-200'
+                ]"
+              >
+                Pilih 1 Kode PIN
+              </button>
+            </div>
+
             <form @submit.prevent="submitTransfer" class="space-y-4 pt-1">
-              <div>
+              <div v-if="transferForm.mode === 'bulk'" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">
+                    TIPE PIN &amp; STOK ANDA
+                  </label>
+                  <select
+                    v-model="transferForm.tier"
+                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 text-xs font-bold focus:outline-none focus:border-[#D4AF37]"
+                  >
+                    <option value="bronze">Bronze (Stok: {{ pin_stocks?.bronze ?? 0 }})</option>
+                    <option value="silver">Silver (Stok: {{ pin_stocks?.silver ?? 0 }})</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">
+                    JUMLAH PIN (1 - 100)
+                  </label>
+                  <input
+                    v-model.number="transferForm.quantity"
+                    type="number"
+                    min="1"
+                    max="100"
+                    required
+                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 text-xs font-bold focus:outline-none focus:border-[#D4AF37]"
+                  />
+                  <div v-if="transferForm.errors.quantity" class="text-rose-500 text-[10px] font-bold mt-1">{{ transferForm.errors.quantity }}</div>
+                </div>
+              </div>
+
+              <div v-else>
                 <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">
-                  PILIH VOUCHER
+                  PILIH KODE PIN
                 </label>
                 <select 
                   v-model="transferForm.voucher_id"
                   required
-                  class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 text-xs font-bold focus:outline-none focus:border-[#04bdb2]"
+                  class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 text-xs font-bold focus:outline-none focus:border-[#D4AF37]"
                 >
-                  <option value="" disabled>..TIPE VOUCHER..</option>
+                  <option value="" disabled>..PILIH KODE PIN..</option>
                   <option v-for="v in available_vouchers" :key="v.id" :value="v.id">
                     {{ v.label }}
                   </option>
@@ -332,18 +395,18 @@ const formatRupiah = (val) => {
                   type="text"
                   required
                   placeholder="cth: budisantoso"
-                  class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 text-xs font-bold focus:outline-none focus:border-[#04bdb2]"
+                  class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 text-xs font-bold focus:outline-none focus:border-[#D4AF37]"
                 />
-                <div v-if="transferForm.errors.recipient_username" class="text-rose-500 text-[10px] mt-1">{{ transferForm.errors.recipient_username }}</div>
+                <div v-if="transferForm.errors.recipient_username" class="text-rose-500 text-[10px] font-bold mt-1">{{ transferForm.errors.recipient_username }}</div>
               </div>
 
               <button 
                 type="submit"
                 :disabled="transferForm.processing || available_vouchers.length === 0"
-                class="w-full py-3 bg-[#04bdb2] hover:bg-[#009c94] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                class="w-full py-3 bg-gradient-to-r from-[#B8922E] via-[#D4AF37] to-[#F3E5AB] hover:opacity-95 text-slate-950 text-xs font-black uppercase tracking-wider rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 <Send class="w-4 h-4" />
-                <span>TRANSFER VOUCHER</span>
+                <span>{{ transferForm.mode === 'bulk' ? `KIRIM ${transferForm.quantity || 1} PIN SEKARANG` : 'TRANSFER PIN' }}</span>
               </button>
             </form>
           </div>

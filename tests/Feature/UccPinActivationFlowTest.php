@@ -210,4 +210,45 @@ class UccPinActivationFlowTest extends TestCase
         // 10% sponsor (10k) + 3% Silver cluster / 2 silver (1.5k) + 3% Fee Stokis (3k) = 14.500
         $this->assertEquals(14500, (float) $stokisUser->fresh()->total_bonus);
     }
+
+    public function test_stokis_or_member_can_bulk_transfer_pins_to_recipient_by_username(): void
+    {
+        $sender = User::factory()->create([
+            'username' => 'stokisbulk',
+            'email' => 'stokisbulk@example.com',
+            'nik' => '3201010101010601',
+            'member_tier' => 'silver',
+            'stokis_type' => 'stokis',
+            'activation_status' => 'active',
+        ]);
+
+        $recipient = User::factory()->create([
+            'username' => 'membertujuan',
+            'email' => 'membertujuan@example.com',
+            'nik' => '3201010101010602',
+            'member_tier' => 'bronze',
+            'activation_status' => 'active',
+        ]);
+
+        for ($i = 1; $i <= 25; $i++) {
+            Voucher::create([
+                'code' => 'UCCB-BULK' . str_pad((string) $i, 4, '0', STR_PAD_LEFT),
+                'user_id' => $sender->id,
+                'package_name' => 'Bronze (Rp 100.000)',
+                'voucher_type' => 'activation',
+                'status' => 'active',
+            ]);
+        }
+
+        $this->actingAs($sender)->post(route('admin.voucher-wallet.transfer'), [
+            'mode' => 'bulk',
+            'tier' => 'bronze',
+            'quantity' => 20,
+            'recipient_username' => '@' . $recipient->username,
+        ])->assertRedirect();
+
+        $this->assertEquals(5, Voucher::where('user_id', $sender->id)->where('status', 'active')->count());
+        $this->assertEquals(20, Voucher::where('user_id', $recipient->id)->where('status', 'active')->count());
+        $this->assertEquals(20, \App\Models\VoucherTransfer::where('sender_id', $sender->id)->where('recipient_id', $recipient->id)->count());
+    }
 }

@@ -128,6 +128,15 @@ class VoucherWalletController extends Controller
             'created_at' => $r->created_at?->format('d M Y H:i'),
         ]);
 
+        $pinStocks = ['bronze' => 0, 'silver' => 0];
+        foreach (Voucher::where('user_id', $user->id)->where('status', 'active')->get() as $activePin) {
+            if (\App\Services\UccBonusService::resolveTierFromPin($activePin) === 'silver') {
+                $pinStocks['silver']++;
+            } else {
+                $pinStocks['bronze']++;
+            }
+        }
+
         return Inertia::render('Admin/VoucherWallet', [
             'wallet' => [
                 'saldo' => (float) ($user->saldo ?? 0),
@@ -138,6 +147,7 @@ class VoucherWalletController extends Controller
             'company_bank' => $companyBank,
             'vouchers' => $vouchers,
             'available_vouchers' => $availableVouchers,
+            'pin_stocks' => $pinStocks,
             'transfers' => $transfers,
             'pin_requests' => $pinRequests,
             'is_admin' => $isAdmin,
@@ -274,50 +284,117 @@ class VoucherWalletController extends Controller
     }
 
     /**
-     * Transfer voucher to another member by username.
+     * Transfer single or bulk PINs/vouchers to another member by username.
      */
     public function transfer(Request $request)
     {
         $request->validate([
-            'voucher_id' => 'required|exists:vouchers,id',
+            'voucher_id' => 'nullable|exists:vouchers,id',
+            'tier' => 'nullable|in:bronze,silver',
+            'quantity' => 'nullable|integer|min:1|max:100',
             'recipient_username' => 'required|string',
         ]);
 
         $sender = auth()->user();
-
-        $voucher = Voucher::where('id', $request->voucher_id)
-            ->where('user_id', $sender->id)
-            ->where('status', 'active')
-            ->first();
-
-        if (!$voucher) {
-            return back()->with('error', 'Voucher tidak valid atau sudah terpakai!');
-        }
-
-        $recipientUsername = ltrim(trim($request->recipient_username), '@');
+        $recipientUsername = ltrim(trim((string) $request->recipient_username), '@');
         $recipient = User::where('username', $recipientUsername)->first();
 
         if (!$recipient) {
-            return back()->with('error', 'Username penerima @' . $request->recipient_username . ' tidak ditemukan!');
+            return back()->withErrors([
+                'recipient_username' => 'Username penerima @' . $recipientUsername . ' tidak ditemukan!',
+            ]);
         }
 
         if ($recipient->id === $sender->id) {
-            return back()->with('error', 'Tidak dapat mentransfer voucher ke akun sendiri!');
+            return back()->withErrors([
+                'recipient_username' => 'Tidak dapat mentransfer PIN ke akun sendiri!',
+            ]);
         }
 
-        DB::transaction(function () use ($voucher, $sender, $recipient) {
-            $voucher->update([
-                'user_id' => $recipient->id,
-            ]);
+        // Mode 1: Single specific voucher_id
+        if ($request->filled('voucher_id') && $request->input('mode') !== 'bulk') {
+            $voucher = Voucher::where('id', $request->voucher_id)
+                ->where('user_id', $sender->id)
+                ->where('status', 'active')
+                ->first();
 
-            VoucherTransfer::create([
-                'voucher_id' => $voucher->id,
-                'voucher_code' => $voucher->code,
-                'sender_id' => $sender->id,
-                'recipient_id' => $recipient->id,
-            ]);
+            if (!$voucher) {
+                return back()->with('error', 'PIN / Voucher tidak valid atau sudah terpakai!');
+            }
+
+            DB::transaction(function () use ($voucher, $sender, $recipient) {
+                $voucher->update(['user_id' => $recipient->id]);
+
+                VoucherTransfer::create([
+                    'voucher_id' => $voucher->id,
+                    'voucher_code' => $voucher->code,
+                    'sender_id' => $sender->id,
+                    'recipient_id' => $recipient->id,
+                ]);
+            });
+
+            \App\Notifications\SystemActivityNotification::sendSafe(
+                $recipient,
+                new \App\Notifications\SystemActivityNotification(
+                    category: 'system',
+                    title: 'Anda Menerima Transfer PIN',
+                    message: "@{$sender->username} mengirimkan PIN {$voucher->code} ({$voucher->package_name}) ke akun Anda.",
+                    link: '/admin/voucher-wallet',
+                    roleTarget: 'member'
+                )
+            );
+
+            return back()->with('success', 'Berhasil mentransfer PIN ' . $voucher->code . ' ke @' . $recipient->username . '!');
+        }
+
+        // Mode 2: Bulk transfer by tier (bronze / silver) & quantity (1-100)
+        $tier = strtolower((string) $request->input('tier', 'bronze'));
+        $qty = max(1, min(100, (int) $request->input('quantity', 1)));
+
+        $transferredCodes = [];
+        $errorMsg = null;
+
+        DB::transaction(function () use ($sender, $recipient, $tier, $qty, &$transferredCodes, &$errorMsg) {
+            $candidates = Voucher::where('user_id', $sender->id)
+                ->where('status', 'active')
+                ->lockForUpdate()
+                ->get()
+                ->filter(fn ($v) => \App\Services\UccBonusService::resolveTierFromPin($v) === $tier)
+                ->take($qty)
+                ->values();
+
+            if ($candidates->count() < $qty) {
+                $errorMsg = "Stok PIN " . ucfirst($tier) . " Anda tidak mencukupi (tersedia {$candidates->count()}, diminta {$qty}).";
+                return;
+            }
+
+            foreach ($candidates as $voucher) {
+                $voucher->update(['user_id' => $recipient->id]);
+                VoucherTransfer::create([
+                    'voucher_id' => $voucher->id,
+                    'voucher_code' => $voucher->code,
+                    'sender_id' => $sender->id,
+                    'recipient_id' => $recipient->id,
+                ]);
+                $transferredCodes[] = $voucher->code;
+            }
         });
 
-        return back()->with('success', 'Berhasil mentransfer voucher ' . $voucher->code . ' ke @' . $recipient->username . '!');
+        if ($errorMsg) {
+            return back()->withErrors(['quantity' => $errorMsg])->with('error', $errorMsg);
+        }
+
+        \App\Notifications\SystemActivityNotification::sendSafe(
+            $recipient,
+            new \App\Notifications\SystemActivityNotification(
+                category: 'system',
+                title: "Anda Menerima {$qty}x PIN " . ucfirst($tier),
+                message: "@{$sender->username} mengirimkan {$qty}x PIN " . ucfirst($tier) . ' ke dompet PIN Anda.',
+                link: '/admin/voucher-wallet',
+                roleTarget: 'member'
+            )
+        );
+
+        return back()->with('success', "Berhasil mengirim {$qty}x PIN " . ucfirst($tier) . " ke @{$recipient->username}!");
     }
 }
