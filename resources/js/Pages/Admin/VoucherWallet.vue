@@ -170,16 +170,16 @@ const formatRupiah = (val) => {
               </div>
             </div>
 
-            <!-- Rekening Pembayaran Manual Info Box -->
-            <div class="p-4 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl space-y-2">
+            <!-- Rekening Pembelian PIN Aktivasi Info Box -->
+            <div class="p-4 bg-[#faf6eb] border border-[#D4AF37]/35 rounded-2xl space-y-2">
               <div class="flex items-center gap-2">
-                <Building2 class="w-4 h-4 text-emerald-700 shrink-0" />
-                <span class="text-xs font-black text-emerald-950 uppercase tracking-tight">REKENING PEMBAYARAN MANUAL</span>
+                <Building2 class="w-4 h-4 text-[#B8922E] shrink-0" />
+                <span class="text-xs font-black text-slate-900 uppercase tracking-tight">REKENING PEMBELIAN PIN AKTIVASI</span>
               </div>
               <div class="text-xs text-slate-700 font-medium space-y-1">
-                <p><strong>Bank:</strong> {{ company_bank?.bank_name || 'Bank BRI' }}</p>
-                <p><strong>No. Rekening:</strong> <span class="font-mono font-black text-slate-900 select-all">{{ company_bank?.account_number || '806401000095564' }}</span></p>
-                <p><strong>Atas Nama:</strong> <strong class="text-slate-900">{{ company_bank?.account_name || 'Universal Card Central' }}</strong></p>
+                <p><strong>Bank:</strong> {{ company_bank?.bank_name || 'Bank BCA' }}</p>
+                <p><strong>No. Rekening:</strong> <span class="font-mono font-black text-slate-900 select-all">{{ company_bank?.account_number || '4371382238' }}</span></p>
+                <p><strong>Atas Nama:</strong> <strong class="text-slate-900">{{ company_bank?.account_name || 'Arief Lukman Halim' }}</strong></p>
               </div>
             </div>
 
@@ -510,6 +510,10 @@ const formatRupiah = (val) => {
               </span>
             </div>
             <p class="text-xs text-slate-500 mt-0.5">Promo Stokis (10 tercepat) &amp; Mobile Stokis (100 tercepat) s.d. 1 Des 2026. Syarat min. Silver ID.</p>
+          </div>
+          <div class="p-3.5 bg-[#faf6eb] border border-[#D4AF37]/35 rounded-2xl text-xs text-slate-700 space-y-0.5">
+            <p class="font-black text-slate-900 uppercase tracking-tight text-[11px]">Rekening Pembelian PIN Aktivasi</p>
+            <p><strong>{{ company_bank?.bank_name || 'Bank BCA' }}</strong> • <span class="font-mono font-black text-slate-900 select-all">{{ company_bank?.account_number || '4371382238' }}</span> (a.n. <strong>{{ company_bank?.account_name || 'Arief Lukman Halim' }}</strong>)</p>
           </div>
           <form @submit.prevent="submitPinOrder" class="space-y-3.5">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">

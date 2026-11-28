@@ -88,11 +88,11 @@ class MemberActivationController extends Controller
             ? $companyBanks
             : [
                 [
-                    'bank_name' => 'Bank BRI',
-                    'bank_account_number' => '806401000095564',
-                    'account_number' => '806401000095564',
-                    'bank_account_name' => 'Universal Card Central',
-                    'account_name' => 'Universal Card Central',
+                    'bank_name' => 'Bank BCA',
+                    'bank_account_number' => '4371382238',
+                    'account_number' => '4371382238',
+                    'bank_account_name' => 'Arief Lukman Halim',
+                    'account_name' => 'Arief Lukman Halim',
                 ]
             ];
 

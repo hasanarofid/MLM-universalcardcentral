@@ -99,9 +99,9 @@ class VoucherWalletController extends Controller
         $companyBank = (is_array($companyBanks) && count($companyBanks) > 0) 
             ? $companyBanks[0] 
             : [
-                'bank_name' => 'Bank BRI',
-                'account_number' => '806401000095564',
-                'account_name' => 'Universal Card Central',
+                'bank_name' => 'Bank BCA',
+                'account_number' => '4371382238',
+                'account_name' => 'Arief Lukman Halim',
             ];
 
         // Voucher Package Catalog for Conversion (UCC Tahap 1 PIN Aktivasi)

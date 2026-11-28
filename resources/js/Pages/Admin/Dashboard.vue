@@ -345,6 +345,22 @@ const formatRupiah = (val) => {
                 Order #{{ pending_pin_request.id }} Menunggu Admin
               </span>
             </div>
+            <div class="rounded-xl bg-slate-900/90 border border-[#D4AF37]/30 px-3.5 py-2.5 text-[11px] flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <span class="text-slate-400">Transfer ke: </span>
+                <strong class="text-white">{{ banks?.[0]?.bank_name || 'Bank BCA' }}</strong>
+                <span class="mx-1 text-slate-500">•</span>
+                <strong class="font-mono text-[#E5C07B] select-all">{{ banks?.[0]?.account_number || banks?.[0]?.bank_account_number || '4371382238' }}</strong>
+                <span class="text-slate-300 ml-1">(a.n. {{ banks?.[0]?.account_name || banks?.[0]?.bank_account_name || 'Arief Lukman Halim' }})</span>
+              </div>
+              <button
+                type="button"
+                @click="copyBankAccount(banks?.[0]?.account_number || banks?.[0]?.bank_account_number || '4371382238')"
+                class="px-2.5 py-1 bg-[#D4AF37]/20 hover:bg-[#D4AF37]/30 text-[#E5C07B] rounded-lg text-[10px] font-bold cursor-pointer"
+              >
+                Salin Rek
+              </button>
+            </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <select
                 v-model="pinOrderForm.tier"
